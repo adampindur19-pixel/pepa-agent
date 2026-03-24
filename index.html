@@ -238,6 +238,50 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 /* Error */
 .error-banner{padding:9px 13px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin:6px 0}
 
+/* Briefing card */
+.briefing{margin:16px 24px;padding:18px 20px;background:linear-gradient(135deg,var(--surface),var(--bg3));border:1px solid var(--gold-border);border-radius:var(--r);animation:fadeIn .3s ease}
+.briefing-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.briefing-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--text)}
+.briefing-date{font-size:11px;color:var(--text3)}
+.briefing-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:2px;transition:color .15s}
+.briefing-close:hover{color:var(--text)}
+.briefing-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+.briefing-stat{padding:10px 12px;background:var(--bg3);border-radius:var(--rs);border:1px solid var(--border)}
+.briefing-stat-val{font-family:'DM Serif Display',serif;font-size:20px;color:var(--gold);line-height:1}
+.briefing-stat-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+.briefing-alerts{display:flex;flex-direction:column;gap:5px}
+.briefing-alert{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:var(--bg3);border-radius:var(--rs);font-size:12px;cursor:pointer;transition:background .15s;border:1px solid var(--border)}
+.briefing-alert:hover{border-color:var(--gold-border);background:var(--bg4)}
+.ba-icon{flex-shrink:0;font-size:13px;margin-top:1px}
+.ba-body{flex:1}
+.ba-title{font-weight:500;color:var(--text);margin-bottom:1px}
+.ba-desc{color:var(--text3);font-size:11px}
+.ba-priority{font-size:10px;padding:2px 6px;border-radius:10px;flex-shrink:0;margin-top:2px}
+.ba-priority.vysoká{background:rgba(232,100,100,.15);color:#E86464}
+.ba-priority.střední{background:rgba(201,168,76,.15);color:var(--gold)}
+.ba-priority.nízká{background:rgba(74,124,89,.15);color:var(--green)}
+
+/* Tasks panel */
+.tasks-view{flex:1;overflow-y:auto;padding:24px 28px}
+.task-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;transition:all .15s}
+.task-item:hover{border-color:var(--gold-border)}
+.task-item.done{opacity:.5}
+.task-check{width:16px;height:16px;border-radius:4px;border:1px solid var(--border);background:none;cursor:pointer;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s}
+.task-check:hover{border-color:var(--gold)}
+.task-check.done{background:var(--green);border-color:var(--green);color:white}
+.task-body{flex:1}
+.task-title{font-size:13px;font-weight:500;color:var(--text)}
+.task-item.done .task-title{text-decoration:line-through;color:var(--text3)}
+.task-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.task-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:2px 4px;opacity:0;transition:all .15s}
+.task-item:hover .task-del{opacity:1}
+.task-del:hover{color:#E88}
+.add-task-bar{display:flex;gap:8px;margin-bottom:16px}
+.add-task-input{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.add-task-input:focus{border-color:var(--gold-border)}
+.add-task-btn{background:var(--gold);border:none;color:#0F0E0A;padding:8px 14px;border-radius:var(--rs);font-size:13px;cursor:pointer;transition:all .15s}
+.add-task-btn:hover{background:#D4B460}
+
 /* Rename input */
 .cli-rename{flex:1;background:var(--bg3);border:1px solid var(--gold-border);border-radius:4px;padding:2px 6px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
 
@@ -325,6 +369,26 @@ const calendarFree=[
   {day:"Sobota 29. 3.",free:["09:00-12:00","13:00-15:00"]},
 ];
 
+// Tržní srovnání — průměrné ceny v lokalitách (Kč/m²)
+const marketPrices=[
+  {locality:"Praha 2 — Vinohrady",avgPriceM2:109000,ourAvg:108537,trend:"+4.2% YoY"},
+  {locality:"Praha 3 — Žižkov",avgPriceM2:98000,ourAvg:110526,trend:"+2.8% YoY"},
+  {locality:"Praha 4 — Nusle/Pankrác",avgPriceM2:105000,ourAvg:107931,trend:"+5.1% YoY"},
+  {locality:"Praha 5 — Smíchov",avgPriceM2:102000,ourAvg:97436,trend:"+3.3% YoY"},
+  {locality:"Praha 6 — Dejvice",avgPriceM2:115000,ourAvg:109231,trend:"+6.2% YoY"},
+  {locality:"Praha 7 — Holešovice",avgPriceM2:107000,ourAvg:106667,trend:"+4.8% YoY"},
+  {locality:"Průhonice — domy",avgPriceM2:62000,ourAvg:57237,trend:"+2.1% YoY"},
+];
+
+// Upozornění / problémy k řešení
+const alerts=[
+  {type:"warning",priority:"vysoká",title:"ABC Invest čeká na odpověď",desc:"Nabídka 18,5 M Kč na Penthouse — deadline do pátku 28. 3.",action:"Napsat odpověď"},
+  {type:"warning",priority:"vysoká",title:"3 nemovitosti bez dokumentace",desc:"NEM-002, NEM-004, NEM-006 mají chybějící data v systému",action:"Zobrazit seznam"},
+  {type:"info",priority:"střední",title:"Vila Průhonice — 7 měsíců bez prodeje",desc:"NEM-006 je v nabídce od 20. 8. 2024. Zvážit snížení ceny.",action:"Analyzovat"},
+  {type:"info",priority:"střední",title:"Kováčovi čekají na kupní smlouvu",desc:"Rezervační smlouva podepsána 23. 3. Poslat kupní smlouvu.",action:"Připravit smlouvu"},
+  {type:"info",priority:"nízká",title:"MUDr. Vlček — nový lead bez přiřazení",desc:"Zájem o prohlídku, zatím bez přiřazeného agenta.",action:"Přiřadit agenta"},
+];
+
 // ============================================================
 // SYSTEM PROMPT
 // ============================================================
@@ -350,7 +414,12 @@ E-mail: formátuj s Předmět:, oslovením, tělem a podpisem.
 Ostatní: markdown, čísla jako 8 900 000 Kč, buď konkrétní a stručný.
 
 Při psaní e-mailů VŽDY zkontroluj kalendář a navrhni konkrétní volné termíny.
-Při dotazu na emaily shrň zprávy a navrhni konkrétní akce pro každou.`;
+Při dotazu na emaily shrň zprávy a navrhni konkrétní akce pro každou.
+
+TRZNI SROVNANI (Kc/m2 dle lokality): ${JSON.stringify(marketPrices)}
+UPOZORNENI A UKOLY: ${JSON.stringify(alerts)}
+
+Pri srovnani s trhem porovnej nase ceny s trhem - jsou predrazene nebo podhodnocene? Pri dotazu na problemy/ukoly zobraz alerts a navrhni reseni.`;
 
 // ============================================================
 // AGENT
@@ -404,6 +473,10 @@ const DEFAULT_QA = [
   {id:"qa4",icon:"🔍",label:"Chybějící data",prompt:"Najdi nemovitosti s chybějícími daty o rekonstrukci. Vrať tabulku s doporučením."},
   {id:"qa5",icon:"📊",label:"Report + slidy",prompt:"Shrň výsledky minulého týdne a připrav prezentaci se třemi slidy."},
   {id:"qa6",icon:"🏘️",label:"Holešovice monitoring",prompt:"Informuj mě o nových nabídkách v Praze Holešovice. Zobraz jako tabulku."},
+  {id:"qa7",icon:"📬",label:"Co je v emailech?",prompt:"Shrň mi všechny příchozí emaily a pro každý navrhni co mám udělat jako další krok."},
+  {id:"qa8",icon:"📉",label:"Srovnání s trhem",prompt:"Porovnej ceny našich nemovitostí s tržními cenami v daných lokalitách. Jsou předražené nebo podhodnocené? Vytvoř přehlednou tabulku."},
+  {id:"qa9",icon:"🔥",label:"Prioritní úkoly",prompt:"Jaké jsou aktuální priority a problémy které musím řešit? Zobraz je seřazené podle důležitosti."},
+  {id:"qa10",icon:"☀️",label:"Ranní briefing",prompt:"Připrav mi ranní briefing na dnešní den — co mám v kalendáři, jaké emaily čekají na odpověď, co jsou priority a na co nesmím zapomenout."},
 ];
 
 // ============================================================
@@ -596,6 +669,74 @@ function AddDataModal({onAdd, onClose}) {
   );
 }
 
+// ============================================================
+// MORNING BRIEFING COMPONENT
+// ============================================================
+function MorningBriefing({onClose, onAction}) {
+  const today = calendarBusy.find(d=>d.day.includes('25. 3.')) || calendarBusy[1];
+  const urgentAlerts = alerts.filter(a=>a.priority==='vysoká');
+  const newEmails = gmailInbox.filter(e=>e.date.includes('24. 3.')||e.date.includes('25. 3.'));
+
+  return React.createElement('div',{className:'briefing'},
+    React.createElement('div',{className:'briefing-header'},
+      React.createElement('div',null,
+        React.createElement('div',{className:'briefing-title'},'☀️ Dobré ráno, Pepo!'),
+        React.createElement('div',{className:'briefing-date'},'Úterý, 25. března 2025')
+      ),
+      React.createElement('button',{className:'briefing-close',onClick:onClose},'×')
+    ),
+    React.createElement('div',{className:'briefing-grid'},
+      React.createElement('div',{className:'briefing-stat'},React.createElement('div',{className:'briefing-stat-val'},newEmails.length),React.createElement('div',{className:'briefing-stat-lbl'},'nové emaily')),
+      React.createElement('div',{className:'briefing-stat'},React.createElement('div',{className:'briefing-stat-val'},today?.slots?.length||0),React.createElement('div',{className:'briefing-stat-lbl'},'schůzky dnes')),
+      React.createElement('div',{className:'briefing-stat'},React.createElement('div',{className:'briefing-stat-val'},urgentAlerts.length),React.createElement('div',{className:'briefing-stat-lbl'},'priority k řešení')),
+      React.createElement('div',{className:'briefing-stat'},React.createElement('div',{className:'briefing-stat-val'},properties.filter(p=>p.notes&&p.notes.length>0).length),React.createElement('div',{className:'briefing-stat-lbl'},'chybí dokumenty'))
+    ),
+    React.createElement('div',{className:'briefing-alerts'},
+      ...alerts.slice(0,3).map((a,i)=>React.createElement('div',{key:i,className:'briefing-alert',onClick:()=>onAction(a.action+': '+a.title)},
+        React.createElement('span',{className:'ba-icon'},a.type==='warning'?'⚠️':'ℹ️'),
+        React.createElement('div',{className:'ba-body'},
+          React.createElement('div',{className:'ba-title'},a.title),
+          React.createElement('div',{className:'ba-desc'},a.desc)
+        ),
+        React.createElement('span',{className:`ba-priority ${a.priority}`},a.priority)
+      ))
+    )
+  );
+}
+
+// ============================================================
+// TASKS COMPONENT
+// ============================================================
+function TasksView({tasks, onAdd, onToggle, onDelete}) {
+  const [newTask, setNewTask] = React.useState('');
+
+  function handleAdd() {
+    if(!newTask.trim()) return;
+    onAdd({id:uid(), title:newTask.trim(), done:false, created:new Date().toLocaleDateString('cs-CZ')});
+    setNewTask('');
+  }
+
+  return React.createElement('div',{className:'tasks-view'},
+    React.createElement('div',{className:'view-hdr'},React.createElement('h1',null,'Úkoly'),React.createElement('p',null,`${tasks.filter(t=>!t.done).length} aktivních · ${tasks.filter(t=>t.done).length} dokončených`)),
+    React.createElement('div',{className:'add-task-bar'},
+      React.createElement('input',{className:'add-task-input',value:newTask,onChange:e=>setNewTask(e.target.value),placeholder:'Přidat nový úkol…',onKeyDown:e=>e.key==='Enter'&&handleAdd()}),
+      React.createElement('button',{className:'add-task-btn',onClick:handleAdd},'+ Přidat')
+    ),
+    tasks.length===0&&React.createElement('div',{style:{textAlign:'center',color:'var(--text3)',padding:'40px 0',fontSize:13}},'Žádné úkoly. Přidejte první nebo řekněte PEPĚ aby vytvorila úkol z konverzace.'),
+    ...tasks.filter(t=>!t.done).map((t,i)=>React.createElement('div',{key:t.id,className:'task-item'},
+      React.createElement('button',{className:'task-check',onClick:()=>onToggle(t.id)},''),
+      React.createElement('div',{className:'task-body'},React.createElement('div',{className:'task-title'},t.title),React.createElement('div',{className:'task-meta'},t.created||'')),
+      React.createElement('button',{className:'task-del',onClick:()=>onDelete(t.id)},'×')
+    )),
+    tasks.filter(t=>t.done).length>0&&React.createElement('div',{style:{fontSize:10,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'.1em',margin:'12px 0 6px',fontWeight:600}},'Dokončené'),
+    ...tasks.filter(t=>t.done).map((t,i)=>React.createElement('div',{key:t.id,className:'task-item done'},
+      React.createElement('button',{className:'task-check done',onClick:()=>onToggle(t.id)},'✓'),
+      React.createElement('div',{className:'task-body'},React.createElement('div',{className:'task-title'},t.title)),
+      React.createElement('button',{className:'task-del',onClick:()=>onDelete(t.id)},'×')
+    ))
+  );
+}
+
 // CopyBtn component
 function CopyBtn({text}) {
   const [copied, setCopied] = useState(false);
@@ -625,6 +766,8 @@ function App(){
   const [input,setInput]=useState('');
   const [showAddQA,setShowAddQA]=useState(false);
   const [showAddData,setShowAddData]=useState(false);
+  const [showBriefing,setShowBriefing]=useState(()=>!localStorage.getItem('pepa-briefing-'+new Date().toDateString()));
+  const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem('pepa-tasks');return s?JSON.parse(s):[{id:'t1',title:'Odpovědět ABC Invest na nabídku penthouse',done:false,created:'25. 3. 2025'},{id:'t2',title:'Zaslat kupní smlouvu Kováčovým',done:false,created:'25. 3. 2025'},{id:'t3',title:'Přiřadit agenta k MUDr. Vlčkovi',done:false,created:'25. 3. 2025'}];}catch(e){return[];}});
   const [renamingId,setRenamingId]=useState(null);
   const [renameVal,setRenameVal]=useState('');
   const [customProps,setCustomProps]=useState(()=>{try{const s=localStorage.getItem('pepa-props');return s?JSON.parse(s):[];}catch(e){return[];}});
@@ -691,9 +834,16 @@ function App(){
 
   useEffect(()=>{try{localStorage.setItem('pepa-props',JSON.stringify(customProps));}catch(e){}},[customProps]);
   useEffect(()=>{try{localStorage.setItem('pepa-clients',JSON.stringify(customClients));}catch(e){}},[customClients]);
+  useEffect(()=>{try{localStorage.setItem('pepa-tasks',JSON.stringify(tasks));}catch(e){}},[tasks]);
 
   function addQA(qa){setQuickActions(prev=>[...prev,qa]);setShowAddQA(false);}
   function deleteQA(id){setQuickActions(prev=>prev.filter(q=>q.id!==id));}
+
+  function addTask(task){setTasks(prev=>[...prev,task]);}
+  function toggleTask(id){setTasks(prev=>prev.map(t=>t.id===id?{...t,done:!t.done}:t));}
+  function deleteTask(id){setTasks(prev=>prev.filter(t=>t.id!==id));}
+  function closeBriefing(){setShowBriefing(false);localStorage.setItem('pepa-briefing-'+new Date().toDateString(),'1');}
+  function briefingAction(prompt){closeBriefing();const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,32),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>send(prompt),50);}
 
   function addData(type, item) {
     if(type==='property'){
@@ -733,7 +883,10 @@ function App(){
       // Nav
       React.createElement('nav',{className:'nav'},
         React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>newChat()},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
-        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard'))
+        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')),
+        React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'+(tasks.filter(t=>!t.done).length>0?' ('+tasks.filter(t=>!t.done).length+')':'')))
+      ),
+      React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,`Úkoly${tasks.filter(t=>!t.done).length>0?' ('+tasks.filter(t=>!t.done).length+')':''`))
       )
     ),
     React.createElement('div',{className:'sidebar-scroll'},
@@ -784,6 +937,7 @@ function App(){
         React.createElement('button',{className:'header-btn',onClick:newChat},'+ Nový chat')
       )
     ),
+    showBriefing&&React.createElement(MorningBriefing,{onClose:closeBriefing,onAction:briefingAction}),
     React.createElement('div',{className:'messages-area'},
       activeChat.msgs.length===0&&React.createElement('div',{className:'welcome'},
         React.createElement('div',{className:'welcome-avatar'},'🏢'),
@@ -831,7 +985,7 @@ function App(){
 
   return React.createElement('div',{className:'app'},
     sidebar,
-    React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):chatView),
+    React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):view==='tasks'?React.createElement(TasksView,{tasks,onAdd:addTask,onToggle:toggleTask,onDelete:deleteTask}):chatView),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
     showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)})
   );
