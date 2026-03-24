@@ -562,7 +562,8 @@ function App() {
     setMsgs(newMsgs);
     setLoading(true);
     try {
-      const res = await callAgent(newMsgs.map(m=>({role:m.role,content:m.content})));
+      const history = newMsgs.slice(-6);
+const res = await callAgent(history.map(m=>({role:m.role,content:m.content})));
       setMsgs([...newMsgs,{role:'assistant',content:res}]);
     } catch(e) {
       setError(`Chyba: ${e.message}. Zkontrolujte prosím nastavení API klíče v Vercel env variables (ANTHROPIC_API_KEY).`);
