@@ -886,7 +886,6 @@ function App(){
         React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')),
         React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'+(tasks.filter(t=>!t.done).length>0?' ('+tasks.filter(t=>!t.done).length+')':'')))
       ),
-      React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'+(tasks.filter(t=>!t.done).length>0?' ('+tasks.filter(t=>!t.done).length+')':''))
     ),
     React.createElement('div',{className:'sidebar-scroll'},
       // Chats
