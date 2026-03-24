@@ -25,14 +25,22 @@ export default async function handler(req) {
 
   let body;
   try {
-    body = await req.json();
+    const text = await req.text();
+    body = JSON.parse(text);
   } catch(e) {
-    return new Response(JSON.stringify({ error: { message: 'Invalid JSON' } }), { status: 400 });
+    return new Response(JSON.stringify({ error: { message: 'Invalid JSON: ' + e.message } }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
 
-  // Ensure correct model
-  body.model = 'claude-haiku-4-5-20251001';
-  if (!body.max_tokens) body.max_tokens = 2000;
+  // Force correct values
+  const payload = {
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 1000,
+    messages: body.messages || [],
+    system: body.system || '',
+  };
 
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -41,16 +49,18 @@ export default async function handler(req) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
 
-  const data = await upstream.text();
+  const responseText = await upstream.text();
 
-  return new Response(data, {
+  // Always return the full response so we can debug
+  return new Response(responseText, {
     status: upstream.status,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'X-Upstream-Status': String(upstream.status),
     },
   });
 }
