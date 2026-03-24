@@ -237,6 +237,26 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 
 /* Error */
 .error-banner{padding:9px 13px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin:6px 0}
+
+/* Rename input */
+.cli-rename{flex:1;background:var(--bg3);border:1px solid var(--gold-border);border-radius:4px;padding:2px 6px;font-size:12px;color:var(--text);font-family:'DM Sans',sans-serif;outline:none}
+
+/* Copy btn on messages */
+.msg-actions{display:flex;justify-content:flex-end;margin-top:4px;opacity:0;transition:opacity .15s}
+.message:hover .msg-actions{opacity:1}
+.msg-copy{background:none;border:1px solid var(--border);color:var(--text3);font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s}
+.msg-copy:hover{border-color:var(--gold-border);color:var(--gold)}
+.msg-copy.copied{color:var(--green);border-color:var(--green)}
+
+/* Export bar */
+.export-bar{display:flex;gap:6px;padding:8px 24px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.export-btn{background:none;border:1px solid var(--border);color:var(--text2);font-size:12px;padding:5px 12px;border-radius:var(--rs);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.export-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+
+/* Data modal */
+.data-modal-tabs{display:flex;gap:4px;margin-bottom:16px}
+.data-tab{padding:6px 14px;border:1px solid var(--border);border-radius:var(--rs);background:none;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
+.data-tab.active{background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold)}
 </style>
 </head>
 <body>
@@ -477,6 +497,117 @@ function Dashboard(){
 }
 
 // Main App
+// ============================================================
+// EXPORT HELPERS
+// ============================================================
+function exportCSV(filename, headers, rows) {
+  const csvContent = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportPropertiesCSV() {
+  const hdrs = ['ID','Název','Adresa','Typ','Velikost m²','Cena Kč','Status','Agent','Rekonstrukce','Energetická třída','Poznámky'];
+  const rows = properties.map(p=>[p.id,p.name,p.address,p.type,p.size,p.price,p.status,p.agent,p.reconstruction||'',p.energyClass||'',p.notes||'']);
+  exportCSV('nemovitosti-bohemia-reality.csv', hdrs, rows);
+}
+
+function exportClientsCSV() {
+  const hdrs = ['ID','Jméno','Typ','Zdroj','Přidán','Kvartál','Status','Agent'];
+  const rows = clients.map(c=>[c.id,c.name,c.type,c.source,c.addedDate,c.quarter,c.status,c.agent]);
+  exportCSV('klienti-bohemia-reality.csv', hdrs, rows);
+}
+
+function exportChatTXT(chat) {
+  const lines = chat.msgs.map(m=>`[${m.role==='user'?'Pepa':'PEPA'}]\n${m.content}\n`).join('\n---\n\n');
+  const blob = new Blob([`Konverzace: ${chat.title}\nExport: ${new Date().toLocaleDateString('cs-CZ')}\n\n${lines}`], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`chat-${chat.title.replace(/[^a-z0-9]/gi,'-')}.txt`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// DATA MODAL
+// ============================================================
+function AddDataModal({onAdd, onClose}) {
+  const [tab, setTab] = useState('property');
+  const [form, setForm] = useState({});
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+
+  function handleSave() {
+    if (tab === 'property') {
+      if (!form.name || !form.address) return;
+      onAdd('property', {
+        id: 'NEM-' + String(properties.length + 1).padStart(3,'0'),
+        name: form.name, address: form.address,
+        type: form.type||'byt', size: Number(form.size)||0,
+        price: Number(form.price)||0, status: form.status||'k prodeji',
+        agent: form.agent||'', reconstruction: form.reconstruction||null,
+        energyClass: form.energyClass||null, notes: form.notes||''
+      });
+    } else {
+      if (!form.name) return;
+      onAdd('client', {
+        id: 'KL-' + String(clients.length + 1).padStart(3,'0'),
+        name: form.name, type: form.type||'kupující',
+        source: form.source||'web', addedDate: new Date().toISOString().slice(0,10),
+        quarter: 'Q1 2025', status: 'nový',
+        agent: form.agent||''
+      });
+    }
+    onClose();
+  }
+
+  const inp = (label,key,placeholder,type='text') => React.createElement('div',{className:'modal-field'},
+    React.createElement('label',null,label),
+    React.createElement('input',{type,value:form[key]||'',onChange:e=>set(key,e.target.value),placeholder})
+  );
+
+  return React.createElement('div',{className:'modal-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'modal'},
+      React.createElement('h3',null,'Přidat data'),
+      React.createElement('div',{className:'data-modal-tabs'},
+        React.createElement('button',{className:`data-tab${tab==='property'?' active':''}`,onClick:()=>setTab('property')},'🏠 Nemovitost'),
+        React.createElement('button',{className:`data-tab${tab==='client'?' active':''}`,onClick:()=>setTab('client')},'👤 Klient')
+      ),
+      tab==='property' ? React.createElement('div',null,
+        inp('Název','name','Byt 3+kk, Vinohrady'),
+        inp('Adresa','address','Mánesova 45, Praha 2'),
+        inp('Typ','type','byt'),
+        inp('Velikost m²','size','82','number'),
+        inp('Cena Kč','price','8900000','number'),
+        inp('Status','status','k prodeji'),
+        inp('Agent','agent','Markéta Horáčková'),
+        inp('Rok rekonstrukce','reconstruction','2023'),
+        React.createElement('div',{className:'modal-field'},React.createElement('label',null,'Poznámky'),React.createElement('textarea',{value:form.notes||'',onChange:e=>set('notes',e.target.value),placeholder:'Chybějící dokumenty...'}))
+      ) : React.createElement('div',null,
+        inp('Jméno','name','Ing. Jan Novák'),
+        inp('Typ klienta','type','kupující'),
+        inp('Zdroj','source','Sreality.cz'),
+        inp('Agent','agent','Tomáš Novák')
+      ),
+      React.createElement('div',{className:'modal-actions'},
+        React.createElement('button',{className:'btn-secondary',onClick:onClose},'Zrušit'),
+        React.createElement('button',{className:'btn-primary',onClick:handleSave},'Přidat')
+      )
+    )
+  );
+}
+
+// CopyBtn component
+function CopyBtn({text}) {
+  const [copied, setCopied] = useState(false);
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(()=>{
+      setCopied(true);
+      setTimeout(()=>setCopied(false), 2000);
+    }).catch(()=>{});
+  }
+  return React.createElement('button',{className:`msg-copy${copied?' copied':''}`,onClick:handleCopy},copied?'✓ Zkopírováno':'Kopírovat');
+}
+
 function App(){
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'dark');
   const [view,setView]=useState('chat');
@@ -493,6 +624,11 @@ function App(){
   const [error,setError]=useState('');
   const [input,setInput]=useState('');
   const [showAddQA,setShowAddQA]=useState(false);
+  const [showAddData,setShowAddData]=useState(false);
+  const [renamingId,setRenamingId]=useState(null);
+  const [renameVal,setRenameVal]=useState('');
+  const [customProps,setCustomProps]=useState(()=>{try{const s=localStorage.getItem('pepa-props');return s?JSON.parse(s):[];}catch(e){return[];}});
+  const [customClients,setCustomClients]=useState(()=>{try{const s=localStorage.getItem('pepa-clients');return s?JSON.parse(s):[];}catch(e){return[];}});
   const endRef=useRef(null);
   const inputRef=useRef(null);
 
@@ -553,8 +689,36 @@ function App(){
 
   function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 
+  useEffect(()=>{try{localStorage.setItem('pepa-props',JSON.stringify(customProps));}catch(e){}},[customProps]);
+  useEffect(()=>{try{localStorage.setItem('pepa-clients',JSON.stringify(customClients));}catch(e){}},[customClients]);
+
   function addQA(qa){setQuickActions(prev=>[...prev,qa]);setShowAddQA(false);}
   function deleteQA(id){setQuickActions(prev=>prev.filter(q=>q.id!==id));}
+
+  function addData(type, item) {
+    if(type==='property'){
+      properties.push(item);
+      setCustomProps(prev=>[...prev,item]);
+    } else {
+      clients.push(item);
+      setCustomClients(prev=>[...prev,item]);
+    }
+    setShowAddData(false);
+  }
+
+  function startRename(chat) {
+    setRenamingId(chat.id);
+    setRenameVal(chat.title);
+  }
+
+  function confirmRename(id) {
+    if(renameVal.trim()) setChats(prev=>prev.map(c=>c.id===id?{...c,title:renameVal.trim()}:c));
+    setRenamingId(null);
+  }
+
+  function copyMsg(text) {
+    navigator.clipboard.writeText(text).catch(()=>{});
+  }
 
   const sidebar=React.createElement('aside',{className:'sidebar'},
     React.createElement('div',{className:'sidebar-top'},
@@ -576,16 +740,25 @@ function App(){
       // Chats
       React.createElement('div',{className:'section-label'},'Konverzace',React.createElement('button',{onClick:newChat,title:'Nový chat'},'+')
       ),
-      ...chats.map(chat=>React.createElement('div',{key:chat.id,className:`chat-list-item${chat.id===activeChatId?' active':''}`,onClick:()=>{setActiveChatId(chat.id);setView('chat');}},
+      ...chats.map(chat=>React.createElement('div',{key:chat.id,className:`chat-list-item${chat.id===activeChatId?' active':''}`,onClick:()=>{if(renamingId!==chat.id){setActiveChatId(chat.id);setView('chat');}}},
         React.createElement('span',{className:'cli-icon'},'💬'),
-        React.createElement('span',{className:'cli-title'},chat.title),
-        chats.length>1&&React.createElement('button',{className:'cli-del',onClick:e=>{e.stopPropagation();deleteChat(chat.id);}},'×')
+        renamingId===chat.id
+          ? React.createElement('input',{className:'cli-rename',value:renameVal,autoFocus:true,onChange:e=>setRenameVal(e.target.value),onKeyDown:e=>{if(e.key==='Enter')confirmRename(chat.id);if(e.key==='Escape')setRenamingId(null);},onBlur:()=>confirmRename(chat.id),onClick:e=>e.stopPropagation()})
+          : React.createElement('span',{className:'cli-title',onDoubleClick:e=>{e.stopPropagation();startRename(chat);}},chat.title),
+        React.createElement('button',{className:'cli-del',onClick:e=>{e.stopPropagation();startRename(chat);},title:'Přejmenovat'},'✏️'),
+        chats.length>1&&React.createElement('button',{className:'cli-del',onClick:e=>{e.stopPropagation();deleteChat(chat.id);},title:'Smazat'},'×')
       )),
       // Quick actions
       React.createElement('div',{className:'qa-header'},
         React.createElement('span',{className:'qa-title'},'Rychlé akce'),
         React.createElement('button',{className:'qa-add',onClick:()=>setShowAddQA(true),title:'Přidat rychlou akci'},'+')
       ),
+      React.createElement('div',{className:'qa-header',style:{paddingTop:4}},
+        React.createElement('span',{className:'qa-title'},'Data'),
+        React.createElement('button',{className:'qa-add',onClick:()=>setShowAddData(true),title:'Přidat nemovitost nebo klienta'},'+')
+      ),
+      customProps.length>0&&React.createElement('div',{style:{padding:'2px 16px 4px',fontSize:11,color:'var(--green)'}},`✓ ${customProps.length} vlastní nemovitost${customProps.length>1?'i':''}`),
+      customClients.length>0&&React.createElement('div',{style:{padding:'2px 16px 4px',fontSize:11,color:'var(--green)'}},`✓ ${customClients.length} vlastní klient${customClients.length>1?'i':''}`),
       ...quickActions.map(q=>React.createElement('button',{key:q.id,className:'qa-btn',onClick:()=>{setView('chat');send(q.prompt);}},
         React.createElement('span',{className:'qa-icon'},q.icon),
         React.createElement('span',{className:'qa-label'},q.label),
@@ -624,7 +797,16 @@ function App(){
       ),
       activeChat.msgs.map((m,i)=>React.createElement('div',{key:i,className:`message ${m.role}`},
         React.createElement('div',{className:'msg-avatar'},m.role==='assistant'?'🤖':'👤'),
-        React.createElement('div',{className:'msg-bubble'},m.role==='user'?React.createElement('div',{className:'user-text'},m.content):React.createElement(MsgContent,{text:m.content}))
+        React.createElement('div',{className:'msg-bubble'},
+          m.role==='user'
+            ? React.createElement('div',{className:'user-text'},m.content)
+            : React.createElement('div',null,
+                React.createElement(MsgContent,{text:m.content}),
+                React.createElement('div',{className:'msg-actions'},
+                  React.createElement(CopyBtn,{text:m.content})
+                )
+              )
+        )
       )),
       loading&&React.createElement('div',{className:'message assistant'},
         React.createElement('div',{className:'msg-avatar'},'🤖'),
@@ -639,13 +821,19 @@ function App(){
         React.createElement('button',{className:'send-btn',disabled:!input.trim()||loading,onClick:()=>send()},loading?React.createElement('span',{className:'spin'},'⟳'):'↑')
       ),
       React.createElement('div',{className:'input-hint'},'Enter pro odeslání · Shift+Enter pro nový řádek')
+    ),
+    React.createElement('div',{className:'export-bar'},
+      React.createElement('button',{className:'export-btn',onClick:exportPropertiesCSV},'📥 Nemovitosti CSV'),
+      React.createElement('button',{className:'export-btn',onClick:exportClientsCSV},'📥 Klienti CSV'),
+      activeChat.msgs.length>0&&React.createElement('button',{className:'export-btn',onClick:()=>exportChatTXT(activeChat)},'💬 Export chatu')
     )
   );
 
   return React.createElement('div',{className:'app'},
     sidebar,
     React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):chatView),
-    showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)})
+    showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
+    showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)})
   );
 }
 
