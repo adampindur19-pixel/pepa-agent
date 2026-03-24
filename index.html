@@ -280,6 +280,31 @@ const agents=[{name:"Markéta Horáčková",deals:8,revenue:52400000,leads:31},{
 const lastWeek={period:"17.–21. března 2025",highlights:["Uzavřen prodej Penthouse Pankrác za 11,2 M Kč","Nové zastoupení: Vila Průhonice (28 M Kč)","6 nových leadů ze Sreality a webu","12 prohlídek, 3 zájemci podali nabídky"]};
 const marketListings=[{source:"Sreality.cz",title:"Byt 3+kk, Holešovice, 85 m²",price:9200000,date:"21. 3. 2025",type:"prodej"},{source:"Bezrealitky.cz",title:"Byt 2+1, Holešovice, 62 m²",price:6800000,date:"22. 3. 2025",type:"prodej"},{source:"Sreality.cz",title:"Byt 4+1, Praha 7, 115 m²",price:12500000,date:"22. 3. 2025",type:"prodej"},{source:"Reality.cz",title:"Byt 1+kk, Holešovice, 32 m²",price:3900000,date:"23. 3. 2025",type:"prodej"},{source:"Sreality.cz",title:"Nájemní byt 2+kk, Holešovice",price:22000,date:"23. 3. 2025",type:"nájem"}];
 
+const gmailInbox=[
+  {id:"GM-001",from:"david.simanek@gmail.com",name:"David Simánek",subject:"Dotaz na byt v Nuslích",date:"24. 3. 2025 08:14",body:"Dobry den, zajima me byt 2+kk v Nuslích (NEM-009). Bylo by mozne domluvit prohlidku tento tyden? Preferuji odpoledne."},
+  {id:"GM-002",from:"info@abcinvest.cz",name:"ABC Invest s.r.o.",subject:"Penthouse Pankrác — cenová nabídka",date:"24. 3. 2025 09:32",body:"Po interní porade jsme pripraveni nabídnout 18 500 000 Kc za penthouse na Pankráci. Prosíme o vyjadrení do konce tydne."},
+  {id:"GM-003",from:"kovacovi@email.cz",name:"Lucie a Petr Kovácovi",subject:"Smlouva — Byt Smíchov",date:"23. 3. 2025 16:45",body:"Posíláme podepsanou rezervacní smlouvu na byt 3+1 Smíchov (NEM-012). Kdy nám zašlete kupní smlouvu?"},
+  {id:"GM-004",from:"vlcek.roman@medic.cz",name:"MUDr. Roman Vlcek",subject:"Zájem o nemovitost",date:"23. 3. 2025 11:20",body:"Mám zájem o prohlidku penthouseu na Pankráci nebo bytu v Dejvicích. Jsem dostupný v pracovní dny po 17:00 nebo v sobotu dopoledne."},
+  {id:"GM-005",from:"obchod@realitygroup.cz",name:"Reality Group CZ",subject:"Spolupráce — Vila Prúhonice",date:"22. 3. 2025 14:08",body:"Máme klienta se zájmem o vilu v Pruhonicích (NEM-006). Nabízíme zprostredkování za standardní provizi. Prosím o zaslání dokumentace."},
+  {id:"GM-006",from:"jana.horakova@post.cz",name:"Bc. Jana Horáková",subject:"Prohlidka rodinného domu",date:"21. 3. 2025 09:55",body:"Chtela bych se zeptat zda je stále dostupný rodinný dum v Pruhonicích (NEM-002). Prosím o termín prohlidky príští tyden."},
+];
+
+const calendarBusy=[
+  {day:"Pondeli 24. 3.",slots:["09:00-10:00 Prohlidka NEM-010 Pankrác","13:00-14:00 Tymová porada","16:00-17:00 Podpis smlouvy Kovácovi"]},
+  {day:"Úterý 25. 3.",slots:["10:00-11:30 Prohlidka NEM-006 Pruhonice","14:00-15:00 Schuzka ABC Invest"]},
+  {day:"Streda 26. 3.",slots:["09:00-10:00 Interní meeting","11:00-12:00 Prohlidka NEM-009 Nusle"]},
+  {day:"Ctvrtek 27. 3.",slots:["15:00-16:00 Právník — kupní smlouva NEM-012"]},
+  {day:"Pátek 28. 3.",slots:["10:00-11:00 Fotograf NEM-002 Pruhonice"]},
+];
+
+const calendarFree=[
+  {day:"Úterý 25. 3.",free:["08:00-09:00","11:30-13:00","15:30-17:00"]},
+  {day:"Streda 26. 3.",free:["10:00-11:00","13:00-15:00","16:00-18:00"]},
+  {day:"Ctvrtek 27. 3.",free:["09:00-12:00","13:00-15:00","16:30-18:00"]},
+  {day:"Pátek 28. 3.",free:["08:00-10:00","11:30-13:00","14:00-16:00"]},
+  {day:"Sobota 29. 3.",free:["09:00-12:00","13:00-15:00"]},
+];
+
 // ============================================================
 // SYSTEM PROMPT
 // ============================================================
@@ -293,12 +318,19 @@ AGENTI: ${JSON.stringify(agents)}
 MINULÝ TÝDEN: ${JSON.stringify(lastWeek)}
 NOVÉ NABÍDKY HOLEŠOVICE: ${JSON.stringify(marketListings)}
 
+GMAIL — PŘÍCHOZÍ E-MAILY (Gmail API): ${JSON.stringify(gmailInbox)}
+KALENDÁŘ — OBSAZENÉ SLOTY (Google Calendar API): ${JSON.stringify(calendarBusy)}
+KALENDÁŘ — VOLNÉ SLOTY: ${JSON.stringify(calendarFree)}
+
 Výstupní formáty:
 Graf: \`\`\`chart\n{"type":"bar"|"line"|"pie","title":"...","data":[...],"xKey":"...","series":[{"key":"...","color":"...","label":"..."}]}\n\`\`\`
 Tabulka: \`\`\`table\n{"title":"...","columns":["..."],"rows":[["..."]]}\n\`\`\`
 Slidy: \`\`\`slides\n[{"title":"...","body":"...","bullets":["..."]}]\n\`\`\`
 E-mail: formátuj s Předmět:, oslovením, tělem a podpisem.
-Ostatní: markdown, čísla jako 8 900 000 Kč, buď konkrétní a stručný.`;
+Ostatní: markdown, čísla jako 8 900 000 Kč, buď konkrétní a stručný.
+
+Při psaní e-mailů VŽDY zkontroluj kalendář a navrhni konkrétní volné termíny.
+Při dotazu na emaily shrň zprávy a navrhni konkrétní akce pro každou.`;
 
 // ============================================================
 // AGENT
