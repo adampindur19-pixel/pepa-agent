@@ -732,7 +732,7 @@ function App(){
       ),
       // Nav
       React.createElement('nav',{className:'nav'},
-        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>setView('chat')},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
+        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>newChat()},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
         React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard'))
       )
     ),
