@@ -12,82 +12,130 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
 <style>
+/* ===== THEMES ===== */
 :root{
   --gold:#C9A84C;--gold-dim:rgba(201,168,76,.12);--gold-border:rgba(201,168,76,.28);
   --bg:#0F0E0A;--bg2:#15130E;--bg3:#1C1A13;--bg4:#232018;
-  --surface:#1E1C15;--surface2:#252318;
-  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
-  --text:#E8E0CC;--text2:#A89E88;--text3:#6B6455;
-  --green:#4A7C59;--r:10px;--rs:6px;
+  --surface:#1E1C15;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.04);
+  --text:#E8E0CC;--text2:#A89E88;--text3:#6B6455;--green:#4A7C59;
+  --shadow:rgba(0,0,0,.4);--r:10px;--rs:6px;
+}
+[data-theme="light"]{
+  --bg:#F5F3EE;--bg2:#EEEBE3;--bg3:#E5E0D4;--bg4:#DDD8CC;
+  --surface:#FFFFFF;--border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.04);
+  --text:#1A1814;--text2:#5A5040;--text3:#9A8E78;
+  --shadow:rgba(0,0,0,.12);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body,#root{height:100%;width:100%;overflow:hidden}
-body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
-button{font-family:'DM Sans',sans-serif}
+body{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+button{font-family:'DM Sans',sans-serif;cursor:pointer}
 
-/* LAYOUT */
+/* ===== LAYOUT ===== */
 .app{display:flex;height:100vh;width:100vw;overflow:hidden}
 
-/* SIDEBAR */
-.sidebar{width:240px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
-.sidebar::-webkit-scrollbar{width:3px}.sidebar::-webkit-scrollbar-thumb{background:var(--border)}
-.logo{display:flex;align-items:center;gap:10px;padding:20px 16px 18px;border-bottom:1px solid var(--border)}
-.logo-icon{font-size:22px;line-height:1}
+/* ===== SIDEBAR ===== */
+.sidebar{width:256px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:background .2s}
+.sidebar-top{flex-shrink:0}
+.sidebar-scroll{flex:1;overflow-y:auto;padding-bottom:8px}
+.sidebar-scroll::-webkit-scrollbar{width:3px}
+.sidebar-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* Logo */
+.logo{display:flex;align-items:center;gap:10px;padding:18px 16px 16px;border-bottom:1px solid var(--border)}
+.logo-icon{font-size:22px}
 .logo-name{font-family:'DM Serif Display',serif;font-size:18px;color:var(--gold);letter-spacing:.05em;line-height:1.1}
 .logo-sub{font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-top:1px}
-.nav{padding:12px 8px 6px;border-bottom:1px solid var(--border2)}
-.nav-item{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;color:var(--text2);font-size:13px;cursor:pointer;border-radius:var(--rs);transition:all .15s;text-align:left}
+.logo-right{margin-left:auto;display:flex;gap:4px}
+
+/* Theme toggle */
+.icon-btn{background:none;border:none;color:var(--text3);padding:5px;border-radius:var(--rs);font-size:14px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.icon-btn:hover{background:var(--bg3);color:var(--text)}
+
+/* Nav */
+.nav{padding:10px 8px 6px;border-bottom:1px solid var(--border2)}
+.nav-item{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;color:var(--text2);font-size:13px;border-radius:var(--rs);transition:all .15s;text-align:left}
 .nav-item:hover{background:var(--bg3);color:var(--text)}
 .nav-item.active{background:var(--gold-dim);color:var(--gold);font-weight:500}
-.nav-icon{font-size:15px;width:16px;text-align:center}
-.qa-section{padding:12px 8px;flex:1}
-.qa-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:4px 10px 8px}
-.qa-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:none;background:none;color:var(--text2);font-size:12px;cursor:pointer;border-radius:var(--rs);transition:all .15s;text-align:left}
+.nav-icon{font-size:15px;width:16px;text-align:center;flex-shrink:0}
+
+/* Chats section */
+.section-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between}
+.section-label button{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s}
+.section-label button:hover{color:var(--gold)}
+
+.chat-list-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--rs);cursor:pointer;transition:all .15s;margin:1px 8px;group:hover}
+.chat-list-item:hover{background:var(--bg3)}
+.chat-list-item.active{background:var(--gold-dim)}
+.chat-list-item.active .cli-title{color:var(--gold)}
+.cli-icon{font-size:13px;flex-shrink:0}
+.cli-title{flex:1;font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .15s}
+.cli-del{background:none;border:none;color:var(--text3);font-size:14px;padding:2px 4px;border-radius:3px;opacity:0;transition:all .15s;line-height:1}
+.chat-list-item:hover .cli-del{opacity:1}
+.cli-del:hover{color:#E88;background:rgba(232,136,136,.1)}
+
+/* Quick actions */
+.qa-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 6px}
+.qa-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.qa-add{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 2px;transition:color .15s;line-height:1}
+.qa-add:hover{color:var(--gold)}
+.qa-btn{display:flex;align-items:center;gap:8px;width:calc(100% - 16px);margin:1px 8px;padding:7px 10px;border:none;background:none;color:var(--text2);font-size:12px;border-radius:var(--rs);transition:all .15s;text-align:left}
 .qa-btn:hover{background:var(--bg3);color:var(--text)}
 .qa-icon{font-size:13px;flex-shrink:0}
-.qa-label{flex:1;text-align:left}
-.qa-arrow{color:var(--text3);font-size:11px}
-.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border)}
+.qa-label{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qa-del{background:none;border:none;color:var(--text3);font-size:13px;padding:2px 4px;border-radius:3px;opacity:0;transition:all .15s}
+.qa-btn:hover .qa-del{opacity:1}
+.qa-del:hover{color:#E88}
+
+/* Sidebar footer */
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);flex-shrink:0}
 .company-badge{font-size:11px;color:var(--text3);font-weight:500}
 .version{font-size:10px;color:var(--text3);margin-top:2px;opacity:.6}
 
-/* MAIN */
+/* ===== MAIN ===== */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 
-/* CHAT */
+/* ===== CHAT VIEW ===== */
 .chat-view{display:flex;flex-direction:column;height:100%;overflow:hidden}
-.chat-header{padding:14px 24px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0}
+.chat-header{padding:13px 24px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;transition:background .2s}
+.chat-header-left{display:flex;flex-direction:column;gap:2px}
 .agent-status{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--text)}
 .status-dot{width:7px;height:7px;border-radius:50%;background:#4A7C59;box-shadow:0 0 6px rgba(74,124,89,.6);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
-.chat-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.messages-area{flex:1;overflow-y:auto;padding:24px 0;scroll-behavior:smooth}
-.messages-area::-webkit-scrollbar{width:4px}.messages-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.chat-sub{font-size:11px;color:var(--text3)}
+.chat-header-right{display:flex;gap:6px}
+.header-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:var(--rs);font-size:12px;transition:all .15s;display:flex;align-items:center;gap:5px}
+.header-btn:hover{border-color:var(--gold-border);color:var(--gold)}
 
-/* WELCOME */
-.welcome{max-width:520px;margin:40px auto;padding:0 24px;text-align:center}
-.welcome-avatar{width:56px;height:56px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:26px}
-.welcome h2{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:10px}
-.welcome p{color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:24px}
-.welcome-hints{display:flex;flex-direction:column;gap:8px}
-.hint{padding:10px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text2);text-align:left;cursor:pointer;transition:all .15s}
-.hint:hover{border-color:var(--gold-border);color:var(--text)}
+/* Messages */
+.messages-area{flex:1;overflow-y:auto;padding:20px 0;scroll-behavior:smooth}
+.messages-area::-webkit-scrollbar{width:4px}
+.messages-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-/* MESSAGES */
-.message{display:flex;gap:12px;padding:8px 24px;max-width:900px;margin:0 auto;width:100%;animation:fadeIn .2s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+/* Welcome */
+.welcome{max-width:500px;margin:32px auto;padding:0 24px;text-align:center}
+.welcome-avatar{width:52px;height:52px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-border);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px}
+.welcome h2{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text);margin-bottom:8px}
+.welcome p{color:var(--text2);font-size:13px;line-height:1.6;margin-bottom:20px}
+.welcome-hints{display:flex;flex-direction:column;gap:6px}
+.hint{padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);font-size:12px;color:var(--text2);text-align:left;cursor:pointer;transition:all .15s}
+.hint:hover{border-color:var(--gold-border);color:var(--text);background:var(--bg3)}
+
+/* Messages */
+.message{display:flex;gap:10px;padding:6px 24px;max-width:860px;margin:0 auto;width:100%;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .message.user{flex-direction:row-reverse}
-.msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:13px}
+.msg-avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:12px}
 .message.assistant .msg-avatar{background:var(--gold-dim);border:1px solid var(--gold-border)}
 .message.user .msg-avatar{background:var(--bg3);border:1px solid var(--border)}
 .msg-bubble{flex:1;min-width:0}
 .message.user .msg-bubble{display:flex;justify-content:flex-end}
-.user-text{background:var(--bg3);border:1px solid var(--border);border-radius:12px 4px 12px 12px;padding:10px 14px;max-width:70%;color:var(--text);font-size:14px;line-height:1.6}
+.user-text{background:var(--bg3);border:1px solid var(--border);border-radius:12px 4px 12px 12px;padding:9px 13px;max-width:70%;color:var(--text);font-size:14px;line-height:1.6}
 .thinking{display:flex;align-items:center;gap:8px;color:var(--text3);font-size:13px;padding:4px 0}
 .spin{animation:spin 1s linear infinite;display:inline-block}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
-/* MARKDOWN */
+/* Markdown */
 .md-content{color:var(--text2);line-height:1.7}
 .md-content h1,.md-content h2{font-family:'DM Serif Display',serif;color:var(--text);margin:16px 0 8px}
 .md-content h3{font-size:13px;font-weight:600;color:var(--gold);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.06em}
@@ -99,81 +147,96 @@ button{font-family:'DM Sans',sans-serif}
 .md-content li{padding:3px 0 3px 16px;position:relative;color:var(--text2)}
 .md-content li::before{content:'◆';position:absolute;left:0;color:var(--gold);font-size:8px;top:7px}
 .md-content code{background:var(--bg3);padding:1px 6px;border-radius:3px;font-size:12px;color:var(--gold);font-family:monospace}
-.md-content blockquote{border-left:2px solid var(--gold);padding-left:14px;margin:10px 0;color:var(--text3)}
 
-/* CHARTS */
-.chart-wrap{margin:14px 0;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.chart-title-text{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border2)}
+/* Charts */
+.chart-wrap{margin:12px 0;padding:16px 18px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:background .2s}
+.chart-title-text{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border2)}
 
-/* TABLE */
-.tbl-wrap{margin:14px 0;overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r)}
-.tbl-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:14px 16px 10px;border-bottom:1px solid var(--border2)}
+/* Table */
+.tbl-wrap{margin:12px 0;overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);transition:background .2s}
+.tbl-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;padding:12px 14px 8px;border-bottom:1px solid var(--border2)}
 table.data-table{width:100%;border-collapse:collapse;font-size:12px}
 table.data-table th{text-align:left;padding:8px 14px;color:var(--gold);font-size:11px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--gold-border);font-weight:600;white-space:nowrap}
 table.data-table td{padding:8px 14px;color:var(--text2);border-bottom:1px solid var(--border2);white-space:nowrap}
 table.data-table tr:last-child td{border-bottom:none}
 table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 
-/* SLIDES */
-.slides-wrap{margin:14px 0;border:1px solid var(--gold-border);border-radius:var(--r);overflow:hidden}
-.slide{padding:28px 32px;background:linear-gradient(135deg,var(--surface) 0%,var(--bg3) 100%);min-height:200px}
-.slide-num{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
-.slide-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:16px;line-height:1.2}
-.slide-body{color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:14px}
-.slide-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
-.slide-bullets li{padding:8px 14px;background:rgba(255,255,255,.04);border-left:2px solid var(--gold);border-radius:0 6px 6px 0;color:var(--text2);font-size:13px}
-.slide-stats{display:flex;gap:24px;flex-wrap:wrap;margin-top:8px}
-.stat-val{font-family:'DM Serif Display',serif;font-size:30px;color:var(--gold);line-height:1;display:block}
+/* Slides */
+.slides-wrap{margin:12px 0;border:1px solid var(--gold-border);border-radius:var(--r);overflow:hidden}
+.slide{padding:24px 28px;background:linear-gradient(135deg,var(--surface) 0%,var(--bg3) 100%);min-height:180px;transition:background .2s}
+.slide-num{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.slide-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:14px;line-height:1.2}
+.slide-body{color:var(--text2);font-size:13px;line-height:1.6;margin-bottom:12px}
+.slide-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:7px}
+.slide-bullets li{padding:7px 12px;background:rgba(255,255,255,.04);border-left:2px solid var(--gold);border-radius:0 5px 5px 0;color:var(--text2);font-size:13px}
+.slide-stats{display:flex;gap:20px;flex-wrap:wrap;margin-top:8px}
+.stat-val{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);line-height:1;display:block}
 .stat-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
-.slide-nav{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;background:var(--bg3);border-top:1px solid var(--border)}
-.slide-btn{background:none;border:1px solid var(--border);color:var(--text2);cursor:pointer;padding:5px 9px;border-radius:4px;font-size:14px;transition:all .15s}
+.slide-nav{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px;background:var(--bg3);border-top:1px solid var(--border)}
+.slide-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:4px 8px;border-radius:4px;font-size:14px;transition:all .15s}
 .slide-btn:hover:not(:disabled){border-color:var(--gold-border);color:var(--gold)}
 .slide-btn:disabled{opacity:.3;cursor:not-allowed}
-.slide-dots{display:flex;gap:6px}
-.slide-dot{width:6px;height:6px;border-radius:50%;background:var(--border);border:none;cursor:pointer;transition:all .15s;padding:0}
+.slide-dots{display:flex;gap:5px}
+.slide-dot{width:6px;height:6px;border-radius:50%;background:var(--border);border:none;padding:0;cursor:pointer;transition:all .15s}
 .slide-dot.active{background:var(--gold)}
 
-/* INPUT */
-.input-area{padding:16px 24px 20px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0}
-.input-wrap{display:flex;gap:10px;align-items:flex-end;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 4px 4px 14px;transition:border-color .15s}
+/* Input */
+.input-area{padding:14px 24px 18px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;transition:background .2s}
+.input-wrap{display:flex;gap:8px;align-items:flex-end;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 4px 4px 14px;transition:border-color .15s,background .2s}
 .input-wrap:focus-within{border-color:var(--gold-border)}
 .chat-input{flex:1;background:none;border:none;outline:none;resize:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5;max-height:120px;padding:8px 0;overflow-y:auto}
 .chat-input::placeholder{color:var(--text3)}
-.send-btn{width:36px;height:36px;border-radius:7px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--bg);flex-shrink:0;transition:all .15s;font-size:16px;margin-bottom:2px}
+.send-btn{width:34px;height:34px;border-radius:7px;background:var(--gold);border:none;display:flex;align-items:center;justify-content:center;color:#0F0E0A;flex-shrink:0;transition:all .15s;font-size:15px;margin-bottom:2px}
 .send-btn:hover:not(:disabled){background:#D4B460;transform:translateY(-1px)}
 .send-btn:disabled{background:var(--bg4);color:var(--text3);cursor:not-allowed;transform:none}
-.input-hint{font-size:10px;color:var(--text3);margin-top:7px;text-align:center}
+.input-hint{font-size:10px;color:var(--text3);margin-top:6px;text-align:center}
 
-/* DASHBOARD */
-.dash-view{flex:1;overflow-y:auto;padding:28px 32px}
-.dash-view::-webkit-scrollbar{width:4px}.dash-view::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-.view-hdr h1{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);margin-bottom:4px}
-.view-hdr p{color:var(--text3);font-size:13px;margin-bottom:24px}
-.dash-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+/* Dashboard */
+.dash-view{flex:1;overflow-y:auto;padding:24px 28px}
+.dash-view::-webkit-scrollbar{width:4px}
+.dash-view::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.view-hdr h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:4px}
+.view-hdr p{color:var(--text3);font-size:13px;margin-bottom:20px}
+.dash-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .dash-date{font-size:13px;color:var(--text2)}
 .dash-live{font-size:11px;color:#4A7C59;font-weight:500}
-.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
-.kpi-card{padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;gap:12px;align-items:flex-start;transition:border-color .15s;cursor:default}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.kpi-card{padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);display:flex;gap:10px;align-items:flex-start;transition:border-color .15s,background .2s}
 .kpi-card:hover{border-color:var(--gold-border)}
 .kpi-card.accent{border-color:rgba(201,168,76,.35)}
-.kpi-ico{width:30px;height:30px;border-radius:6px;background:var(--gold-dim);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:14px}
-.kpi-val{font-family:'DM Serif Display',serif;font-size:24px;color:var(--text);line-height:1.1}
+.kpi-ico{width:28px;height:28px;border-radius:6px;background:var(--gold-dim);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;font-size:13px}
+.kpi-val{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);line-height:1.1}
 .kpi-lbl{font-size:12px;color:var(--text2);margin-top:2px}
-.kpi-sub{font-size:11px;color:var(--text3);margin-top:4px}
-.section-hdr{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;font-weight:600}
-.highlights{display:flex;flex-direction:column;gap:6px;margin-bottom:24px}
-.hl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text2)}
+.kpi-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.section-hdr{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-weight:600}
+.highlights{display:flex;flex-direction:column;gap:5px;margin-bottom:20px}
+.hl-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text2);transition:background .2s}
 .hl-dot{color:var(--gold);font-size:8px;margin-top:4px;flex-shrink:0}
-.agents-list{display:flex;flex-direction:column;gap:8px}
-.agent-row{display:grid;grid-template-columns:1fr 80px 90px 120px;gap:16px;align-items:center;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs)}
+.agents-list{display:flex;flex-direction:column;gap:6px}
+.agent-row{display:grid;grid-template-columns:1fr 80px 90px 100px;gap:14px;align-items:center;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);transition:background .2s}
 .agent-name{font-size:13px;font-weight:500;color:var(--text)}
 .agent-deals{font-size:12px;color:var(--text2)}
 .agent-rev{font-size:12px;color:var(--gold)}
 .bar-wrap{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
 .bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),#D4B460);border-radius:2px}
 
-/* ERROR BANNER */
-.error-banner{padding:10px 14px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin:8px 0}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;animation:fadeIn .15s ease}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:24px;width:380px;max-width:90vw;box-shadow:0 20px 60px var(--shadow)}
+.modal h3{font-family:'DM Serif Display',serif;font-size:18px;color:var(--text);margin-bottom:16px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.modal-field input,.modal-field textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+.modal-field input:focus,.modal-field textarea:focus{border-color:var(--gold-border)}
+.modal-field textarea{resize:vertical;min-height:80px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.btn-primary{background:var(--gold);color:#0F0E0A;border:none;padding:8px 18px;border-radius:var(--rs);font-size:13px;font-weight:500;transition:all .15s}
+.btn-primary:hover{background:#D4B460}
+.btn-secondary{background:none;color:var(--text2);border:1px solid var(--border);padding:8px 18px;border-radius:var(--rs);font-size:13px;transition:all .15s}
+.btn-secondary:hover{border-color:var(--gold-border);color:var(--text)}
+
+/* Error */
+.error-banner{padding:9px 13px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin:6px 0}
 </style>
 </head>
 <body>
@@ -182,498 +245,366 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 // ============================================================
 // DATA
 // ============================================================
-const COMPANY = "Bohemia Reality";
-
 const properties = [
-  {id:"NEM-001",name:"Byt 3+kk, Vinohrady",address:"Mánesova 45, Praha 2",type:"byt",size:82,price:8900000,status:"prodáno",listedDate:"2024-10-05",soldDate:"2024-11-20",agent:"Markéta Horáčková",reconstruction:"2019",energyClass:"B",notes:""},
-  {id:"NEM-002",name:"Rodinný dům, Průhonice",address:"Kytínská 12, Průhonice",type:"dům",size:210,price:15500000,status:"k prodeji",listedDate:"2024-12-01",soldDate:null,agent:"Tomáš Novák",reconstruction:null,energyClass:"C",notes:"Chybí info o rekonstrukci a stáří střechy"},
-  {id:"NEM-003",name:"Kancelář, Smíchov",address:"Radlická 180, Praha 5",type:"komerční",size:155,price:42000,status:"pronájem",listedDate:"2024-09-15",soldDate:null,agent:"Jana Veselá",reconstruction:"2022",energyClass:"A",notes:""},
-  {id:"NEM-004",name:"Byt 1+kk, Žižkov",address:"Seifertova 78, Praha 3",type:"byt",size:38,price:4200000,status:"prodáno",listedDate:"2024-11-10",soldDate:"2025-01-08",agent:"Markéta Horáčková",reconstruction:null,energyClass:"D",notes:"Chybí dokumentace stavebních úprav z 2021"},
-  {id:"NEM-005",name:"Byt 2+1, Dejvice",address:"Jugoslávských partyzánů 22, Praha 6",type:"byt",size:65,price:7100000,status:"rezervace",listedDate:"2025-01-05",soldDate:null,agent:"Tomáš Novák",reconstruction:"2023",energyClass:"B",notes:""},
-  {id:"NEM-006",name:"Vila, Průhonice",address:"Dobřejovická 5, Průhonice",type:"dům",size:380,price:28000000,status:"k prodeji",listedDate:"2024-08-20",soldDate:null,agent:"Jana Veselá",reconstruction:null,energyClass:null,notes:"Chybí energetický průkaz, rekonstrukce neznámá"},
-  {id:"NEM-007",name:"Byt 4+kk, Holešovice",address:"Tusarova 31, Praha 7",type:"byt",size:105,price:11200000,status:"prodáno",listedDate:"2024-10-20",soldDate:"2025-01-25",agent:"Markéta Horáčková",reconstruction:"2020",energyClass:"B",notes:""},
-  {id:"NEM-008",name:"Sklad, Letňany",address:"Tupolevova 15, Praha 9",type:"komerční",size:840,price:125000,status:"pronájem",listedDate:"2025-02-01",soldDate:null,agent:"Tomáš Novák",reconstruction:"2018",energyClass:"C",notes:""},
-  {id:"NEM-009",name:"Byt 2+kk, Nusle",address:"Táborská 55, Praha 4",type:"byt",size:58,price:5800000,status:"k prodeji",listedDate:"2025-02-10",soldDate:null,agent:"Jana Veselá",reconstruction:null,energyClass:"C",notes:"Chybí rok výstavby a stavební dokumentace"},
-  {id:"NEM-010",name:"Penthouse, Pankrác",address:"Na Pankráci 12, Praha 4",type:"byt",size:180,price:19500000,status:"k prodeji",listedDate:"2025-01-20",soldDate:null,agent:"Markéta Horáčková",reconstruction:"2024",energyClass:"A",notes:""},
-  {id:"NEM-011",name:"Chata, Sázava",address:"Bystřice nad Sázavou 44",type:"rekreační",size:95,price:2800000,status:"prodáno",listedDate:"2024-12-05",soldDate:"2025-02-28",agent:"Tomáš Novák",reconstruction:null,energyClass:null,notes:"Chybí stavební povolení a info o přípojkách"},
-  {id:"NEM-012",name:"Byt 3+1, Smíchov",address:"Kartouzská 12, Praha 5",type:"byt",size:78,price:7600000,status:"rezervace",listedDate:"2025-02-20",soldDate:null,agent:"Jana Veselá",reconstruction:"2021",energyClass:"C",notes:""},
+  {id:"NEM-001",name:"Byt 3+kk, Vinohrady",address:"Mánesova 45, Praha 2",type:"byt",size:82,price:8900000,status:"prodáno",agent:"Markéta Horáčková",reconstruction:"2019",energyClass:"B",notes:""},
+  {id:"NEM-002",name:"Rodinný dům, Průhonice",address:"Kytínská 12, Průhonice",type:"dům",size:210,price:15500000,status:"k prodeji",agent:"Tomáš Novák",reconstruction:null,energyClass:"C",notes:"Chybí info o rekonstrukci a stáří střechy"},
+  {id:"NEM-003",name:"Kancelář, Smíchov",address:"Radlická 180, Praha 5",type:"komerční",size:155,price:42000,status:"pronájem",agent:"Jana Veselá",reconstruction:"2022",energyClass:"A",notes:""},
+  {id:"NEM-004",name:"Byt 1+kk, Žižkov",address:"Seifertova 78, Praha 3",type:"byt",size:38,price:4200000,status:"prodáno",agent:"Markéta Horáčková",reconstruction:null,energyClass:"D",notes:"Chybí dokumentace stavebních úprav z 2021"},
+  {id:"NEM-005",name:"Byt 2+1, Dejvice",address:"Jugoslávských partyzánů 22, Praha 6",type:"byt",size:65,price:7100000,status:"rezervace",agent:"Tomáš Novák",reconstruction:"2023",energyClass:"B",notes:""},
+  {id:"NEM-006",name:"Vila, Průhonice",address:"Dobřejovická 5, Průhonice",type:"dům",size:380,price:28000000,status:"k prodeji",agent:"Jana Veselá",reconstruction:null,energyClass:null,notes:"Chybí energetický průkaz, rekonstrukce neznámá"},
+  {id:"NEM-007",name:"Byt 4+kk, Holešovice",address:"Tusarova 31, Praha 7",type:"byt",size:105,price:11200000,status:"prodáno",agent:"Markéta Horáčková",reconstruction:"2020",energyClass:"B",notes:""},
+  {id:"NEM-008",name:"Sklad, Letňany",address:"Tupolevova 15, Praha 9",type:"komerční",size:840,price:125000,status:"pronájem",agent:"Tomáš Novák",reconstruction:"2018",energyClass:"C",notes:""},
+  {id:"NEM-009",name:"Byt 2+kk, Nusle",address:"Táborská 55, Praha 4",type:"byt",size:58,price:5800000,status:"k prodeji",agent:"Jana Veselá",reconstruction:null,energyClass:"C",notes:"Chybí rok výstavby a stavební dokumentace"},
+  {id:"NEM-010",name:"Penthouse, Pankrác",address:"Na Pankráci 12, Praha 4",type:"byt",size:180,price:19500000,status:"k prodeji",agent:"Markéta Horáčková",reconstruction:"2024",energyClass:"A",notes:""},
+  {id:"NEM-011",name:"Chata, Sázava",address:"Bystřice nad Sázavou 44",type:"rekreační",size:95,price:2800000,status:"prodáno",agent:"Tomáš Novák",reconstruction:null,energyClass:null,notes:"Chybí stavební povolení a info o přípojkách"},
+  {id:"NEM-012",name:"Byt 3+1, Smíchov",address:"Kartouzská 12, Praha 5",type:"byt",size:78,price:7600000,status:"rezervace",agent:"Jana Veselá",reconstruction:"2021",energyClass:"C",notes:""},
 ];
-
 const clients = [
-  {id:"KL-001",name:"Ing. Pavel Kratochvíl",type:"kupující",source:"doporučení",addedDate:"2025-01-08",quarter:"Q1 2025",email:"pavel.kratochvil@email.cz",status:"aktivní",agent:"Markéta Horáčková"},
-  {id:"KL-002",name:"Martina Procházková",type:"kupující",source:"web",addedDate:"2025-01-15",quarter:"Q1 2025",email:"m.prochazkova@seznam.cz",status:"aktivní",agent:"Tomáš Novák"},
-  {id:"KL-003",name:"ABC Invest s.r.o.",type:"investor",source:"LinkedIn",addedDate:"2025-01-22",quarter:"Q1 2025",email:"info@abcinvest.cz",status:"aktivní",agent:"Jana Veselá"},
-  {id:"KL-004",name:"David Šimánek",type:"kupující",source:"Sreality.cz",addedDate:"2025-02-03",quarter:"Q1 2025",email:"david.simanek@gmail.com",status:"aktivní",agent:"Markéta Horáčková"},
-  {id:"KL-005",name:"Lucie a Petr Kováčovi",type:"kupující",source:"doporučení",addedDate:"2025-02-14",quarter:"Q1 2025",email:"kovacovi@email.cz",status:"aktivní",agent:"Jana Veselá"},
-  {id:"KL-006",name:"Reality Group CZ a.s.",type:"developer",source:"veletrh",addedDate:"2025-02-28",quarter:"Q1 2025",email:"obchod@realitygroup.cz",status:"aktivní",agent:"Tomáš Novák"},
-  {id:"KL-007",name:"Bc. Jana Horáková",type:"kupující",source:"web",addedDate:"2025-03-05",quarter:"Q1 2025",email:"jana.horakova@post.cz",status:"aktivní",agent:"Jana Veselá"},
-  {id:"KL-008",name:"MUDr. Roman Vlček",type:"kupující",source:"Sreality.cz",addedDate:"2025-03-12",quarter:"Q1 2025",email:"vlcek.roman@medic.cz",status:"nový",agent:"Markéta Horáčková"},
-  {id:"KL-009",name:"Ing. Zuzana Malá",type:"kupující",source:"web",addedDate:"2024-10-08",quarter:"Q4 2024",email:"zmala@firma.cz",status:"uzavřeno",agent:"Markéta Horáčková"},
-  {id:"KL-010",name:"Tomáš Blaha",type:"kupující",source:"doporučení",addedDate:"2024-10-20",quarter:"Q4 2024",email:"t.blaha@seznam.cz",status:"uzavřeno",agent:"Tomáš Novák"},
-  {id:"KL-011",name:"FG Logistics s.r.o.",type:"nájemce",source:"LinkedIn",addedDate:"2024-11-05",quarter:"Q4 2024",email:"info@fglogistics.cz",status:"aktivní",agent:"Jana Veselá"},
-  {id:"KL-012",name:"Radek Pospíšil",type:"kupující",source:"Sreality.cz",addedDate:"2024-11-18",quarter:"Q4 2024",email:"r.pospisil@email.cz",status:"uzavřeno",agent:"Markéta Horáčková"},
-  {id:"KL-013",name:"Alena Červenková",type:"kupující",source:"Facebook",addedDate:"2024-12-02",quarter:"Q4 2024",email:"cervenkova@post.cz",status:"uzavřeno",agent:"Tomáš Novák"},
+  {id:"KL-001",name:"Ing. Pavel Kratochvíl",type:"kupující",source:"doporučení",addedDate:"2025-01-08",quarter:"Q1 2025",status:"aktivní",agent:"Markéta Horáčková"},
+  {id:"KL-002",name:"Martina Procházková",type:"kupující",source:"web",addedDate:"2025-01-15",quarter:"Q1 2025",status:"aktivní",agent:"Tomáš Novák"},
+  {id:"KL-003",name:"ABC Invest s.r.o.",type:"investor",source:"LinkedIn",addedDate:"2025-01-22",quarter:"Q1 2025",status:"aktivní",agent:"Jana Veselá"},
+  {id:"KL-004",name:"David Šimánek",type:"kupující",source:"Sreality.cz",addedDate:"2025-02-03",quarter:"Q1 2025",status:"aktivní",agent:"Markéta Horáčková"},
+  {id:"KL-005",name:"Lucie a Petr Kováčovi",type:"kupující",source:"doporučení",addedDate:"2025-02-14",quarter:"Q1 2025",status:"aktivní",agent:"Jana Veselá"},
+  {id:"KL-006",name:"Reality Group CZ a.s.",type:"developer",source:"veletrh",addedDate:"2025-02-28",quarter:"Q1 2025",status:"aktivní",agent:"Tomáš Novák"},
+  {id:"KL-007",name:"Bc. Jana Horáková",type:"kupující",source:"web",addedDate:"2025-03-05",quarter:"Q1 2025",status:"aktivní",agent:"Jana Veselá"},
+  {id:"KL-008",name:"MUDr. Roman Vlček",type:"kupující",source:"Sreality.cz",addedDate:"2025-03-12",quarter:"Q1 2025",status:"nový",agent:"Markéta Horáčková"},
+  {id:"KL-009",name:"Ing. Zuzana Malá",type:"kupující",source:"web",addedDate:"2024-10-08",quarter:"Q4 2024",status:"uzavřeno",agent:"Markéta Horáčková"},
+  {id:"KL-010",name:"Tomáš Blaha",type:"kupující",source:"doporučení",addedDate:"2024-10-20",quarter:"Q4 2024",status:"uzavřeno",agent:"Tomáš Novák"},
+  {id:"KL-011",name:"FG Logistics s.r.o.",type:"nájemce",source:"LinkedIn",addedDate:"2024-11-05",quarter:"Q4 2024",status:"aktivní",agent:"Jana Veselá"},
+  {id:"KL-012",name:"Radek Pospíšil",type:"kupující",source:"Sreality.cz",addedDate:"2024-11-18",quarter:"Q4 2024",status:"uzavřeno",agent:"Markéta Horáčková"},
+  {id:"KL-013",name:"Alena Červenková",type:"kupující",source:"Facebook",addedDate:"2024-12-02",quarter:"Q4 2024",status:"uzavřeno",agent:"Tomáš Novák"},
 ];
+const leadsHistory=[{month:"Říj 2024",leads:14,prodeje:3},{month:"Lis 2024",leads:18,prodeje:4},{month:"Pro 2024",leads:11,prodeje:2},{month:"Led 2025",leads:22,prodeje:5},{month:"Úno 2025",leads:19,prodeje:3},{month:"Bře 2025",leads:16,prodeje:2}];
+const leadSources=[{source:"Sreality.cz",count:28},{source:"Doporučení",count:22},{source:"Web/SEO",count:16},{source:"LinkedIn",count:8},{source:"Facebook",count:4},{source:"Veletrh",count:2}];
+const agents=[{name:"Markéta Horáčková",deals:8,revenue:52400000,leads:31},{name:"Tomáš Novák",deals:6,revenue:38700000,leads:27},{name:"Jana Veselá",deals:5,revenue:32100000,leads:22}];
+const lastWeek={period:"17.–21. března 2025",highlights:["Uzavřen prodej Penthouse Pankrác za 11,2 M Kč","Nové zastoupení: Vila Průhonice (28 M Kč)","6 nových leadů ze Sreality a webu","12 prohlídek, 3 zájemci podali nabídky"]};
+const marketListings=[{source:"Sreality.cz",title:"Byt 3+kk, Holešovice, 85 m²",price:9200000,date:"21. 3. 2025",type:"prodej"},{source:"Bezrealitky.cz",title:"Byt 2+1, Holešovice, 62 m²",price:6800000,date:"22. 3. 2025",type:"prodej"},{source:"Sreality.cz",title:"Byt 4+1, Praha 7, 115 m²",price:12500000,date:"22. 3. 2025",type:"prodej"},{source:"Reality.cz",title:"Byt 1+kk, Holešovice, 32 m²",price:3900000,date:"23. 3. 2025",type:"prodej"},{source:"Sreality.cz",title:"Nájemní byt 2+kk, Holešovice",price:22000,date:"23. 3. 2025",type:"nájem"}];
 
-const leadsHistory = [
-  {month:"Říj 2024",leads:14,prodeje:3},
-  {month:"Lis 2024",leads:18,prodeje:4},
-  {month:"Pro 2024",leads:11,prodeje:2},
-  {month:"Led 2025",leads:22,prodeje:5},
-  {month:"Úno 2025",leads:19,prodeje:3},
-  {month:"Bře 2025",leads:16,prodeje:2},
-];
+// ============================================================
+// SYSTEM PROMPT
+// ============================================================
+const SYSTEM_PROMPT = `Jsi PEPA — Back Office Operations Agent pro Bohemia Reality s.r.o. Mluvíš česky, jsi profesionální a věcný.
 
-const leadSources = [
-  {source:"Sreality.cz",count:28},{source:"Doporučení",count:22},
-  {source:"Web/SEO",count:16},{source:"LinkedIn",count:8},
-  {source:"Facebook",count:4},{source:"Veletrh",count:2},
-];
+NEMOVITOSTI: ${JSON.stringify(properties)}
+KLIENTI: ${JSON.stringify(clients)}
+LEADY/PRODEJE (6M): ${JSON.stringify(leadsHistory)}
+ZDROJE LEADŮ: ${JSON.stringify(leadSources)}
+AGENTI: ${JSON.stringify(agents)}
+MINULÝ TÝDEN: ${JSON.stringify(lastWeek)}
+NOVÉ NABÍDKY HOLEŠOVICE: ${JSON.stringify(marketListings)}
 
-const agents = [
-  {name:"Markéta Horáčková",deals:8,revenue:52400000,leads:31},
-  {name:"Tomáš Novák",deals:6,revenue:38700000,leads:27},
-  {name:"Jana Veselá",deals:5,revenue:32100000,leads:22},
-];
-
-const lastWeek = {
-  period:"17.–21. března 2025",
-  newLeads:6,viewings:12,offers:3,closedDeals:1,closedValue:11200000,
-  highlights:[
-    "Uzavřen prodej Penthouse Pankrác za 11,2 M Kč",
-    "Nové zastoupení: Vila Průhonice (28 M Kč)",
-    "6 nových leadů ze Sreality a webu",
-    "12 prohlídek, 3 zájemci podali nabídky",
-  ]
-};
-
-const marketListings = [
-  {id:"ML-001",source:"Sreality.cz",title:"Byt 3+kk, Holešovice, 85 m²",price:9200000,date:"21. 3. 2025",type:"prodej"},
-  {id:"ML-002",source:"Bezrealitky.cz",title:"Byt 2+1, Holešovice, 62 m²",price:6800000,date:"22. 3. 2025",type:"prodej"},
-  {id:"ML-003",source:"Sreality.cz",title:"Byt 4+1, Praha 7, 115 m²",price:12500000,date:"22. 3. 2025",type:"prodej"},
-  {id:"ML-004",source:"Reality.cz",title:"Byt 1+kk, Holešovice, 32 m²",price:3900000,date:"23. 3. 2025",type:"prodej"},
-  {id:"ML-005",source:"Sreality.cz",title:"Nájemní byt 2+kk, Holešovice",price:22000,date:"23. 3. 2025",type:"nájem"},
-];
+Výstupní formáty:
+Graf: \`\`\`chart\n{"type":"bar"|"line"|"pie","title":"...","data":[...],"xKey":"...","series":[{"key":"...","color":"...","label":"..."}]}\n\`\`\`
+Tabulka: \`\`\`table\n{"title":"...","columns":["..."],"rows":[["..."]]}\n\`\`\`
+Slidy: \`\`\`slides\n[{"title":"...","body":"...","bullets":["..."]}]\n\`\`\`
+E-mail: formátuj s Předmět:, oslovením, tělem a podpisem.
+Ostatní: markdown, čísla jako 8 900 000 Kč, buď konkrétní a stručný.`;
 
 // ============================================================
 // AGENT
 // ============================================================
-const SYSTEM_PROMPT = `Jsi PEPA — inteligentní Back Office Operations Agent pro realitní firmu Bohemia Reality s.r.o. Mluvíš česky, jsi profesionální a věcný.
-
-## Firemní data (k 23. 3. 2025)
-
-NEMOVITOSTI (12):
-${JSON.stringify(properties)}
-
-KLIENTI (13):
-${JSON.stringify(clients)}
-
-VÝVOJ LEADŮ/PRODEJŮ (6 měsíců):
-${JSON.stringify(leadsHistory)}
-
-ZDROJE LEADŮ: ${JSON.stringify(leadSources)}
-
-AGENTI: ${JSON.stringify(agents)}
-
-MINULÝ TÝDEN (17.–21. 3. 2025): ${JSON.stringify(lastWeek)}
-
-NOVÉ NABÍDKY (Praha Holešovice): ${JSON.stringify(marketListings)}
-
-## Výstupní formáty
-
-### Grafy — vrať JSON blok:
-\`\`\`chart
-{"type":"bar"|"line"|"pie","title":"...","data":[...],"xKey":"...","series":[{"key":"...","color":"...","label":"..."}]}
-\`\`\`
-
-### Tabulky:
-\`\`\`table
-{"title":"...","columns":["..."],"rows":[["..."]]}
-\`\`\`
-
-### Prezentace (slidy):
-\`\`\`slides
-[{"title":"...","body":"...","bullets":["..."]},{"title":"...","stats":[{"value":"...","label":"..."}]}]
-\`\`\`
-
-### E-maily:
-Formátuj s **Předmět:**, **Oslovení**, tělo, **Podpis**.
-
-### Ostatní:
-Markdown (tučné, kurzíva, nadpisy, odrážky). Čísla: 8 900 000 Kč. Buď konkrétní.`;
-
 async function callAgent(messages) {
-  // Try proxy first (production), fallback shows error
   const r = await fetch("/api/claude", {
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({
-      model:"claude-sonnet-4-6",
-      max_tokens:800,
-      system:SYSTEM_PROMPT,
-      messages
-    })
+    body: JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:SYSTEM_PROMPT,messages})
   });
-  // response always 200 from proxy
   const d = await r.json();
   if(d.error) throw new Error(d.error.message || "API error");
   return d.content[0]?.text || "Prázdná odpověď.";
 }
 
 // ============================================================
-// PARSE RESPONSE
+// HELPERS
 // ============================================================
 function parseResponse(text) {
-  const parts = [];
-  const re = /```(chart|table|slides)([\s\S]*?)```/g;
-  let last = 0, m;
-  while((m = re.exec(text)) !== null) {
-    if(m.index > last) {
-      const t = text.slice(last, m.index).trim();
-      if(t) parts.push({type:"text",content:t});
-    }
-    try {
-      parts.push({type:m[1], content:JSON.parse(m[2].trim())});
-    } catch(e) {
-      parts.push({type:"text",content:m[0]});
-    }
-    last = m.index + m[0].length;
+  const parts=[];
+  const re=/```(chart|table|slides)([\s\S]*?)```/g;
+  let last=0,m;
+  while((m=re.exec(text))!==null){
+    if(m.index>last){const t=text.slice(last,m.index).trim();if(t)parts.push({type:"text",content:t});}
+    try{parts.push({type:m[1],content:JSON.parse(m[2].trim())});}catch(e){parts.push({type:"text",content:m[0]});}
+    last=m.index+m[0].length;
   }
-  if(last < text.length) {
-    const t = text.slice(last).trim();
-    if(t) parts.push({type:"text",content:t});
-  }
-  if(!parts.length) parts.push({type:"text",content:text});
+  if(last<text.length){const t=text.slice(last).trim();if(t)parts.push({type:"text",content:t});}
+  if(!parts.length)parts.push({type:"text",content:text});
   return parts;
 }
-
-// ============================================================
-// MARKDOWN
-// ============================================================
-function renderMd(text) {
+function renderMd(text){
   return text
     .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/\*(.+?)\*/g,'<em>$1</em>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
-    .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>')
     .replace(/`(.+?)`/g,'<code>$1</code>')
-    .replace(/^[-•] (.+)$/gm,'<li>$1</li>')
-    .replace(/^(\d+)\. (.+)$/gm,'<li>$2</li>')
-    .replace(/(<li>[\s\S]*?<\/li>)/g, m => `<ul>${m}</ul>`)
-    .split('\n\n').map(p => {
-      if(/^<[hul]/.test(p.trim())) return p;
-      if(!p.trim()) return '';
-      return `<p>${p.replace(/\n/g,'<br/>')}</p>`;
-    }).join('');
+    .replace(/^[-•] (.+)$/gm,'<li>$1</li>').replace(/^(\d+)\. (.+)$/gm,'<li>$2</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,m=>`<ul>${m}</ul>`)
+    .split('\n\n').map(p=>{if(/^<[hul]/.test(p.trim()))return p;if(!p.trim())return'';return`<p>${p.replace(/\n/g,'<br/>')}</p>`;}).join('');
 }
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 // ============================================================
-// QUICK ACTIONS
+// DEFAULT QUICK ACTIONS
 // ============================================================
-const QUICK = [
-  {icon:"👥",label:"Klienti Q1 2025",prompt:"Jaké nové klienty máme za 1. kvartál? Odkud přišli? Znázorni to graficky jako koláčový graf zdrojů."},
-  {icon:"📈",label:"Graf leadů a prodejů",prompt:"Vytvoř graf vývoje počtu leadů a prodaných nemovitostí za posledních 6 měsíců."},
-  {icon:"📧",label:"E-mail pro zájemce",prompt:"Napiš e-mail pro zájemce o nemovitost Byt 3+kk Vinohrady a doporuč mu termín prohlídky v úterý 25. března nebo středu 26. března 2025."},
-  {icon:"🔍",label:"Chybějící data",prompt:"Najdi nemovitosti, u kterých nám v systému chybí data o rekonstrukci nebo stavebních úpravách. Vrať přehlednou tabulku s doporučením dalšího kroku."},
-  {icon:"📊",label:"Report + slidy",prompt:"Shrň výsledky minulého týdne do krátkého reportu pro vedení a připrav prezentaci se třemi slidy."},
-  {icon:"🏘️",label:"Monitoring Holešovice",prompt:"Informuj mě o nových nabídkách nemovitostí v lokalitě Praha Holešovice z realitních serverů. Zobraz jako tabulku."},
+const DEFAULT_QA = [
+  {id:"qa1",icon:"👥",label:"Klienti Q1 2025",prompt:"Jaké nové klienty máme za 1. kvartál? Odkud přišli? Znázorni graficky jako koláčový graf."},
+  {id:"qa2",icon:"📈",label:"Graf leadů a prodejů",prompt:"Vytvoř graf vývoje počtu leadů a prodaných nemovitostí za posledních 6 měsíců."},
+  {id:"qa3",icon:"📧",label:"E-mail pro zájemce",prompt:"Napiš e-mail pro zájemce o nemovitost Byt 3+kk Vinohrady a doporuč termín prohlídky 25. nebo 26. března 2025."},
+  {id:"qa4",icon:"🔍",label:"Chybějící data",prompt:"Najdi nemovitosti s chybějícími daty o rekonstrukci. Vrať tabulku s doporučením."},
+  {id:"qa5",icon:"📊",label:"Report + slidy",prompt:"Shrň výsledky minulého týdne a připrav prezentaci se třemi slidy."},
+  {id:"qa6",icon:"🏘️",label:"Holešovice monitoring",prompt:"Informuj mě o nových nabídkách v Praze Holešovice. Zobraz jako tabulku."},
 ];
 
 // ============================================================
 // REACT COMPONENTS
 // ============================================================
-const { useState, useEffect, useRef } = React;
-const { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+const {useState,useEffect,useRef,useCallback}=React;
+const {BarChart,Bar,LineChart,Line,PieChart,Pie,Cell,XAxis,YAxis,CartesianGrid,Tooltip,Legend,ResponsiveContainer}=Recharts;
+const COLORS=['#C9A84C','#4A7C59','#8B4513','#6B9EC9','#D4885A','#9B6B9E'];
 
-const COLORS = ['#C9A84C','#4A7C59','#8B4513','#6B9EC9','#D4885A','#9B6B9E'];
-
-function ChartTooltip({active,payload,label}) {
-  if(!active||!payload?.length) return null;
-  return React.createElement('div',{style:{background:'rgba(20,18,14,.96)',border:'1px solid rgba(201,168,76,.3)',borderRadius:8,padding:'10px 14px',fontSize:12}},
-    label && React.createElement('p',{style:{color:'#C9A84C',marginBottom:4,fontWeight:600}},label),
-    ...payload.map((e,i)=>React.createElement('p',{key:i,style:{color:e.color,margin:'2px 0'}},
-      `${e.name}: `,React.createElement('strong',null,
-        typeof e.value==='number'&&e.value>100000?e.value.toLocaleString('cs-CZ')+' Kč':e.value
-      )
-    ))
+function ChartTip({active,payload,label}){
+  if(!active||!payload?.length)return null;
+  return React.createElement('div',{style:{background:'var(--bg2)',border:'1px solid var(--gold-border)',borderRadius:8,padding:'9px 13px',fontSize:12}},
+    label&&React.createElement('p',{style:{color:'var(--gold)',marginBottom:4,fontWeight:600}},label),
+    ...payload.map((e,i)=>React.createElement('p',{key:i,style:{color:e.color,margin:'2px 0'}},`${e.name}: `,React.createElement('strong',null,typeof e.value==='number'&&e.value>100000?e.value.toLocaleString('cs-CZ')+' Kč':e.value)))
   );
 }
 
-function ChartBlock({data}) {
-  const {type,title,data:rows,xKey,series=[]} = data;
-  const axisStyle = {fill:'#8C8474',fontSize:11};
-  
-  const inner = () => {
-    if(type==='bar') return React.createElement(BarChart,{data:rows,margin:{top:10,right:20,left:0,bottom:5}},
-      React.createElement(CartesianGrid,{strokeDasharray:"3 3",stroke:"rgba(201,168,76,.1)"}),
-      React.createElement(XAxis,{dataKey:xKey,tick:axisStyle}),
-      React.createElement(YAxis,{tick:axisStyle}),
-      React.createElement(Tooltip,{content:React.createElement(ChartTooltip)}),
-      React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'#8C8474'}}),
-      ...series.map((s,i)=>React.createElement(Bar,{key:i,dataKey:s.key,name:s.label||s.key,fill:s.color||COLORS[i%COLORS.length],radius:[3,3,0,0]}))
-    );
-    if(type==='line') return React.createElement(LineChart,{data:rows,margin:{top:10,right:20,left:0,bottom:5}},
-      React.createElement(CartesianGrid,{strokeDasharray:"3 3",stroke:"rgba(201,168,76,.1)"}),
-      React.createElement(XAxis,{dataKey:xKey,tick:axisStyle}),
-      React.createElement(YAxis,{tick:axisStyle}),
-      React.createElement(Tooltip,{content:React.createElement(ChartTooltip)}),
-      React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'#8C8474'}}),
-      ...series.map((s,i)=>React.createElement(Line,{key:i,type:"monotone",dataKey:s.key,name:s.label||s.key,stroke:s.color||COLORS[i%COLORS.length],strokeWidth:2.5,dot:{r:4,fill:s.color||COLORS[i%COLORS.length]},activeDot:{r:6}}))
-    );
-    if(type==='pie') return React.createElement(PieChart,null,
-      React.createElement(Pie,{data:rows,cx:"50%",cy:"50%",outerRadius:100,dataKey:series[0]?.key||'count',nameKey:xKey||'source',label:({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`},
-        rows.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i%COLORS.length]}))
-      ),
-      React.createElement(Tooltip,{content:React.createElement(ChartTooltip)})
-    );
+function ChartBlock({data}){
+  const {type,title,data:rows,xKey,series=[]}=data;
+  const ax={fill:'var(--text3)',fontSize:11};
+  const inner=()=>{
+    if(type==='bar')return React.createElement(BarChart,{data:rows,margin:{top:8,right:16,left:0,bottom:4}},React.createElement(CartesianGrid,{strokeDasharray:"3 3",stroke:"rgba(201,168,76,.1)"}),React.createElement(XAxis,{dataKey:xKey,tick:ax}),React.createElement(YAxis,{tick:ax}),React.createElement(Tooltip,{content:React.createElement(ChartTip)}),React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'var(--text3)'}}), ...series.map((s,i)=>React.createElement(Bar,{key:i,dataKey:s.key,name:s.label||s.key,fill:s.color||COLORS[i%COLORS.length],radius:[3,3,0,0]})));
+    if(type==='line')return React.createElement(LineChart,{data:rows,margin:{top:8,right:16,left:0,bottom:4}},React.createElement(CartesianGrid,{strokeDasharray:"3 3",stroke:"rgba(201,168,76,.1)"}),React.createElement(XAxis,{dataKey:xKey,tick:ax}),React.createElement(YAxis,{tick:ax}),React.createElement(Tooltip,{content:React.createElement(ChartTip)}),React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'var(--text3)'}}), ...series.map((s,i)=>React.createElement(Line,{key:i,type:"monotone",dataKey:s.key,name:s.label||s.key,stroke:s.color||COLORS[i%COLORS.length],strokeWidth:2.5,dot:{r:4,fill:s.color||COLORS[i%COLORS.length]},activeDot:{r:6}})));
+    if(type==='pie')return React.createElement(PieChart,null,React.createElement(Pie,{data:rows,cx:"50%",cy:"50%",outerRadius:95,dataKey:series[0]?.key||'count',nameKey:xKey||'source',label:({name,percent})=>`${name} ${(percent*100).toFixed(0)}%`},rows.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i%COLORS.length]}))),React.createElement(Tooltip,{content:React.createElement(ChartTip)}));
     return null;
   };
-
-  return React.createElement('div',{className:'chart-wrap'},
-    title && React.createElement('div',{className:'chart-title-text'},title),
-    React.createElement(ResponsiveContainer,{width:"100%",height:280},inner())
-  );
+  return React.createElement('div',{className:'chart-wrap'},title&&React.createElement('div',{className:'chart-title-text'},title),React.createElement(ResponsiveContainer,{width:"100%",height:260},inner()));
 }
 
-function TableBlock({data}) {
-  const {title,columns,rows} = data;
-  return React.createElement('div',{className:'tbl-wrap'},
-    title && React.createElement('div',{className:'tbl-title'},title),
-    React.createElement('table',{className:'data-table'},
-      React.createElement('thead',null,
-        React.createElement('tr',null,...columns.map((c,i)=>React.createElement('th',{key:i},c)))
-      ),
-      React.createElement('tbody',null,
-        rows.map((row,i)=>React.createElement('tr',{key:i},...row.map((cell,j)=>React.createElement('td',{key:j},cell))))
-      )
-    )
-  );
+function TableBlock({data}){
+  const {title,columns,rows}=data;
+  return React.createElement('div',{className:'tbl-wrap'},title&&React.createElement('div',{className:'tbl-title'},title),React.createElement('table',{className:'data-table'},React.createElement('thead',null,React.createElement('tr',null,...columns.map((c,i)=>React.createElement('th',{key:i},c)))),React.createElement('tbody',null,rows.map((row,i)=>React.createElement('tr',{key:i},...row.map((cell,j)=>React.createElement('td',{key:j},cell)))))));
 }
 
-function SlidesBlock({data}) {
-  const [cur, setCur] = useState(0);
-  const slide = data[cur];
+function SlidesBlock({data}){
+  const [cur,setCur]=useState(0);
+  const s=data[cur];
   return React.createElement('div',{className:'slides-wrap'},
-    React.createElement('div',{className:'slide'},
-      React.createElement('div',{className:'slide-num'},`${cur+1} / ${data.length}`),
-      React.createElement('h3',{className:'slide-title'},slide.title),
-      slide.body && React.createElement('p',{className:'slide-body'},slide.body),
-      slide.bullets && React.createElement('ul',{className:'slide-bullets'},
-        slide.bullets.map((b,i)=>React.createElement('li',{key:i},b))
-      ),
-      slide.stats && React.createElement('div',{className:'slide-stats'},
-        slide.stats.map((s,i)=>React.createElement('div',{key:i},
-          React.createElement('span',{className:'stat-val'},s.value),
-          React.createElement('span',{className:'stat-lbl'},s.label)
-        ))
+    React.createElement('div',{className:'slide'},React.createElement('div',{className:'slide-num'},`${cur+1} / ${data.length}`),React.createElement('h3',{className:'slide-title'},s.title),s.body&&React.createElement('p',{className:'slide-body'},s.body),s.bullets&&React.createElement('ul',{className:'slide-bullets'},s.bullets.map((b,i)=>React.createElement('li',{key:i},b))),s.stats&&React.createElement('div',{className:'slide-stats'},s.stats.map((st,i)=>React.createElement('div',{key:i},React.createElement('span',{className:'stat-val'},st.value),React.createElement('span',{className:'stat-lbl'},st.label))))),
+    data.length>1&&React.createElement('div',{className:'slide-nav'},React.createElement('button',{className:'slide-btn',disabled:cur===0,onClick:()=>setCur(c=>c-1)},'‹'),React.createElement('div',{className:'slide-dots'},data.map((_,i)=>React.createElement('button',{key:i,className:`slide-dot${i===cur?' active':''}`,onClick:()=>setCur(i)}))),React.createElement('button',{className:'slide-btn',disabled:cur===data.length-1,onClick:()=>setCur(c=>c+1)},'›'))
+  );
+}
+
+function MsgContent({text}){
+  const parts=parseResponse(text);
+  return React.createElement('div',null,parts.map((p,i)=>{
+    if(p.type==='text')return React.createElement('div',{key:i,className:'md-content',dangerouslySetInnerHTML:{__html:renderMd(p.content)}});
+    if(p.type==='chart')return React.createElement(ChartBlock,{key:i,data:p.content});
+    if(p.type==='table')return React.createElement(TableBlock,{key:i,data:p.content});
+    if(p.type==='slides')return React.createElement(SlidesBlock,{key:i,data:p.content});
+    return null;
+  }));
+}
+
+// Modal pro přidání rychlé akce
+function AddQAModal({onSave,onClose}){
+  const [icon,setIcon]=useState('⚡');
+  const [label,setLabel]=useState('');
+  const [prompt,setPrompt]=useState('');
+  return React.createElement('div',{className:'modal-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'modal'},
+      React.createElement('h3',null,'Nová rychlá akce'),
+      React.createElement('div',{className:'modal-field'},React.createElement('label',null,'Ikona'),React.createElement('input',{value:icon,onChange:e=>setIcon(e.target.value),placeholder:'⚡',style:{width:60}})),
+      React.createElement('div',{className:'modal-field'},React.createElement('label',null,'Název'),React.createElement('input',{value:label,onChange:e=>setLabel(e.target.value),placeholder:'Např. Týdenní report'})),
+      React.createElement('div',{className:'modal-field'},React.createElement('label',null,'Dotaz / instrukce'),React.createElement('textarea',{value:prompt,onChange:e=>setPrompt(e.target.value),placeholder:'Např. Shrň výsledky tohoto týdne...'})),
+      React.createElement('div',{className:'modal-actions'},
+        React.createElement('button',{className:'btn-secondary',onClick:onClose},'Zrušit'),
+        React.createElement('button',{className:'btn-primary',onClick:()=>{if(label&&prompt)onSave({id:uid(),icon,label,prompt});},disabled:!label||!prompt},'Uložit')
       )
-    ),
-    data.length > 1 && React.createElement('div',{className:'slide-nav'},
-      React.createElement('button',{className:'slide-btn',disabled:cur===0,onClick:()=>setCur(c=>c-1)},'‹'),
-      React.createElement('div',{className:'slide-dots'},
-        data.map((_,i)=>React.createElement('button',{key:i,className:`slide-dot${i===cur?' active':''}`,onClick:()=>setCur(i)}))
-      ),
-      React.createElement('button',{className:'slide-btn',disabled:cur===data.length-1,onClick:()=>setCur(c=>c+1)},'›')
     )
   );
 }
 
-function MsgContent({text}) {
-  const parts = parseResponse(text);
-  return React.createElement('div',null,
-    parts.map((p,i)=>{
-      if(p.type==='text') return React.createElement('div',{key:i,className:'md-content',dangerouslySetInnerHTML:{__html:renderMd(p.content)}});
-      if(p.type==='chart') return React.createElement(ChartBlock,{key:i,data:p.content});
-      if(p.type==='table') return React.createElement(TableBlock,{key:i,data:p.content});
-      if(p.type==='slides') return React.createElement(SlidesBlock,{key:i,data:p.content});
-      return null;
-    })
-  );
-}
-
-function Dashboard() {
-  const q1 = clients.filter(c=>c.quarter==="Q1 2025");
-  const missing = properties.filter(p=>p.notes&&p.notes.length>0);
-  
+// Dashboard
+function Dashboard(){
+  const q1=clients.filter(c=>c.quarter==="Q1 2025");
+  const missing=properties.filter(p=>p.notes&&p.notes.length>0);
   return React.createElement('div',{className:'dash-view'},
-    React.createElement('div',{className:'view-hdr'},
-      React.createElement('h1',null,'Přehled operací'),
-      React.createElement('p',null,'Aktuální stav · Bohemia Reality s.r.o.')
-    ),
-    React.createElement('div',{className:'dash-row'},
-      React.createElement('span',{className:'dash-date'},'Pondělí, 23. března 2025'),
-      React.createElement('span',{className:'dash-live'},'● Živá data')
-    ),
+    React.createElement('div',{className:'view-hdr'},React.createElement('h1',null,'Přehled operací'),React.createElement('p',null,'Aktuální stav · Bohemia Reality s.r.o.')),
+    React.createElement('div',{className:'dash-row'},React.createElement('span',{className:'dash-date'},'Pondělí, 23. března 2025'),React.createElement('span',{className:'dash-live'},'● Živá data')),
     React.createElement('div',{className:'kpi-grid'},
-      ...[
-        {ico:'🏠',label:'Nemovitosti',val:properties.length,sub:`${properties.filter(p=>p.status==='k prodeji').length} k prodeji`,accent:true},
-        {ico:'✅',label:'Prodáno',val:properties.filter(p=>p.status==='prodáno').length,sub:`+ ${properties.filter(p=>p.status==='rezervace').length} v rezervaci`},
-        {ico:'👥',label:'Klienti Q1 2025',val:q1.length,sub:`${clients.filter(c=>c.status==='aktivní').length} aktivních`},
-        {ico:'⚠️',label:'Chybí data',val:missing.length,sub:'nemovitostí'},
-        {ico:'💰',label:'Celkový obrat',val:'123,2 M Kč',sub:'průměr 9,5M / deal'},
-        {ico:'📅',label:'Průměr dní',val:47,sub:'k uzavření prodeje'},
-      ].map((k,i)=>React.createElement('div',{key:i,className:`kpi-card${k.accent?' accent':''}`},
-        React.createElement('div',{className:'kpi-ico'},k.ico),
-        React.createElement('div',null,
-          React.createElement('div',{className:'kpi-val'},k.val),
-          React.createElement('div',{className:'kpi-lbl'},k.label),
-          React.createElement('div',{className:'kpi-sub'},k.sub)
-        )
-      ))
+      ...[{ico:'🏠',label:'Nemovitosti',val:properties.length,sub:`${properties.filter(p=>p.status==='k prodeji').length} k prodeji`,accent:true},{ico:'✅',label:'Prodáno',val:properties.filter(p=>p.status==='prodáno').length,sub:`+ ${properties.filter(p=>p.status==='rezervace').length} v rezervaci`},{ico:'👥',label:'Klienti Q1',val:q1.length,sub:`${clients.filter(c=>c.status==='aktivní').length} aktivních`},{ico:'⚠️',label:'Chybí data',val:missing.length,sub:'nemovitostí'},{ico:'💰',label:'Celkový obrat',val:'123,2 M Kč',sub:'průměr 9,5M / deal'},{ico:'📅',label:'Průměr dní',val:47,sub:'k uzavření'}].map((k,i)=>
+        React.createElement('div',{key:i,className:`kpi-card${k.accent?' accent':''}`},React.createElement('div',{className:'kpi-ico'},k.ico),React.createElement('div',null,React.createElement('div',{className:'kpi-val'},k.val),React.createElement('div',{className:'kpi-lbl'},k.label),React.createElement('div',{className:'kpi-sub'},k.sub)))
+      )
     ),
     React.createElement('div',{className:'section-hdr'},'Minulý týden · '+lastWeek.period),
-    React.createElement('div',{className:'highlights'},
-      lastWeek.highlights.map((h,i)=>React.createElement('div',{key:i,className:'hl-item'},
-        React.createElement('span',{className:'hl-dot'},'◆'),
-        React.createElement('span',null,h)
-      ))
-    ),
+    React.createElement('div',{className:'highlights'},lastWeek.highlights.map((h,i)=>React.createElement('div',{key:i,className:'hl-item'},React.createElement('span',{className:'hl-dot'},'◆'),React.createElement('span',null,h)))),
     React.createElement('div',{className:'section-hdr'},'Výsledky agentů'),
-    React.createElement('div',{className:'agents-list'},
-      agents.map((a,i)=>React.createElement('div',{key:i,className:'agent-row'},
-        React.createElement('span',{className:'agent-name'},a.name),
-        React.createElement('span',{className:'agent-deals'},a.deals+' dealů'),
-        React.createElement('span',{className:'agent-rev'},(a.revenue/1000000).toFixed(1)+' M Kč'),
-        React.createElement('div',{className:'bar-wrap'},
-          React.createElement('div',{className:'bar-fill',style:{width:`${(a.revenue/55000000)*100}%`}})
-        )
-      ))
-    )
+    React.createElement('div',{className:'agents-list'},agents.map((a,i)=>React.createElement('div',{key:i,className:'agent-row'},React.createElement('span',{className:'agent-name'},a.name),React.createElement('span',{className:'agent-deals'},a.deals+' dealů'),React.createElement('span',{className:'agent-rev'},(a.revenue/1000000).toFixed(1)+' M Kč'),React.createElement('div',{className:'bar-wrap'},React.createElement('div',{className:'bar-fill',style:{width:`${(a.revenue/55000000)*100}%`}})))))
   );
 }
 
-function App() {
-  const [msgs, setMsgs] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [view, setView] = useState('chat');
-  const [error, setError] = useState('');
-  const endRef = useRef(null);
-  const inputRef = useRef(null);
+// Main App
+function App(){
+  const [theme,setTheme]=useState('dark');
+  const [view,setView]=useState('chat');
+  const [chats,setChats]=useState([{id:'c1',title:'Nový chat',msgs:[]}]);
+  const [activeChatId,setActiveChatId]=useState('c1');
+  const [quickActions,setQuickActions]=useState(DEFAULT_QA);
+  const [loading,setLoading]=useState(false);
+  const [error,setError]=useState('');
+  const [input,setInput]=useState('');
+  const [showAddQA,setShowAddQA]=useState(false);
+  const endRef=useRef(null);
+  const inputRef=useRef(null);
 
-  useEffect(()=>{ endRef.current?.scrollIntoView({behavior:'smooth'}); },[msgs,loading]);
+  useEffect(()=>{document.documentElement.setAttribute('data-theme',theme);},[theme]);
+  useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'});},[chats,loading]);
 
-  async function send(text) {
-    const t = (text||input).trim();
-    if(!t||loading) return;
-    setInput(''); setError('');
-    const newMsgs = [...msgs, {role:'user',content:t}];
-    setMsgs(newMsgs);
+  const activeChat=chats.find(c=>c.id===activeChatId)||chats[0];
+
+  function newChat(){
+    const id=uid();
+    setChats(prev=>[...prev,{id,title:'Nový chat',msgs:[]}]);
+    setActiveChatId(id);
+    setView('chat');
+    setError('');
+  }
+
+  function deleteChat(id){
+    setChats(prev=>{
+      const next=prev.filter(c=>c.id!==id);
+      if(next.length===0){const nc={id:uid(),title:'Nový chat',msgs:[]};setActiveChatId(nc.id);return[nc];}
+      if(activeChatId===id)setActiveChatId(next[next.length-1].id);
+      return next;
+    });
+  }
+
+  function updateChatTitle(id,msgs){
+    if(msgs.length===1){
+      const title=msgs[0].content.slice(0,32)+(msgs[0].content.length>32?'…':'');
+      setChats(prev=>prev.map(c=>c.id===id?{...c,title}:c));
+    }
+  }
+
+  async function send(text){
+    const t=(text||input).trim();
+    if(!t||loading)return;
+    setInput('');setError('');
+    const newMsg={role:'user',content:t};
+    const newMsgs=[...activeChat.msgs,newMsg];
+    setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:newMsgs}:c));
+    updateChatTitle(activeChatId,newMsgs);
     setLoading(true);
-    try {
-      const res = await callAgent(newMsgs.map(m=>({role:m.role,content:m.content})));
-      setMsgs([...newMsgs,{role:'assistant',content:res}]);
-    } catch(e) {
-      setError(`Chyba: ${e.message}. Zkontrolujte prosím nastavení API klíče v Vercel env variables (ANTHROPIC_API_KEY).`);
-      setMsgs([...newMsgs,{role:'assistant',content:'**Chyba připojení k AI.** Ujistěte se, že je nastaven `ANTHROPIC_API_KEY` v prostředí Vercelu.'}]);
-    } finally {
+    try{
+      const history=newMsgs.slice(-6).map(m=>({role:m.role,content:m.content}));
+      const res=await callAgent(history);
+      const finalMsgs=[...newMsgs,{role:'assistant',content:res}];
+      setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:finalMsgs}:c));
+    }catch(e){
+      setError(`Chyba: ${e.message}`);
+      setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:[...newMsgs,{role:'assistant',content:`**Chyba:** ${e.message}`}]}:c));
+    }finally{
       setLoading(false);
       setTimeout(()=>inputRef.current?.focus(),100);
     }
   }
 
-  function onKey(e) {
-    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
-  }
+  function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 
-  const chatView = React.createElement('div',{className:'chat-view'},
-    React.createElement('div',{className:'chat-header'},
-      React.createElement('div',{className:'agent-status'},
-        React.createElement('span',{className:'status-dot'}),
-        'PEPA je online'
+  function addQA(qa){setQuickActions(prev=>[...prev,qa]);setShowAddQA(false);}
+  function deleteQA(id){setQuickActions(prev=>prev.filter(q=>q.id!==id));}
+
+  const sidebar=React.createElement('aside',{className:'sidebar'},
+    React.createElement('div',{className:'sidebar-top'},
+      // Logo
+      React.createElement('div',{className:'logo'},
+        React.createElement('span',{className:'logo-icon'},'🏢'),
+        React.createElement('div',null,React.createElement('div',{className:'logo-name'},'PEPA'),React.createElement('div',{className:'logo-sub'},'Back Office Agent')),
+        React.createElement('div',{className:'logo-right'},
+          React.createElement('button',{className:'icon-btn',onClick:()=>setTheme(t=>t==='dark'?'light':'dark'),title:'Přepnout téma'},theme==='dark'?'☀️':'🌙')
+        )
       ),
-      React.createElement('div',{className:'chat-sub'},'Back Office Operations Agent · Bohemia Reality s.r.o.')
+      // Nav
+      React.createElement('nav',{className:'nav'},
+        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>setView('chat')},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
+        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard'))
+      )
+    ),
+    React.createElement('div',{className:'sidebar-scroll'},
+      // Chats
+      React.createElement('div',{className:'section-label'},'Konverzace',React.createElement('button',{onClick:newChat,title:'Nový chat'},'+')
+      ),
+      ...chats.map(chat=>React.createElement('div',{key:chat.id,className:`chat-list-item${chat.id===activeChatId?' active':''}`,onClick:()=>{setActiveChatId(chat.id);setView('chat');}},
+        React.createElement('span',{className:'cli-icon'},'💬'),
+        React.createElement('span',{className:'cli-title'},chat.title),
+        chats.length>1&&React.createElement('button',{className:'cli-del',onClick:e=>{e.stopPropagation();deleteChat(chat.id);}},'×')
+      )),
+      // Quick actions
+      React.createElement('div',{className:'qa-header'},
+        React.createElement('span',{className:'qa-title'},'Rychlé akce'),
+        React.createElement('button',{className:'qa-add',onClick:()=>setShowAddQA(true),title:'Přidat rychlou akci'},'+')
+      ),
+      ...quickActions.map(q=>React.createElement('button',{key:q.id,className:'qa-btn',onClick:()=>{setView('chat');send(q.prompt);}},
+        React.createElement('span',{className:'qa-icon'},q.icon),
+        React.createElement('span',{className:'qa-label'},q.label),
+        React.createElement('button',{className:'qa-del',onClick:e=>{e.stopPropagation();deleteQA(q.id);}},'-')
+      ))
+    ),
+    React.createElement('div',{className:'sidebar-footer'},
+      React.createElement('div',{className:'company-badge'},'Bohemia Reality s.r.o.'),
+      React.createElement('div',{className:'version'},'v2.0 · Praha · 2025')
+    )
+  );
+
+  const chatView=React.createElement('div',{className:'chat-view'},
+    React.createElement('div',{className:'chat-header'},
+      React.createElement('div',{className:'chat-header-left'},
+        React.createElement('div',{className:'agent-status'},React.createElement('span',{className:'status-dot'}),'PEPA je online'),
+        React.createElement('div',{className:'chat-sub'},activeChat.title==='Nový chat'?'Bohemia Reality s.r.o. · Back Office Agent':activeChat.title)
+      ),
+      React.createElement('div',{className:'chat-header-right'},
+        React.createElement('button',{className:'header-btn',onClick:()=>{setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:[],title:'Nový chat'}:c));setError('');}},
+          '🗑️ Vymazat chat'
+        ),
+        React.createElement('button',{className:'header-btn',onClick:newChat},'+ Nový chat')
+      )
     ),
     React.createElement('div',{className:'messages-area'},
-      msgs.length===0 && React.createElement('div',{className:'welcome'},
+      activeChat.msgs.length===0&&React.createElement('div',{className:'welcome'},
         React.createElement('div',{className:'welcome-avatar'},'🏢'),
         React.createElement('h2',null,'Dobrý den, já jsem PEPA'),
-        React.createElement('p',null,'Váš inteligentní back office asistent. Pomůžu s analýzami, reporty, e-maily a prezentacemi pro Bohemia Reality.'),
+        React.createElement('p',null,'Váš back office asistent pro Bohemia Reality. Zeptejte se na data, reporty, e-maily nebo grafy.'),
         React.createElement('div',{className:'welcome-hints'},
-          React.createElement('div',{className:'hint',onClick:()=>send("Jaký je aktuální stav portfolia nemovitostí?")},
-            '💼 Zeptejte se na stav portfolia nebo klientů'
-          ),
-          React.createElement('div',{className:'hint',onClick:()=>send("Vytvoř graf vývoje leadů a prodejů za posledních 6 měsíců.")},
-            '📊 Požádejte o grafy nebo reporty'
-          ),
-          React.createElement('div',{className:'hint',onClick:()=>send("Jaké nemovitosti mají chybějící data?")},
-            '🔍 Najděte nemovitosti s chybějícími daty'
-          )
+          React.createElement('div',{className:'hint',onClick:()=>send("Jaký je aktuální stav portfolia?")},'💼 Stav portfolia nemovitostí'),
+          React.createElement('div',{className:'hint',onClick:()=>send("Vytvoř graf vývoje leadů za posledních 6 měsíců.")},'📊 Graf vývoje leadů'),
+          React.createElement('div',{className:'hint',onClick:()=>send("Které nemovitosti mají chybějící dokumentaci?")},'🔍 Chybějící dokumentace')
         )
       ),
-      msgs.map((m,i)=>React.createElement('div',{key:i,className:`message ${m.role}`},
+      activeChat.msgs.map((m,i)=>React.createElement('div',{key:i,className:`message ${m.role}`},
         React.createElement('div',{className:'msg-avatar'},m.role==='assistant'?'🤖':'👤'),
-        React.createElement('div',{className:'msg-bubble'},
-          m.role==='user'
-            ? React.createElement('div',{className:'user-text'},m.content)
-            : React.createElement(MsgContent,{text:m.content})
-        )
+        React.createElement('div',{className:'msg-bubble'},m.role==='user'?React.createElement('div',{className:'user-text'},m.content):React.createElement(MsgContent,{text:m.content}))
       )),
-      loading && React.createElement('div',{className:'message assistant'},
+      loading&&React.createElement('div',{className:'message assistant'},
         React.createElement('div',{className:'msg-avatar'},'🤖'),
-        React.createElement('div',{className:'msg-bubble'},
-          React.createElement('div',{className:'thinking'},
-            React.createElement('span',{className:'spin'},'⟳'),
-            ' PEPA přemýšlí…'
-          )
-        )
+        React.createElement('div',{className:'msg-bubble'},React.createElement('div',{className:'thinking'},React.createElement('span',{className:'spin'},'⟳'),' PEPA přemýšlí…'))
       ),
       React.createElement('div',{ref:endRef})
     ),
-    error && React.createElement('div',{className:'error-banner',style:{margin:'0 24px 8px'}},error),
+    error&&React.createElement('div',{className:'error-banner',style:{margin:'0 24px 6px'}},error),
     React.createElement('div',{className:'input-area'},
       React.createElement('div',{className:'input-wrap'},
-        React.createElement('textarea',{
-          ref:inputRef,value:input,
-          onChange:e=>setInput(e.target.value),
-          onKeyDown:onKey,
-          placeholder:'Napište dotaz nebo instrukci pro PEPU…',
-          rows:1,className:'chat-input'
-        }),
-        React.createElement('button',{
-          className:'send-btn',
-          disabled:!input.trim()||loading,
-          onClick:()=>send()
-        }, loading ? React.createElement('span',{className:'spin'},'⟳') : '↑')
+        React.createElement('textarea',{ref:inputRef,value:input,onChange:e=>setInput(e.target.value),onKeyDown:onKey,placeholder:'Napište dotaz nebo instrukci…',rows:1,className:'chat-input'}),
+        React.createElement('button',{className:'send-btn',disabled:!input.trim()||loading,onClick:()=>send()},loading?React.createElement('span',{className:'spin'},'⟳'):'↑')
       ),
       React.createElement('div',{className:'input-hint'},'Enter pro odeslání · Shift+Enter pro nový řádek')
     )
   );
 
   return React.createElement('div',{className:'app'},
-    React.createElement('aside',{className:'sidebar'},
-      React.createElement('div',{className:'logo'},
-        React.createElement('span',{className:'logo-icon'},'🏢'),
-        React.createElement('div',null,
-          React.createElement('div',{className:'logo-name'},'PEPA'),
-          React.createElement('div',{className:'logo-sub'},'Back Office Agent')
-        )
-      ),
-      React.createElement('nav',{className:'nav'},
-        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>setView('chat')},
-          React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')
-        ),
-        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},
-          React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')
-        )
-      ),
-      React.createElement('div',{className:'qa-section'},
-        React.createElement('div',{className:'qa-title'},'Rychlé akce'),
-        QUICK.map((q,i)=>React.createElement('button',{key:i,className:'qa-btn',onClick:()=>{setView('chat');send(q.prompt);}},
-          React.createElement('span',{className:'qa-icon'},q.icon),
-          React.createElement('span',{className:'qa-label'},q.label),
-          React.createElement('span',{className:'qa-arrow'},'›')
-        ))
-      ),
-      React.createElement('div',{className:'sidebar-footer'},
-        React.createElement('div',{className:'company-badge'},'Bohemia Reality s.r.o.'),
-        React.createElement('div',{className:'version'},'v1.0 · Praha · 2025')
-      )
-    ),
-    React.createElement('main',{className:'main'},
-      view==='dashboard' ? React.createElement(Dashboard) : chatView
-    )
+    sidebar,
+    React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):chatView),
+    showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)})
   );
 }
 
