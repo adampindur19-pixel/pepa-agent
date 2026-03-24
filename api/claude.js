@@ -44,11 +44,13 @@ export default async function handler(req) {
 
   const data = await upstream.text();
 
+  // Vždy vrať 200 aby browser mohl číst chybovou zprávu
   return new Response(data, {
-    status: upstream.status,
+    status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
+      'X-Upstream-Status': String(upstream.status),
     },
   });
 }
