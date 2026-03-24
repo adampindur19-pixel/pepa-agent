@@ -329,6 +329,52 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 .data-modal-tabs{display:flex;gap:4px;margin-bottom:16px}
 .data-tab{padding:6px 14px;border:1px solid var(--border);border-radius:var(--rs);background:none;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
 .data-tab.active{background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold)}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar{
+    position:fixed;top:0;left:0;height:100vh;z-index:200;
+    transform:translateX(-100%);transition:transform .25s ease;
+    width:280px;box-shadow:4px 0 20px rgba(0,0,0,.4);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+  .sidebar-overlay.open{display:block}
+  .main{width:100vw}
+  .chat-header{padding:10px 14px}
+  .chat-header-right .header-btn span{display:none}
+  .header-btn{padding:6px 8px;font-size:13px}
+  .messages-area{padding:12px 0}
+  .message{padding:6px 12px}
+  .user-text{max-width:85%}
+  .input-area{padding:10px 12px 14px}
+  .export-bar{padding:6px 12px;gap:4px;overflow-x:auto;flex-wrap:nowrap}
+  .export-btn{white-space:nowrap;font-size:11px;padding:4px 8px;flex-shrink:0}
+  .welcome{padding:0 16px;margin:20px auto}
+  .welcome h2{font-size:20px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .agent-row{grid-template-columns:1fr 60px 70px}
+  .bar-wrap{display:none}
+  .dash-view{padding:16px}
+  .upload-zone{margin:6px 12px}
+  .file-processing{margin:6px 12px}
+  .modal{width:calc(100vw - 32px);max-height:90vh;overflow-y:auto}
+  .briefing{margin:10px 12px}
+  .briefing-grid{grid-template-columns:repeat(2,1fr)}
+  .tasks-view{padding:16px}
+  .slide{padding:18px 20px}
+  /* Mobile top bar */
+  .mobile-topbar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+  .hamburger{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;line-height:1;flex-shrink:0}
+  .mobile-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--gold);flex:1}
+  .mobile-theme-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:4px}
+  /* Hide desktop chat header on mobile */
+  .chat-header{display:none}
+}
+@media (min-width: 769px) {
+  .mobile-topbar{display:none}
+  .sidebar-overlay{display:none !important}
+}
 </style>
 </head>
 <body>
@@ -858,6 +904,7 @@ function App(){
   const [error,setError]=useState('');
   const [input,setInput]=useState('');
   const [showAddQA,setShowAddQA]=useState(false);
+  const [sidebarOpen,setSidebarOpen]=useState(false);
   const [showAddData,setShowAddData]=useState(false);
   const [showTemplate,setShowTemplate]=useState(false);
   const [showUpload,setShowUpload]=useState(false);
@@ -1028,7 +1075,9 @@ function App(){
     navigator.clipboard.writeText(text).catch(()=>{});
   }
 
-  const sidebar=React.createElement('aside',{className:'sidebar'},
+  const sidebar=React.createElement(React.Fragment,null,
+    React.createElement('div',{className:'sidebar-overlay'+(sidebarOpen?' open':''),onClick:()=>setSidebarOpen(false)}),
+    React.createElement('aside',{className:'sidebar'+(sidebarOpen?' open':'')},
     React.createElement('div',{className:'sidebar-top'},
       // Logo
       React.createElement('div',{className:'logo'},
@@ -1040,9 +1089,9 @@ function App(){
       ),
       // Nav
       React.createElement('nav',{className:'nav'},
-        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>newChat()},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
-        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')),
-        React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'),tasks.filter(t=>!t.done).length>0&&React.createElement('span',{className:'notif-badge'},tasks.filter(t=>!t.done).length))
+        React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>{newChat();setSidebarOpen(false);}},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
+        React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>{setView('dashboard');setSidebarOpen(false);}},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')),
+        React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>{setView('tasks');setSidebarOpen(false);}},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'),tasks.filter(t=>!t.done).length>0&&React.createElement('span',{className:'notif-badge'},tasks.filter(t=>!t.done).length))
       ),
       React.createElement('button',{className:'nav-item',style:{borderTop:'1px solid var(--border)',marginTop:6,paddingTop:10},onClick:()=>setShowBriefing(true)},React.createElement('span',{className:'nav-icon'},'☀️'),React.createElement('span',null,'Ranní briefing')),
     ),
@@ -1050,7 +1099,7 @@ function App(){
       // Chats
       React.createElement('div',{className:'section-label'},'Konverzace',React.createElement('button',{onClick:newChat,title:'Nový chat'},'+')
       ),
-      ...chats.map(chat=>React.createElement('div',{key:chat.id,className:`chat-list-item${chat.id===activeChatId?' active':''}`,onClick:()=>{if(renamingId!==chat.id){setActiveChatId(chat.id);setView('chat');}}},
+      ...chats.map(chat=>React.createElement('div',{key:chat.id,className:`chat-list-item${chat.id===activeChatId?' active':''}`,onClick:()=>{if(renamingId!==chat.id){setActiveChatId(chat.id);setView('chat');setSidebarOpen(false);}}},
         React.createElement('span',{className:'cli-icon'},'💬'),
         renamingId===chat.id
           ? React.createElement('input',{className:'cli-rename',value:renameVal,autoFocus:true,onChange:e=>setRenameVal(e.target.value),onKeyDown:e=>{if(e.key==='Enter')confirmRename(chat.id);if(e.key==='Escape')setRenamingId(null);},onBlur:()=>confirmRename(chat.id),onClick:e=>e.stopPropagation()})
@@ -1079,9 +1128,14 @@ function App(){
       React.createElement('div',{className:'company-badge'},'Bohemia Reality s.r.o.'),
       React.createElement('div',{className:'version'},'v2.0 · Praha · 2025')
     )
-  );
+  ));
 
   const chatView=React.createElement('div',{className:'chat-view'},
+    React.createElement('div',{className:'mobile-topbar'},
+      React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
+      React.createElement('div',{className:'mobile-title'},'PEPA'),
+      React.createElement('button',{className:'mobile-theme-btn',onClick:()=>setTheme(t=>t==='dark'?'light':'dark')},theme==='dark'?'☀️':'🌙')
+    ),
     React.createElement('div',{className:'chat-header'},
       React.createElement('div',{className:'chat-header-left'},
         React.createElement('div',{className:'agent-status'},React.createElement('span',{className:'status-dot'}),'PEPA je online'),
