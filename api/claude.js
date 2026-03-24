@@ -28,17 +28,14 @@ export default async function handler(req) {
     body = await req.json();
   } catch(e) {
     return new Response(
-      JSON.stringify({ error: { message: 'Invalid request JSON' } }),
+      JSON.stringify({ error: { message: 'Invalid request JSON: ' + e.message } }),
       { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
   }
 
-  const payload = {
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1000,
-    system: body.system || '',
-    messages: body.messages || [],
-  };
+  // Always use claude-sonnet-4-6, keep rest of body as-is (supports vision/images)
+  body.model = 'claude-sonnet-4-6';
+  if (!body.max_tokens) body.max_tokens = 1000;
 
   let upstream;
   try {
@@ -49,7 +46,7 @@ export default async function handler(req) {
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     });
   } catch(e) {
     return new Response(
