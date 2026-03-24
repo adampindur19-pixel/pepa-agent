@@ -26,7 +26,7 @@ export default async function handler(req) {
   const body = await req.json();
 
   const payload = {
-    model: 'claude-sonnet-4-5',
+    model: 'claude-sonnet-4-6',
     max_tokens: 2000,
     system: body.system || '',
     messages: body.messages || [],
