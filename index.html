@@ -977,7 +977,7 @@ function App(){
             model:'claude-sonnet-4-6', max_tokens:800,
             system: 'Jsi realitní asistent. Analyzuj obrázek nemovitosti nebo dokumentu a extrahuj relevantní informace v češtině. Buď stručný a konkrétní.',
             messages:[{role:'user',content:[
-              {type:'image',source:{type:'base64',media_type:'image/'+ext,data:b64}},
+              {type:'image',source:{type:'base64',media_type:(ext==='jpg'?'image/jpeg':'image/'+ext),data:b64}},
               {type:'text',text:'Analyzuj tento obrázek. Je to fotka nemovitosti nebo dokument? Popiš co vidíš a navrhni jak s tím pracovat v realitní kanceláři.'}
             ]}]
           })
