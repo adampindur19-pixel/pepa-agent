@@ -238,6 +238,34 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 /* Error */
 .error-banner{padding:9px 13px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin:6px 0}
 
+/* File upload */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all .2s;margin:8px 24px;background:var(--surface)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold-border);background:var(--gold-dim)}
+.upload-zone-icon{font-size:28px;margin-bottom:6px}
+.upload-zone-text{font-size:13px;color:var(--text2)}
+.upload-zone-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.file-processing{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--gold-dim);border:1px solid var(--gold-border);border-radius:var(--rs);margin:8px 24px;font-size:13px;color:var(--gold)}
+.file-msg{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);margin:4px 0}
+.file-msg-icon{font-size:18px;flex-shrink:0}
+.file-msg-body{flex:1;font-size:12px;color:var(--text2)}
+.file-msg-name{font-weight:600;color:var(--text);margin-bottom:3px;font-size:13px}
+
+/* Notification badges */
+.notif-badge{display:inline-flex;align-items:center;justify-content:center;min-width:16px;height:16px;border-radius:8px;background:#E86464;color:white;font-size:10px;font-weight:700;padding:0 4px;margin-left:auto;flex-shrink:0}
+
+/* Context actions on messages */
+.msg-ctx-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;opacity:0;transition:opacity .15s}
+.message:hover .msg-ctx-actions{opacity:1}
+.ctx-btn{background:none;border:1px solid var(--border);color:var(--text3);font-size:11px;padding:3px 8px;border-radius:4px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.ctx-btn:hover{border-color:var(--gold-border);color:var(--gold)}
+
+/* Template modal */
+.template-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.template-item{padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s}
+.template-item:hover{border-color:var(--gold-border)}
+.template-item-title{font-size:13px;font-weight:500;color:var(--text)}
+.template-item-desc{font-size:11px;color:var(--text3);margin-top:2px}
+
 /* Briefing card */
 .briefing{margin:16px 24px;padding:18px 20px;background:linear-gradient(135deg,var(--surface),var(--bg3));border:1px solid var(--gold-border);border-radius:var(--r);animation:fadeIn .3s ease}
 .briefing-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -737,6 +765,71 @@ function TasksView({tasks, onAdd, onToggle, onDelete}) {
   );
 }
 
+// ============================================================
+// FILE UPLOAD COMPONENT
+// ============================================================
+function FileUpload({onFile, onClose}) {
+  const [drag, setDrag] = React.useState(false);
+  const inputRef = React.useRef(null);
+
+  function handleFile(file) {
+    if(!file) return;
+    onFile(file);
+  }
+
+  function onDrop(e) {
+    e.preventDefault(); setDrag(false);
+    const file = e.dataTransfer.files[0];
+    if(file) handleFile(file);
+  }
+
+  return React.createElement('div',{
+    className:'upload-zone'+(drag?' drag':''),
+    onDragOver:e=>{e.preventDefault();setDrag(true);},
+    onDragLeave:()=>setDrag(false),
+    onDrop,
+    onClick:()=>inputRef.current?.click()
+  },
+    React.createElement('input',{ref:inputRef,type:'file',style:{display:'none'},
+      accept:'.pdf,.png,.jpg,.jpeg,.csv,.xlsx,.xls',
+      onChange:e=>handleFile(e.target.files[0])}),
+    React.createElement('div',{className:'upload-zone-icon'},drag?'📂':'📎'),
+    React.createElement('div',{className:'upload-zone-text'},'Přetáhněte soubor nebo klikněte'),
+    React.createElement('div',{className:'upload-zone-sub'},'PDF, obrázek (JPG/PNG), CSV nebo Excel')
+  );
+}
+
+// ============================================================
+// TEMPLATE MODAL
+// ============================================================
+const TEMPLATES = [
+  {id:'t1',title:'Rezervační smlouva',desc:'Základní šablona rezervační smlouvy na nemovitost',icon:'📋',
+   prompt:'Vygeneruj rezervační smlouvu pro nemovitost NEM-009 (Byt 2+kk, Nusle) pro klienta David Šimánek. Cena 5 800 000 Kč, rezervační záloha 100 000 Kč, platnost rezervace 30 dní.'},
+  {id:'t2',title:'Průvodní dopis klientovi',desc:'Představení nemovitosti potenciálnímu kupujícímu',icon:'✉️',
+   prompt:'Napiš průvodní dopis klientovi MUDr. Romanu Vlčkovi představující Penthouse na Pankráci (NEM-010). Zdůrazni klíčové výhody nemovitosti a přilož návrh termínu prohlídky.'},
+  {id:'t3',title:'Týdenní report pro vedení',desc:'Souhrn aktivit a výsledků za uplynulý týden',icon:'📊',
+   prompt:'Připrav týdenní report pro vedení za týden 17.–21. března 2025. Zahrň počty prohlídek, nové leady, uzavřené obchody, příjmy a doporučení na příští týden. Formátuj profesionálně.'},
+  {id:'t4',title:'Cenová analýza nemovitosti',desc:'Porovnání ceny s trhem a doporučení',icon:'📉',
+   prompt:'Připrav cenovou analýzu pro Vila Průhonice (NEM-006, cena 28 000 000 Kč). Porovnej s tržními cenami v lokalitě, zhodnoť jak dlouho je v nabídce a doporuč cenovou strategii.'},
+  {id:'t5',title:'Email — upomínka dokumentů',desc:'Žádost klientovi o chybějící podklady',icon:'📬',
+   prompt:'Napiš e-mail pro agenta Tomáše Nováka s žádostí o doplnění chybějících dokumentů u nemovitostí NEM-002 a NEM-011. Uveď konkrétně co chybí a navrhni deadline.'},
+];
+
+function TemplateModal({onSelect, onClose}) {
+  return React.createElement('div',{className:'modal-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'modal',style:{width:440}},
+      React.createElement('h3',null,'📝 Šablony dokumentů'),
+      React.createElement('div',{className:'template-list'},
+        TEMPLATES.map(t=>React.createElement('div',{key:t.id,className:'template-item',onClick:()=>{onSelect(t.prompt);onClose();}},
+          React.createElement('div',{className:'template-item-title'},t.icon+' '+t.title),
+          React.createElement('div',{className:'template-item-desc'},t.desc)
+        ))
+      ),
+      React.createElement('button',{className:'btn-secondary',onClick:onClose,style:{width:'100%'}},'Zavřít')
+    )
+  );
+}
+
 // CopyBtn component
 function CopyBtn({text}) {
   const [copied, setCopied] = useState(false);
@@ -766,6 +859,10 @@ function App(){
   const [input,setInput]=useState('');
   const [showAddQA,setShowAddQA]=useState(false);
   const [showAddData,setShowAddData]=useState(false);
+  const [showTemplate,setShowTemplate]=useState(false);
+  const [showUpload,setShowUpload]=useState(false);
+  const [uploadProcessing,setUploadProcessing]=useState(false);
+  const [uploadFileName,setUploadFileName]=useState('');
   const [showBriefing,setShowBriefing]=useState(true);
   const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem('pepa-tasks');return s?JSON.parse(s):[{id:'t1',title:'Odpovědět ABC Invest na nabídku penthouse',done:false,created:'25. 3. 2025'},{id:'t2',title:'Zaslat kupní smlouvu Kováčovým',done:false,created:'25. 3. 2025'},{id:'t3',title:'Přiřadit agenta k MUDr. Vlčkovi',done:false,created:'25. 3. 2025'}];}catch(e){return[];}});
   const [renamingId,setRenamingId]=useState(null);
@@ -856,6 +953,65 @@ function App(){
     setShowAddData(false);
   }
 
+  async function handleFile(file) {
+    setShowUpload(false);
+    setUploadProcessing(true);
+    setUploadFileName(file.name);
+
+    try {
+      const ext = file.name.split('.').pop().toLowerCase();
+      let userMsg = '';
+
+      if(['png','jpg','jpeg'].includes(ext)) {
+        // Image - send as base64 to Claude vision
+        const b64 = await new Promise((res,rej)=>{
+          const r = new FileReader();
+          r.onload=()=>res(r.result.split(',')[1]);
+          r.onerror=rej;
+          r.readAsDataURL(file);
+        });
+        const resp = await fetch('/api/claude', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            model:'claude-sonnet-4-6', max_tokens:800,
+            system: 'Jsi realitní asistent. Analyzuj obrázek nemovitosti nebo dokumentu a extrahuj relevantní informace v češtině. Buď stručný a konkrétní.',
+            messages:[{role:'user',content:[
+              {type:'image',source:{type:'base64',media_type:'image/'+ext,data:b64}},
+              {type:'text',text:'Analyzuj tento obrázek. Je to fotka nemovitosti nebo dokument? Popiš co vidíš a navrhni jak s tím pracovat v realitní kanceláři.'}
+            ]}]
+          })
+        });
+        const d = await resp.json();
+        userMsg = d.content?.[0]?.text || 'Soubor byl nahrán ale nepodařilo se ho analyzovat.';
+      } else if(ext === 'csv') {
+        const text = await file.text();
+        const lines = text.split('\n').slice(0,20).join('\n');
+        userMsg = 'Analyzoval jsem CSV soubor "'+file.name+'". Prvních 20 řádků:\n\n'+lines+'\n\nNavrhuji importovat tato data do systému. Chcete pokračovat?';
+      } else if(['xlsx','xls'].includes(ext)) {
+        userMsg = 'Excel soubor "'+file.name+'" byl nahrán ('+Math.round(file.size/1024)+' KB). Pro import Excelu doporučuji nejprve uložit jako CSV. Chcete, abych připravil instrukce?';
+      } else if(ext === 'pdf') {
+        userMsg = 'PDF dokument "'+file.name+'" byl nahrán ('+Math.round(file.size/1024)+' KB). Zpracovávám obsah...\n\nPoznámka: Pro plnou analýzu PDF doporučuji zkopírovat text z dokumentu a vložit ho přímo do chatu.';
+      } else {
+        userMsg = 'Soubor "'+file.name+'" byl nahrán. Jak s ním chcete pracovat?';
+      }
+
+      const fileMsg = {role:'user', content:'📎 Nahrán soubor: **'+file.name+'**', isFile:true};
+      const agentMsg = {role:'assistant', content:userMsg};
+      setChats(prev=>prev.map(ch=>ch.id===activeChatId?{...ch,msgs:[...ch.msgs,fileMsg,agentMsg]}:ch));
+    } catch(err) {
+      setError('Chyba při zpracování souboru: '+err.message);
+    } finally {
+      setUploadProcessing(false);
+      setUploadFileName('');
+    }
+  }
+
+  function saveAsTask(text) {
+    const title = text.slice(0,60)+(text.length>60?'…':'');
+    addTask({id:uid(), title, done:false, created:new Date().toLocaleDateString('cs-CZ')});
+  }
+
   function startRename(chat) {
     setRenamingId(chat.id);
     setRenameVal(chat.title);
@@ -884,7 +1040,7 @@ function App(){
       React.createElement('nav',{className:'nav'},
         React.createElement('button',{className:`nav-item${view==='chat'?' active':''}`,onClick:()=>newChat()},React.createElement('span',{className:'nav-icon'},'💬'),React.createElement('span',null,'Chat')),
         React.createElement('button',{className:`nav-item${view==='dashboard'?' active':''}`,onClick:()=>setView('dashboard')},React.createElement('span',{className:'nav-icon'},'📊'),React.createElement('span',null,'Dashboard')),
-        React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'+(tasks.filter(t=>!t.done).length>0?' ('+tasks.filter(t=>!t.done).length+')':'')))
+        React.createElement('button',{className:`nav-item${view==='tasks'?' active':''}`,onClick:()=>setView('tasks')},React.createElement('span',{className:'nav-icon'},'✅'),React.createElement('span',null,'Úkoly'),tasks.filter(t=>!t.done).length>0&&React.createElement('span',{className:'notif-badge'},tasks.filter(t=>!t.done).length))
       ),
       React.createElement('button',{className:'nav-item',style:{borderTop:'1px solid var(--border)',marginTop:6,paddingTop:10},onClick:()=>setShowBriefing(true)},React.createElement('span',{className:'nav-icon'},'☀️'),React.createElement('span',null,'Ranní briefing')),
     ),
@@ -955,8 +1111,11 @@ function App(){
             ? React.createElement('div',{className:'user-text'},m.content)
             : React.createElement('div',null,
                 React.createElement(MsgContent,{text:m.content}),
-                React.createElement('div',{className:'msg-actions'},
-                  React.createElement(CopyBtn,{text:m.content})
+                React.createElement('div',{className:'msg-ctx-actions'},
+                  React.createElement(CopyBtn,{text:m.content}),
+                  React.createElement('button',{className:'ctx-btn',onClick:()=>saveAsTask(m.content)},'✅ Uložit jako úkol'),
+                  React.createElement('button',{className:'ctx-btn',onClick:()=>setShowTemplate(true)},'📝 Použít šablonu'),
+                  React.createElement('button',{className:'ctx-btn',onClick:()=>exportChatTXT(activeChat)},'💾 Stáhnout')
                 )
               )
         )
@@ -968,6 +1127,11 @@ function App(){
       React.createElement('div',{ref:endRef})
     ),
     error&&React.createElement('div',{className:'error-banner',style:{margin:'0 24px 6px'}},error),
+    uploadProcessing&&React.createElement('div',{className:'file-processing'},
+      React.createElement('span',{className:'spin'},'⧘'),
+      ' Zpracovávám soubor: ',uploadFileName,'…'
+    ),
+    showUpload&&React.createElement(FileUpload,{onFile:handleFile,onClose:()=>setShowUpload(false)}),
     React.createElement('div',{className:'input-area'},
       React.createElement('div',{className:'input-wrap'},
         React.createElement('textarea',{ref:inputRef,value:input,onChange:e=>setInput(e.target.value),onKeyDown:onKey,placeholder:'Napište dotaz nebo instrukci…',rows:1,className:'chat-input'}),
@@ -976,8 +1140,10 @@ function App(){
       React.createElement('div',{className:'input-hint'},'Enter pro odeslání · Shift+Enter pro nový řádek')
     ),
     React.createElement('div',{className:'export-bar'},
-      React.createElement('button',{className:'export-btn',onClick:exportPropertiesCSV},'📥 Nemovitosti CSV'),
-      React.createElement('button',{className:'export-btn',onClick:exportClientsCSV},'📥 Klienti CSV'),
+      React.createElement('button',{className:'export-btn',onClick:()=>setShowUpload(v=>!v),title:'Nahrát dokument'},'📎 Nahrát soubor'),
+      React.createElement('button',{className:'export-btn',onClick:()=>setShowTemplate(true),title:'Šablony dokumentů'},'📝 Šablony'),
+      React.createElement('button',{className:'export-btn',onClick:exportPropertiesCSV},'📊 Nemovitosti CSV'),
+      React.createElement('button',{className:'export-btn',onClick:exportClientsCSV},'📊 Klienti CSV'),
       activeChat.msgs.length>0&&React.createElement('button',{className:'export-btn',onClick:()=>exportChatTXT(activeChat)},'💬 Export chatu')
     )
   );
@@ -986,7 +1152,8 @@ function App(){
     sidebar,
     React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):view==='tasks'?React.createElement(TasksView,{tasks,onAdd:addTask,onToggle:toggleTask,onDelete:deleteTask}):chatView),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
-    showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)})
+    showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)}),
+    showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,30),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>send(prompt),50);},onClose:()=>setShowTemplate(false)})
   );
 }
 
