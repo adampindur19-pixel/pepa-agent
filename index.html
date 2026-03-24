@@ -478,11 +478,17 @@ function Dashboard(){
 
 // Main App
 function App(){
-  const [theme,setTheme]=useState('dark');
+  const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'dark');
   const [view,setView]=useState('chat');
-  const [chats,setChats]=useState([{id:'c1',title:'Nový chat',msgs:[]}]);
-  const [activeChatId,setActiveChatId]=useState('c1');
-  const [quickActions,setQuickActions]=useState(DEFAULT_QA);
+  const [chats,setChats]=useState(()=>{
+    try{const s=localStorage.getItem('pepa-chats');return s?JSON.parse(s):[{id:'c1',title:'Nový chat',msgs:[]}];}
+    catch(e){return[{id:'c1',title:'Nový chat',msgs:[]}];}
+  });
+  const [activeChatId,setActiveChatId]=useState(()=>localStorage.getItem('pepa-active-chat')||'c1');
+  const [quickActions,setQuickActions]=useState(()=>{
+    try{const s=localStorage.getItem('pepa-qa');return s?JSON.parse(s):DEFAULT_QA;}
+    catch(e){return DEFAULT_QA;}
+  });
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState('');
   const [input,setInput]=useState('');
@@ -490,8 +496,11 @@ function App(){
   const endRef=useRef(null);
   const inputRef=useRef(null);
 
-  useEffect(()=>{document.documentElement.setAttribute('data-theme',theme);},[theme]);
+  useEffect(()=>{document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('pepa-theme',theme);},[theme]);
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'});},[chats,loading]);
+  useEffect(()=>{try{localStorage.setItem('pepa-chats',JSON.stringify(chats));}catch(e){}},[chats]);
+  useEffect(()=>{localStorage.setItem('pepa-active-chat',activeChatId);},[activeChatId]);
+  useEffect(()=>{try{localStorage.setItem('pepa-qa',JSON.stringify(quickActions));}catch(e){}},[quickActions]);
 
   const activeChat=chats.find(c=>c.id===activeChatId)||chats[0];
 
