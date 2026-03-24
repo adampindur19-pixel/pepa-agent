@@ -983,7 +983,9 @@ function App(){
           })
         });
         const d = await resp.json();
-        userMsg = d.content?.[0]?.text || 'Soubor byl nahrán ale nepodařilo se ho analyzovat.';
+        if(d.error) throw new Error(d.error.message || 'API error');
+        if(!d.content?.[0]?.text) throw new Error('Prázdná odpověď od API. Zkuste znovu.');
+        userMsg = d.content[0].text;
       } else if(ext === 'csv') {
         const text = await file.text();
         const lines = text.split('\n').slice(0,20).join('\n');
