@@ -18,12 +18,21 @@ export default async function handler(req) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: { message: 'ANTHROPIC_API_KEY není nastaven v prostředí Vercelu.' } }),
+      JSON.stringify({ error: { message: 'ANTHROPIC_API_KEY není nastaven.' } }),
       { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
   }
 
-  const body = await req.text();
+  let body;
+  try {
+    body = await req.json();
+  } catch(e) {
+    return new Response(JSON.stringify({ error: { message: 'Invalid JSON' } }), { status: 400 });
+  }
+
+  // Ensure correct model
+  body.model = 'claude-haiku-4-5-20251001';
+  if (!body.max_tokens) body.max_tokens = 2000;
 
   const upstream = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -32,7 +41,7 @@ export default async function handler(req) {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
     },
-    body,
+    body: JSON.stringify(body),
   });
 
   const data = await upstream.text();
