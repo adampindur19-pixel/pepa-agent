@@ -19,38 +19,60 @@ export default async function handler(req) {
   if (!apiKey) {
     return new Response(
       JSON.stringify({ error: { message: 'ANTHROPIC_API_KEY není nastaven.' } }),
-      { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
   }
 
-  const body = await req.json();
+  let body;
+  try {
+    body = await req.json();
+  } catch(e) {
+    return new Response(
+      JSON.stringify({ error: { message: 'Invalid request JSON' } }),
+      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+    );
+  }
 
   const payload = {
     model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
+    max_tokens: 1000,
     system: body.system || '',
     messages: body.messages || [],
   };
 
-  const upstream = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify(payload),
-  });
+  let upstream;
+  try {
+    upstream = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch(e) {
+    return new Response(
+      JSON.stringify({ error: { message: 'Nepodařilo se spojit s Anthropic API: ' + e.message } }),
+      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+    );
+  }
 
-  const data = await upstream.text();
+  let data;
+  try {
+    data = await upstream.json();
+  } catch(e) {
+    return new Response(
+      JSON.stringify({ error: { message: 'Anthropic API vrátilo neplatnou odpověď.' } }),
+      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
+    );
+  }
 
-  // Vždy vrať 200 aby browser mohl číst chybovou zprávu
-  return new Response(data, {
+  return new Response(JSON.stringify(data), {
     status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': '*',
-      'X-Upstream-Status': String(upstream.status),
     },
   });
 }
