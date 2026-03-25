@@ -599,6 +599,7 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
     transform:translateX(0);transition:width .25s,transform .25s;
     overflow:hidden;
   }
+  .sidebar-avatar{width:36px;height:36px;margin:0 auto}
   .sidebar.open{width:220px}
   .sidebar-btn{width:40px;height:40px;font-size:16px;padding:0;justify-content:center;margin:0 auto}
   .sidebar-btn span{display:none}
@@ -608,8 +609,8 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .sidebar.open .sidebar-logo{margin:4px 14px 16px}
   .chat-list-panel,.qa-section,.sidebar-divider{display:none}
   .sidebar.open .chat-list-panel,.sidebar.open .qa-section,.sidebar.open .sidebar-divider{display:flex;flex-direction:column;width:100%}
-  .sidebar-bottom{margin:0 auto}
-  .sidebar.open .sidebar-bottom{margin:0;width:100%}
+  .sidebar-bottom{margin:0 auto;padding:0 10px}
+  .sidebar.open .sidebar-bottom{margin:0;width:100%;padding:0 8px}
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
   .sidebar-overlay.open{display:block}
   /* Main content */
@@ -617,7 +618,9 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .home-grid{grid-template-columns:1fr!important}
   .home-grid-3{grid-template-columns:1fr!important}
   .welcome-stats{display:none!important}
-  .welcome-banner{padding:20px;min-height:100px}
+  .welcome-banner{padding:20px 20px;min-height:130px;border-radius:12px}
+  .welcome-left h1{font-size:24px!important}
+  .welcome-btn{padding:10px 16px;font-size:13px}
   .welcome-left h1{font-size:22px}
   .home-view{padding:12px!important;gap:12px!important}
   .card{padding:14px}
