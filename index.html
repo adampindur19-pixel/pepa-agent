@@ -69,13 +69,9 @@ input,textarea{font-family:'Inter',sans-serif}
   padding:16px 0;gap:0;
   z-index:50;overflow:hidden;
 }
-.sidebar-logo{
-  width:40px;height:40px;border-radius:12px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;margin:4px 14px 16px;
-  box-shadow:0 4px 16px rgba(124,111,247,.4);flex-shrink:0;
-}
+.sidebar-logo{display:none}
+.sidebar-hamburger-btn{background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;padding:8px 14px;line-height:1;width:100%;text-align:left;transition:color .15s}
+.sidebar-hamburger-btn:hover{color:white}
 .sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1;width:100%;padding:0 8px}
 .sidebar-btn{
   width:100%;height:40px;border-radius:10px;
@@ -609,8 +605,8 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .sidebar-btn span{display:none}
   .sidebar.open .sidebar-btn{width:100%;height:40px;padding:0 14px;justify-content:flex-start;margin:0}
   .sidebar.open .sidebar-btn span{display:inline}
-  .sidebar-logo{margin:4px auto 16px}
-  .sidebar.open .sidebar-logo{margin:4px 14px 16px}
+  .sidebar-logo{display:none}
+  .sidebar.open .sidebar-logo{display:none}
   .chat-list-panel,.qa-section,.sidebar-divider{display:none}
   .sidebar.open .chat-list-panel,.sidebar.open .qa-section,.sidebar.open .sidebar-divider{display:flex;flex-direction:column;width:100%}
   .sidebar-bottom{margin:0 auto;padding:0 10px}
@@ -620,7 +616,7 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
   .sidebar-overlay.open{display:block}
   /* Main content */
-  .main{width:calc(100vw - 56px);margin-left:56px}
+  .main{width:100vw!important;margin-left:0!important}
   .home-grid{grid-template-columns:1fr!important}
   .home-grid-3{grid-template-columns:1fr!important}
   .welcome-stats{display:none!important}
@@ -639,7 +635,7 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .toolbar{padding:4px 12px 0}
   .email-subject{max-width:130px}
   /* Mobile topbar */
-  .mobile-topbar{display:flex;align-items:center;padding:max(env(safe-area-inset-top,44px),44px) 16px 10px 8px;background:var(--sidebar);flex-shrink:0;width:100%}
+  .mobile-topbar{display:none!important}
   .hamburger{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:0;line-height:1}
 }
 @media(min-width:769px){.mobile-topbar{display:none!important}.sidebar-overlay{display:none!important}}
@@ -1223,7 +1219,23 @@ function App(){
   const sidebar=React.createElement(React.Fragment,null,
     React.createElement('div',{className:'sidebar-overlay'+(sidebarOpen?' open':''),onClick:()=>setSidebarOpen(false)}),
     React.createElement('aside',{className:'sidebar'+(sidebarOpen?' open':'')},
-      React.createElement('div',{className:'sidebar-logo'},'P'),
+      React.createElement('div',{style:{flexShrink:0,paddingTop:'max(env(safe-area-inset-top,44px),44px)'}},
+        React.createElement('div',{style:{position:'relative',padding:'8px 10px 4px'}},
+          React.createElement('button',{className:'sidebar-avatar',onClick:()=>setUserMenuOpen(v=>!v)},
+            React.createElement('div',{className:'sidebar-avatar-dot'},(user&&user.email||'?')[0].toUpperCase()),
+            React.createElement('span',{className:'sidebar-avatar-name'},(user&&user.user_metadata&&user.user_metadata.name)||(user&&user.email&&user.email.split('@')[0])||'Profil')
+          ),
+          userMenuOpen&&React.createElement('div',{className:'user-dropdown'},
+            React.createElement('div',{className:'user-info'},
+              React.createElement('div',{className:'user-name'},(user&&user.user_metadata&&user.user_metadata.name)||(user&&user.email&&user.email.split('@')[0])||'Uzivatel'),
+              React.createElement('div',{className:'user-email'},(user&&user.email)||'')
+            ),
+            React.createElement('button',{className:'dropdown-btn',onClick:handleSignOut},'Odhlasit se')
+          )
+        ),
+        React.createElement('button',{className:'sidebar-hamburger-btn',onClick:()=>setSidebarOpen(v=>!v)},'\u2630'),
+        React.createElement('div',{className:'sidebar-divider'})
+      ),
       React.createElement('div',{className:'sidebar-nav'},
         React.createElement('button',{className:`sidebar-btn${view==='home'?' active':''}`,onClick:()=>{setView('home');setSidebarOpen(false);},title:'Přehled'},'⊞',React.createElement('span',null,'Přehled')),
         React.createElement('button',{className:`sidebar-btn${view==='chat'?' active':''}`,onClick:()=>{newChat();setSidebarOpen(false);},title:'Nový chat'},'💬',React.createElement('span',null,'Nový chat')),
