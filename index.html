@@ -332,6 +332,8 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
+  .dash-view{padding-top:16px}
+  .tasks-view{padding-top:16px}
   .sidebar{
     position:fixed;top:0;left:0;height:100vh;z-index:200;
     transform:translateX(-100%);transition:transform .25s ease;
@@ -1130,12 +1132,13 @@ function App(){
     )
   ));
 
+  const mobileTopbar=React.createElement('div',{className:'mobile-topbar'},
+    React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
+    React.createElement('div',{className:'mobile-title'},'PEPA · Bohemia Reality'),
+    React.createElement('button',{className:'mobile-theme-btn',onClick:()=>setTheme(t=>t==='dark'?'light':'dark')},theme==='dark'?'☀️':'🌙')
+  );
+
   const chatView=React.createElement('div',{className:'chat-view'},
-    React.createElement('div',{className:'mobile-topbar'},
-      React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
-      React.createElement('div',{className:'mobile-title'},'PEPA'),
-      React.createElement('button',{className:'mobile-theme-btn',onClick:()=>setTheme(t=>t==='dark'?'light':'dark')},theme==='dark'?'☀️':'🌙')
-    ),
     React.createElement('div',{className:'chat-header'},
       React.createElement('div',{className:'chat-header-left'},
         React.createElement('div',{className:'agent-status'},React.createElement('span',{className:'status-dot'}),'PEPA je online'),
@@ -1206,7 +1209,10 @@ function App(){
 
   return React.createElement('div',{className:'app'},
     sidebar,
-    React.createElement('main',{className:'main'},view==='dashboard'?React.createElement(Dashboard):view==='tasks'?React.createElement(TasksView,{tasks,onAdd:addTask,onToggle:toggleTask,onDelete:deleteTask}):chatView),
+    React.createElement('main',{className:'main'},
+      mobileTopbar,
+      view==='dashboard'?React.createElement(Dashboard):view==='tasks'?React.createElement(TasksView,{tasks,onAdd:addTask,onToggle:toggleTask,onDelete:deleteTask}):chatView
+    ),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
     showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)}),
     showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,30),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>send(prompt),50);},onClose:()=>setShowTemplate(false)})
