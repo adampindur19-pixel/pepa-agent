@@ -587,6 +587,34 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .msg-copy:hover{border-color:var(--accent-border);color:var(--accent)}
 .msg-copy.copied{color:var(--green);border-color:var(--green)}
 
+/* ===== NOTIFICATIONS ===== */
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sidebar)}
+.notif-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--sidebar)}
+/* ===== VOICE INPUT ===== */
+.voice-btn{width:38px;height:38px;border-radius:12px;border:none;background:var(--surface2);color:var(--text3);font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .2s;margin-bottom:2px}
+.voice-btn:hover{background:var(--accent-dim);color:var(--accent)}
+.voice-btn.listening{background:var(--red);color:white;animation:voice-pulse 1s ease infinite}
+@keyframes voice-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,0)}}
+/* ===== SEARCH ===== */
+.search-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:flex;align-items:flex-start;justify-content:center;padding-top:80px;backdrop-filter:blur(4px)}
+.search-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rx);width:600px;max-width:90vw;box-shadow:var(--shadow-lg);overflow:hidden}
+.search-input-wrap{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--border)}
+.search-icon{font-size:18px;color:var(--text3);flex-shrink:0}
+.search-inp{flex:1;background:none;border:none;outline:none;font-size:16px;color:var(--text);font-family:'Inter',sans-serif}
+.search-inp::placeholder{color:var(--text3)}
+.search-kbd{font-size:11px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;cursor:pointer;flex-shrink:0}
+.search-results{max-height:400px;overflow-y:auto}
+.search-section{padding:8px 16px 4px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em}
+.search-item{display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;transition:background .15s}
+.search-item:hover,.search-item.selected{background:var(--accent-dim)}
+.search-item-icon{font-size:16px;flex-shrink:0}
+.search-item-title{font-size:13px;font-weight:500;color:var(--text)}
+.search-item-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.search-empty{padding:32px;text-align:center;color:var(--text3);font-size:14px}
+/* ===== SHARE CHAT ===== */
+.share-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:500;animation:toast-in .2s ease}
+@keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
 /* Mobile */
 .mobile-topbar{display:none}
 @media(max-width:768px){
@@ -1085,6 +1113,11 @@ function App(){
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'light');
   const [view,setView]=useState('home');
   const [sidebarOpen,setSidebarOpen]=useState(false);
+  const [showSearch,setShowSearch]=useState(false);
+  const [searchQ,setSearchQ]=useState('');
+  const [listening,setListening]=useState(false);
+  const [shareToast,setShareToast]=useState(false);
+  const [unreadEmails]=useState(gmailInbox.length);
   const [showAddQA,setShowAddQA]=useState(false);
   const [showAddData,setShowAddData]=useState(false);
   const [showTemplate,setShowTemplate]=useState(false);
@@ -1163,12 +1196,61 @@ function App(){
   useEffect(()=>{try{localStorage.setItem(K('tasks'),JSON.stringify(tasks));}catch(e){}},[tasks]);
   useEffect(()=>{endRef.current&&endRef.current.scrollIntoView({behavior:'smooth'});},[chats,loading]);
 
+  // Keyboard shortcut Ctrl+K for search
+  useEffect(()=>{
+    const handler=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();setShowSearch(v=>!v);}};
+    window.addEventListener('keydown',handler);
+    return ()=>window.removeEventListener('keydown',handler);
+  },[]);
+
   const activeChat=(chats||[]).find(c=>c.id===activeChatId)||chats[0];
 
   async function handleSignOut(){await sb.auth.signOut();setUser(null);setUserMenuOpen(false);}
 
   function newChat(){const id=uid();setChats(prev=>[...prev,{id,title:'Nový chat',msgs:[]}]);setActiveChatId(id);setView('chat');setError('');}
   function deleteChat(id){setChats(prev=>{const next=prev.filter(c=>c.id!==id);if(next.length===0){const nc={id:uid(),title:'Nový chat',msgs:[]};setActiveChatId(nc.id);return[nc];}if(activeChatId===id)setActiveChatId(next[next.length-1].id);return next;});}
+
+  // Voice input
+  function startVoice(){
+    if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+      setError('Váš prohlížeč nepodporuje hlasový vstup.');return;
+    }
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const rec=new SR();
+    rec.lang='cs-CZ';rec.continuous=false;rec.interimResults=false;
+    rec.onstart=()=>setListening(true);
+    rec.onend=()=>setListening(false);
+    rec.onerror=()=>setListening(false);
+    rec.onresult=e=>{
+      const t=e.results[0][0].transcript;
+      setInput(t);
+      setTimeout(()=>send(t),100);
+    };
+    rec.start();
+  }
+
+  // Share chat
+  function shareChat(){
+    const msgs2=(activeChat&&activeChat.msgs)||[];const text=msgs2.map(function(m){return '['+( m.role==='user'?'Vy':'PEPA')+'] '+m.content;}).join('\n\n');
+    if(navigator.share){
+      navigator.share({title:activeChat?.title||'Chat PEPA',text:text.slice(0,2000)});
+    } else {
+      navigator.clipboard.writeText(text);
+      setShareToast(true);
+      setTimeout(()=>setShareToast(false),2500);
+    }
+  }
+
+  // Search
+  const searchResults=React.useMemo(()=>{
+    if(!searchQ.trim())return{chats:[],props:[],clients:[]};
+    const q=searchQ.toLowerCase();
+    return {
+      chats:(chats||[]).filter(ch=>ch.title.toLowerCase().includes(q)||ch.msgs?.some(m=>m.content?.toLowerCase().includes(q))).slice(0,5),
+      props:properties.filter(p=>p.name.toLowerCase().includes(q)||p.address.toLowerCase().includes(q)||p.status.toLowerCase().includes(q)).slice(0,4),
+      clients:clients.filter(cl=>cl.name.toLowerCase().includes(q)||cl.source?.toLowerCase().includes(q)).slice(0,4),
+    };
+  },[searchQ,chats]);
 
   async function send(text){
     const t=(text||input).trim();if(!t||loading)return;
@@ -1238,7 +1320,10 @@ function App(){
       ),
       React.createElement('div',{className:'sidebar-nav'},
         React.createElement('button',{className:`sidebar-btn${view==='home'?' active':''}`,onClick:()=>{setView('home');setSidebarOpen(false);},title:'Přehled'},'⊞',React.createElement('span',null,'Přehled')),
-        React.createElement('button',{className:`sidebar-btn${view==='chat'?' active':''}`,onClick:()=>{newChat();setSidebarOpen(false);},title:'Nový chat'},'💬',React.createElement('span',null,'Nový chat')),
+        React.createElement('button',{className:`sidebar-btn${view==='chat'?' active':''}`,onClick:()=>{newChat();setSidebarOpen(false);},title:'Nový chat'},
+          '💬',React.createElement('span',null,'Nový chat'),
+          unreadEmails>0&&React.createElement('span',{className:'notif-count',style:{position:'static',minWidth:16,height:16,fontSize:9,marginLeft:'auto'}},unreadEmails)
+        ),
         React.createElement('button',{className:`sidebar-btn${view==='tasks'?' active':''}`,onClick:()=>{setView('tasks');setSidebarOpen(false);},title:'Úkoly'},
           '✅',React.createElement('span',null,'Úkoly'),
           (tasks||[]).filter(t=>!t.done).length>0&&React.createElement('span',{className:'sidebar-badge'},(tasks||[]).filter(t=>!t.done).length)
@@ -1294,6 +1379,7 @@ function App(){
         React.createElement('div',{className:'chat-sub'},(activeChat&&activeChat.title)==='Nový chat'?'Back Office Agent · Bohemia Reality':(activeChat&&activeChat.title))
       ),
       React.createElement('div',{className:'chat-actions'},
+        (activeChat&&activeChat.msgs&&activeChat.msgs.length>0)&&React.createElement('button',{className:'chat-btn',onClick:shareChat},'?? Sdílet'),
         React.createElement('button',{className:'chat-btn',onClick:()=>{setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:[],title:'Nový chat'}:c));setError('');}},'🗑️ Smazat'),
         React.createElement('button',{className:'chat-btn',onClick:newChat},'+ Nový')
       )
@@ -1344,6 +1430,7 @@ function App(){
     React.createElement('div',{className:'input-area'},
       React.createElement('div',{className:'input-wrap'},
         React.createElement('textarea',{ref:inputRef,value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}},placeholder:'Napište dotaz nebo instrukci…',rows:1,className:'chat-input'}),
+        React.createElement('button',{className:'voice-btn'+(listening?' listening':''),onClick:startVoice,title:'Hlasový vstup'},listening?'🔴':'🎤'),
         React.createElement('button',{className:'send-btn',disabled:!input.trim()||loading,onClick:()=>send()},loading?React.createElement('span',{className:'spin'},'⟳'):'↑')
       ),
       React.createElement('div',{className:'input-hint'},'Enter pro odeslání · Shift+Enter pro nový řádek')
@@ -1375,7 +1462,42 @@ function App(){
     ),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
     showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)}),
-    showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{openChat(prompt);},onClose:()=>setShowTemplate(false)})
+    showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{openChat(prompt);},onClose:()=>setShowTemplate(false)}),
+    showSearch&&React.createElement('div',{className:'search-overlay',onClick:e=>{if(e.target===e.currentTarget)setShowSearch(false);}},
+      React.createElement('div',{className:'search-box'},
+        React.createElement('div',{className:'search-input-wrap'},
+          React.createElement('span',{className:'search-icon'},'🔍'),
+          React.createElement('input',{className:'search-inp',autoFocus:true,value:searchQ,onChange:e=>setSearchQ(e.target.value),placeholder:'Hledat v chatech, nemovitostech, klientech...',onKeyDown:e=>{if(e.key==='Escape')setShowSearch(false);if(e.key==='Enter'&&searchQ.trim()){openChat('Najdi: '+searchQ);setShowSearch(false);}}}),
+          React.createElement('span',{className:'search-kbd',onClick:()=>setShowSearch(false)},'ESC')
+        ),
+        React.createElement('div',{className:'search-results'},
+          !searchQ.trim()&&React.createElement('div',{className:'search-empty'},'Začněte psát pro vyhledávání...'),
+          searchQ.trim()&&searchResults.chats.length===0&&searchResults.props.length===0&&searchResults.clients.length===0&&React.createElement('div',{className:'search-empty'},'Nic nenalezeno pro "'+searchQ+'"'),
+          searchResults.chats.length>0&&React.createElement('div',null,
+            React.createElement('div',{className:'search-section'},'Chaty'),
+            searchResults.chats.map((ch,i)=>React.createElement('div',{key:i,className:'search-item',onClick:()=>{setActiveChatId(ch.id);setView('chat');setShowSearch(false);setSearchQ('');}},
+              React.createElement('span',{className:'search-item-icon'},'💬'),
+              React.createElement('div',null,React.createElement('div',{className:'search-item-title'},ch.title),React.createElement('div',{className:'search-item-sub'},ch.msgs?.length||0,' zpráv'))
+            ))
+          ),
+          searchResults.props.length>0&&React.createElement('div',null,
+            React.createElement('div',{className:'search-section'},'Nemovitosti'),
+            searchResults.props.map((p,i)=>React.createElement('div',{key:i,className:'search-item',onClick:()=>{openChat('Řekni mi vše o nemovitosti '+p.id+' '+p.name);setShowSearch(false);setSearchQ('');}},
+              React.createElement('span',{className:'search-item-icon'},'🏠'),
+              React.createElement('div',null,React.createElement('div',{className:'search-item-title'},p.name),React.createElement('div',{className:'search-item-sub'},p.address+' · '+p.status))
+            ))
+          ),
+          searchResults.clients.length>0&&React.createElement('div',null,
+            React.createElement('div',{className:'search-section'},'Klienti'),
+            searchResults.clients.map((cl,i)=>React.createElement('div',{key:i,className:'search-item',onClick:()=>{openChat('Řekni mi vše o klientovi '+cl.name);setShowSearch(false);setSearchQ('');}},
+              React.createElement('span',{className:'search-item-icon'},'👤'),
+              React.createElement('div',null,React.createElement('div',{className:'search-item-title'},cl.name),React.createElement('div',{className:'search-item-sub'},cl.type+' · '+cl.source))
+            ))
+          )
+        )
+      )
+    ),
+    shareToast&&React.createElement('div',{className:'share-toast'},'✓ Chat zkopírován do schránky')
   );
 }
 
