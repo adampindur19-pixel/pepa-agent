@@ -1073,7 +1073,7 @@ function App(){
   const [showUpload,setShowUpload]=useState(false);
   const [uploadProcessing,setUploadProcessing]=useState(false);
   const [uploadFileName,setUploadFileName]=useState('');
-  const [showBriefing,setShowBriefing]=useState(true);
+  const [showBriefing,setShowBriefing]=useState(()=>!localStorage.getItem(K('briefing-'+new Date().toDateString())));
   const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem(K('tasks'));return s?JSON.parse(s):[];}catch(e){return[];}});
   const [renamingId,setRenamingId]=useState(null);
   const [renameVal,setRenameVal]=useState('');
@@ -1149,7 +1149,7 @@ function App(){
   function addTask(task){setTasks(prev=>[...prev,task]);}
   function toggleTask(id){setTasks(prev=>prev.map(t=>t.id===id?{...t,done:!t.done}:t));}
   function deleteTask(id){setTasks(prev=>prev.filter(t=>t.id!==id));}
-  function closeBriefing(){setShowBriefing(false);}
+  function closeBriefing(){setShowBriefing(false);localStorage.setItem(K('briefing-'+new Date().toDateString()),'1');}
   function briefingAction(prompt){closeBriefing();const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,32),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>send(prompt),50);}
 
   function addData(type, item) {
