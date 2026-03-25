@@ -1163,7 +1163,7 @@ function AddMeetingModal({onSave,onClose,defaultDate}){
   );
   return React.createElement('div',{className:'modal-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
     React.createElement('div',{className:'modal meeting-form'},
-      React.createElement('h3',null,'?? Nová schůzka'),
+      React.createElement('h3',null,'Nová schůzka'),
       inp('Název schůzky','title','text','Prohlídka NEM-010'),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},
         inp('Datum','date','date'),
@@ -1261,8 +1261,8 @@ function TeamCalendar({user,onAskPepa}){
 
   return React.createElement('div',{className:'cal-view'},
     React.createElement('div',{className:'cal-toolbar'},
-      React.createElement('h1',null,'?? Týmový kalendář'),
-      React.createElement('button',{className:'btn-secondary',style:{padding:'8px 14px',fontSize:12},onClick:()=>onAskPepa('Kdy mají agenti volno tento týden? Kdo má nejvíc schůzek? Shrn mi kalendář týmu.')},'?? Zeptat PEPU'),
+      React.createElement('h1',null,'Týmový kalendář'),
+      React.createElement('button',{className:'btn-secondary',style:{padding:'8px 14px',fontSize:12},onClick:()=>onAskPepa('Kdy mají agenti volno tento týden? Kdo má nejvíc schůzek? Shrn mi kalendář týmu.')},'💬 Zeptat PEPU'),
       React.createElement('button',{className:'btn-primary',style:{padding:'8px 16px',fontSize:13},onClick:()=>{setAddDate(today.toISOString().slice(0,10));setShowAddModal(true);}},'+ Přidat schůzku')
     ),
     // Agent filters
