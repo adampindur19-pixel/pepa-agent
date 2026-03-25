@@ -11,6 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ===== THEMES ===== */
 :root{
@@ -330,6 +331,37 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 .data-tab{padding:6px 14px;border:1px solid var(--border);border-radius:var(--rs);background:none;color:var(--text2);font-size:12px;cursor:pointer;transition:all .15s}
 .data-tab.active{background:var(--gold-dim);border-color:var(--gold-border);color:var(--gold)}
 
+/* ===== AUTH SCREEN ===== */
+.auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg);padding:24px}
+.auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo-icon{font-size:40px;margin-bottom:8px}
+.auth-logo-name{font-family:'DM Serif Display',serif;font-size:28px;color:var(--gold);letter-spacing:.05em}
+.auth-logo-sub{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-top:2px}
+.auth-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--bg3);padding:4px;border-radius:var(--rs)}
+.auth-tab{flex:1;padding:8px;border:none;background:none;color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;border-radius:5px;cursor:pointer;transition:all .15s}
+.auth-tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.auth-field{margin-bottom:14px}
+.auth-field label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;font-weight:600}
+.auth-field input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s}
+.auth-field input:focus{border-color:var(--gold-border)}
+.auth-submit{width:100%;background:var(--gold);color:#0F0E0A;border:none;padding:12px;border-radius:var(--rs);font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;margin-top:6px}
+.auth-submit:hover{background:#D4B460}
+.auth-submit:disabled{opacity:.6;cursor:not-allowed}
+.auth-error{padding:10px 14px;background:rgba(139,44,44,.2);border:1px solid rgba(139,44,44,.4);border-radius:var(--rs);color:#E88;font-size:13px;margin-bottom:14px}
+.auth-success{padding:10px 14px;background:rgba(74,124,89,.2);border:1px solid rgba(74,124,89,.4);border-radius:var(--rs);color:#4A7C59;font-size:13px;margin-bottom:14px}
+.auth-footer{text-align:center;margin-top:20px;font-size:12px;color:var(--text3)}
+
+/* User menu */
+.user-menu{position:relative}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-border);color:var(--gold);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s}
+.user-avatar:hover{border-color:var(--gold)}
+.user-dropdown{position:absolute;bottom:calc(100% + 6px);left:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:6px;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,.3);z-index:100}
+.user-dropdown-name{padding:8px 10px;font-size:13px;font-weight:500;color:var(--text);border-bottom:1px solid var(--border);margin-bottom:4px}
+.user-dropdown-email{font-size:11px;color:var(--text3);font-weight:400}
+.user-dropdown-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px;border:none;background:none;color:var(--text2);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border-radius:var(--rs);transition:all .15s;text-align:left}
+.user-dropdown-btn:hover{background:var(--bg3);color:var(--text)}
+
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 768px) {
   .dash-view{padding-top:16px}
@@ -382,6 +414,13 @@ table.data-table tr:hover td{background:var(--bg3);color:var(--text)}
 <body>
 <div id="root"></div>
 <script>
+// ============================================================
+// SUPABASE INIT
+// ============================================================
+const SUPABASE_URL = 'https://xcywshkyeamghiqzuiav.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fP8IAEATD7qiyUebsVU85A_bsAvYqXI';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ============================================================
 // DATA
 // ============================================================
@@ -878,6 +917,100 @@ function TemplateModal({onSelect, onClose}) {
   );
 }
 
+// ============================================================
+// AUTH SCREEN COMPONENT
+// ============================================================
+function AuthScreen({onAuth}) {
+  const [tab, setTab] = React.useState('login');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [name, setName] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
+  const [success, setSuccess] = React.useState('');
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    if(!email||!password) return;
+    setLoading(true); setError(''); setSuccess('');
+    try {
+      const {data, error: err} = await sb.auth.signInWithPassword({email, password});
+      if(err) throw err;
+      onAuth(data.user);
+    } catch(err) {
+      setError(err.message || 'Přihlášení se nezdařilo');
+    } finally { setLoading(false); }
+  }
+
+  async function handleRegister(e) {
+    e.preventDefault();
+    if(!email||!password||!name) return;
+    setLoading(true); setError(''); setSuccess('');
+    try {
+      const {data, error: err} = await sb.auth.signUp({
+        email, password,
+        options: { data: { name } }
+      });
+      if(err) throw err;
+      if(data.user && !data.session) {
+        setSuccess('Registrace úspěšná! Zkontrolujte e-mail pro potvrzení.');
+      } else if(data.user) {
+        onAuth(data.user);
+      }
+    } catch(err) {
+      setError(err.message || 'Registrace se nezdařila');
+    } finally { setLoading(false); }
+  }
+
+  return React.createElement('div',{className:'auth-screen'},
+    React.createElement('div',{className:'auth-card'},
+      React.createElement('div',{className:'auth-logo'},
+        React.createElement('div',{className:'auth-logo-icon'},'🏢'),
+        React.createElement('div',{className:'auth-logo-name'},'PEPA'),
+        React.createElement('div',{className:'auth-logo-sub'},'Back Office Agent · Bohemia Reality')
+      ),
+      React.createElement('div',{className:'auth-tabs'},
+        React.createElement('button',{className:'auth-tab'+(tab==='login'?' active':''),onClick:()=>{setTab('login');setError('');setSuccess('');}},
+          'Přihlásit se'),
+        React.createElement('button',{className:'auth-tab'+(tab==='register'?' active':''),onClick:()=>{setTab('register');setError('');setSuccess('');}},
+          'Registrovat')
+      ),
+      error && React.createElement('div',{className:'auth-error'},error),
+      success && React.createElement('div',{className:'auth-success'},success),
+      tab==='login'
+        ? React.createElement('form',{onSubmit:handleLogin},
+            React.createElement('div',{className:'auth-field'},
+              React.createElement('label',null,'E-mail'),
+              React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'vas@email.cz',required:true,autoComplete:'email'})
+            ),
+            React.createElement('div',{className:'auth-field'},
+              React.createElement('label',null,'Heslo'),
+              React.createElement('input',{type:'password',value:password,onChange:e=>setPassword(e.target.value),placeholder:'••••••••',required:true,autoComplete:'current-password'})
+            ),
+            React.createElement('button',{type:'submit',className:'auth-submit',disabled:loading},
+              loading?'Přihlašuji…':'Přihlásit se')
+          )
+        : React.createElement('form',{onSubmit:handleRegister},
+            React.createElement('div',{className:'auth-field'},
+              React.createElement('label',null,'Jméno'),
+              React.createElement('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'Pepa Novák',required:true})
+            ),
+            React.createElement('div',{className:'auth-field'},
+              React.createElement('label',null,'E-mail'),
+              React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'vas@email.cz',required:true,autoComplete:'email'})
+            ),
+            React.createElement('div',{className:'auth-field'},
+              React.createElement('label',null,'Heslo'),
+              React.createElement('input',{type:'password',value:password,onChange:e=>setPassword(e.target.value),placeholder:'Min. 6 znaků',required:true,minLength:6,autoComplete:'new-password'})
+            ),
+            React.createElement('button',{type:'submit',className:'auth-submit',disabled:loading},
+              loading?'Registruji…':'Vytvořit účet')
+          ),
+      React.createElement('div',{className:'auth-footer'},'Bohemia Reality s.r.o. · Interní systém')
+    )
+  );
+}
+
 // CopyBtn component
 function CopyBtn({text}) {
   const [copied, setCopied] = useState(false);
@@ -891,6 +1024,31 @@ function CopyBtn({text}) {
 }
 
 function App(){
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  // Check auth on mount
+  useEffect(()=>{
+    sb.auth.getSession().then(({data:{session}})=>{
+      setUser(session?.user || null);
+      setAuthLoading(false);
+    });
+    const {data:{subscription}} = sb.auth.onAuthStateChange((_,session)=>{
+      setUser(session?.user || null);
+    });
+    return ()=>subscription.unsubscribe();
+  },[]);
+
+  async function handleSignOut() {
+    await sb.auth.signOut();
+    setUser(null);
+    setUserMenuOpen(false);
+    // Clear local data
+    localStorage.removeItem('pepa-chats');
+    localStorage.removeItem('pepa-tasks');
+  }
+
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'dark');
   const [view,setView]=useState('chat');
   const [chats,setChats]=useState(()=>{
@@ -1127,7 +1285,19 @@ function App(){
       ))
     ),
     React.createElement('div',{className:'sidebar-footer'},
-      React.createElement('div',{className:'company-badge'},'Bohemia Reality s.r.o.'),
+      React.createElement('div',{className:'user-menu'},
+        React.createElement('button',{className:'user-avatar',onClick:()=>setUserMenuOpen(v=>!v),title:'Uživatelský účet'},
+          (user?.email||'?')[0].toUpperCase()
+        ),
+        userMenuOpen&&React.createElement('div',{className:'user-dropdown'},
+          React.createElement('div',{className:'user-dropdown-name'},
+            user?.user_metadata?.name||user?.email?.split('@')[0]||'Uživatel',
+            React.createElement('div',{className:'user-dropdown-email'},user?.email||'')
+          ),
+          React.createElement('button',{className:'user-dropdown-btn',onClick:handleSignOut},'🚪 Odhlásit se')
+        )
+      ),
+      React.createElement('div',{className:'company-badge',style:{marginTop:8}},'Bohemia Reality s.r.o.'),
       React.createElement('div',{className:'version'},'v2.0 · Praha · 2025')
     )
   ));
@@ -1206,6 +1376,12 @@ function App(){
       activeChat.msgs.length>0&&React.createElement('button',{className:'export-btn',onClick:()=>exportChatTXT(activeChat)},'💬 Export chatu')
     )
   );
+
+  // Auth loading
+  if(authLoading) return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'var(--bg)',color:'var(--text2)',fontSize:14}},'⧘ Načítám…');
+
+  // Auth screen
+  if(!user) return React.createElement(AuthScreen,{onAuth:setUser});
 
   return React.createElement('div',{className:'app'},
     sidebar,
