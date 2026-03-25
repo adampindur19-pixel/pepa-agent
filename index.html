@@ -166,9 +166,9 @@ input,textarea{font-family:'Inter',sans-serif}
 /* Welcome banner */
 .welcome-banner{
   background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 50%,#C084FC 100%);
-  border-radius:var(--rx);padding:28px 32px;
+  border-radius:var(--rx);padding:32px 36px;
   display:flex;align-items:center;justify-content:space-between;
-  color:white;position:relative;overflow:hidden;
+  color:white;position:relative;overflow:hidden;min-height:120px;
 }
 .welcome-banner::before{
   content:'';position:absolute;top:-40px;right:-40px;
@@ -182,7 +182,7 @@ input,textarea{font-family:'Inter',sans-serif}
 }
 .welcome-left h1{
   font-family:'DM Serif Display',serif;
-  font-size:28px;font-weight:400;margin-bottom:4px;
+  font-size:32px;font-weight:400;margin-bottom:6px;
 }
 .welcome-left p{font-size:13px;opacity:.8;margin-bottom:0}
 .welcome-stats{display:flex;gap:32px;position:relative;z-index:1}
@@ -592,41 +592,49 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 /* Mobile */
 .mobile-topbar{display:none}
 @media(max-width:768px){
-  .sidebar{width:56px!important}
-  .chat-list-panel,.qa-section{display:none!important}
-  .sidebar-btn{width:40px;height:40px;font-size:16px;padding:0;justify-content:center}
+  /* Sidebar - icon only when closed, full when open */
+  .sidebar{
+    position:fixed;top:0;left:0;height:100vh;z-index:200;
+    width:56px;
+    transform:translateX(0);transition:width .25s,transform .25s;
+    overflow:hidden;
+  }
+  .sidebar.open{width:220px}
+  .sidebar-btn{width:40px;height:40px;font-size:16px;padding:0;justify-content:center;margin:0 auto}
   .sidebar-btn span{display:none}
-  .chat-list-panel,.qa-section,.sidebar-logo + *{display:none}
+  .sidebar.open .sidebar-btn{width:100%;height:40px;padding:0 14px;justify-content:flex-start;margin:0}
+  .sidebar.open .sidebar-btn span{display:inline}
+  .sidebar-logo{margin:4px auto 16px}
+  .sidebar.open .sidebar-logo{margin:4px 14px 16px}
+  .chat-list-panel,.qa-section,.sidebar-divider{display:none}
+  .sidebar.open .chat-list-panel,.sidebar.open .qa-section,.sidebar.open .sidebar-divider{display:flex;flex-direction:column;width:100%}
+  .sidebar-bottom{margin:0 auto}
+  .sidebar.open .sidebar-bottom{margin:0;width:100%}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
+  .sidebar-overlay.open{display:block}
+  /* Main content */
+  .main{width:calc(100vw - 56px);margin-left:56px}
   .home-grid{grid-template-columns:1fr!important}
   .home-grid-3{grid-template-columns:1fr!important}
-  .welcome-stats{display:none}
-  .main{width:calc(100vw - 56px)!important}
-  .home-grid-3{grid-template-columns:1fr 1fr}
-  .span-2{grid-column:span 1}
-  .welcome-banner{flex-direction:column;gap:16px;padding:20px}
-  .welcome-stats{gap:20px}
-  .topbar{padding:10px 14px}
+  .welcome-stats{display:none!important}
+  .welcome-banner{padding:20px;min-height:100px}
+  .welcome-left h1{font-size:22px}
+  .home-view{padding:12px!important;gap:12px!important}
+  .card{padding:14px}
+  .topbar{padding:10px 14px;display:none}
+  .chat-header{display:flex}
   .messages-area{padding:12px 0}
   .message{padding:6px 12px}
   .user-text{max-width:85%}
   .input-area{padding:10px 12px 14px}
   .toolbar{padding:4px 12px 0}
+  .email-subject{max-width:130px}
+  /* Mobile topbar */
   .mobile-topbar{display:flex;align-items:center;gap:10px;padding:max(env(safe-area-inset-top,44px),44px) 14px 10px;background:var(--sidebar);flex-shrink:0}
-  .hamburger{background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer}
+  .hamburger{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:0}
   .mobile-title{font-size:15px;color:white;font-weight:600;flex:1}
-  .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:200;transform:translateX(-100%);transition:transform .25s;width:240px;align-items:flex-start;padding:16px 0}
-  .sidebar.open{transform:translateX(0)}
-  .sidebar.open{transform:translateX(0)}
-  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
-  .sidebar-overlay.open{display:block}
-  .sidebar-logo{margin:8px 14px 12px}
-  .chat-list-panel,.qa-section{display:flex;flex-direction:column;width:100%}
-  .sidebar-nav{width:100%}
-  .sidebar-btn{width:100%;border-radius:10px;justify-content:flex-start;padding:0 14px;gap:10px;font-size:14px;height:42px}
-  .sidebar-btn::before{display:none}
-  .sidebar-btn span{font-size:13px;font-weight:500;color:rgba(255,255,255,.6)}
-  .sidebar-btn.active span{color:white}
 }
+@media(min-width:769px){.mobile-topbar{display:none!important}.sidebar-overlay{display:none!important}}
 @media(min-width:769px){.sidebar-overlay{display:none!important}.mobile-topbar{display:none!important}}
 </style>
 </head>
@@ -1306,8 +1314,7 @@ function App(){
   // Mobile topbar
   const mobileTopbar=React.createElement('div',{className:'mobile-topbar'},
     React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
-    React.createElement('span',{className:'mobile-title'},'PEPA · Bohemia Reality'),
-    React.createElement('button',{style:{background:'none',border:'none',fontSize:18,cursor:'pointer'},onClick:()=>setTheme(t=>t==='light'?'dark':'light')},theme==='light'?'🌙':'☀️')
+    React.createElement('span',{className:'mobile-title'},'PEPA · Bohemia Reality')
   );
 
   if(authLoading)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'var(--bg)',color:'var(--text3)',fontSize:14}},'⟳ Načítám…');
