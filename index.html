@@ -1225,7 +1225,7 @@ function App(){
           React.createElement('div',{className:'hint-card',onClick:()=>send("Jaké emaily dnes přišly a co mám udělat?")},'📬 Dnešní emaily')
         )
       ),
-      (activeChat&&activeChat.msgs&&activeChat.msgs.map)((m,i)=>React.createElement('div',{key:i,className:`message ${m.role}`},
+      (activeChat&&activeChat.msgs||[]).map((m,i)=>React.createElement('div',{key:i,className:`message ${m.role}`},
         React.createElement('div',{className:'msg-avatar'},m.role==='assistant'?'✨':'👤'),
         React.createElement('div',{className:'msg-bubble'},
           m.role==='user'?React.createElement('div',{className:'user-text'},m.content):
