@@ -633,9 +633,8 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .toolbar{padding:4px 12px 0}
   .email-subject{max-width:130px}
   /* Mobile topbar */
-  .mobile-topbar{display:flex;align-items:center;gap:10px;padding:max(env(safe-area-inset-top,44px),44px) 14px 10px;background:var(--sidebar);flex-shrink:0}
-  .hamburger{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:0}
-  .mobile-title{font-size:15px;color:white;font-weight:600;flex:1}
+  .mobile-topbar{display:flex;align-items:center;padding:max(env(safe-area-inset-top,44px),44px) 8px 8px;background:var(--sidebar);flex-shrink:0;width:56px}
+  .hamburger{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:0;line-height:1}
 }
 @media(min-width:769px){.mobile-topbar{display:none!important}.sidebar-overlay{display:none!important}}
 @media(min-width:769px){.sidebar-overlay{display:none!important}.mobile-topbar{display:none!important}}
@@ -1112,14 +1111,52 @@ function App(){
   const userId=(user&&user.id)||'guest';
   const K=(key)=>`pepa-${userId}-${key}`;
 
-  const [chats,setChats]=useState(()=>{try{const s=localStorage.getItem('pepa-chats-'+userId);const p=s?JSON.parse(s):null;return Array.isArray(p)&&p.length>0?p:[{id:'c1',title:'Nový chat',msgs:[]}];}catch(e){return[{id:'c1',title:'Nový chat',msgs:[]}];}});
+  const [chats,setChats]=useState([{id:'c1',title:'Nový chat',msgs:[]}]);
+  const [chatsLoaded,setChatsLoaded]=useState(false);
   const [activeChatId,setActiveChatId]=useState('c1');
   const [quickActions,setQuickActions]=useState(()=>{try{const s=localStorage.getItem(K('qa'));const p=s?JSON.parse(s):null;return Array.isArray(p)&&p.length>0?p:DEFAULT_QA;}catch(e){return DEFAULT_QA;}});
   const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem(K('tasks'));const p=s?JSON.parse(s):null;return Array.isArray(p)?p:[];}catch(e){return[];}});
   const [customProps,setCustomProps]=useState([]);
   const [customClients2,setCustomClients2]=useState([]);
 
-  useEffect(()=>{try{localStorage.setItem('pepa-chats-'+userId,JSON.stringify(chats));}catch(e){}},[chats,userId]);
+  useEffect(()=>{
+    if(!user||!chatsLoaded)return;
+    // Save to localStorage cache
+    try{localStorage.setItem('pepa-chats-'+userId,JSON.stringify(chats));}catch(e){}
+    // Save to Supabase
+    const saveToSupabase=async()=>{
+      try{
+        await sb.from('user_chats').upsert({user_id:userId,chats:JSON.stringify(chats)},{onConflict:'user_id'});
+      }catch(e){}
+    };
+    const t=setTimeout(saveToSupabase,1000);
+    return ()=>clearTimeout(t);
+  },[chats,userId,chatsLoaded,user]);
+
+  // Load chats from Supabase on mount
+  useEffect(()=>{
+    if(!user)return;
+    const loadChats=async()=>{
+      // First try localStorage cache for instant load
+      try{
+        const cached=localStorage.getItem('pepa-chats-'+userId);
+        if(cached){const p=JSON.parse(cached);if(Array.isArray(p)&&p.length>0){setChats(p);}}
+      }catch(e){}
+      // Then load from Supabase
+      try{
+        const {data}=await sb.from('user_chats').select('chats').eq('user_id',userId).single();
+        if(data?.chats){
+          const p=JSON.parse(data.chats);
+          if(Array.isArray(p)&&p.length>0){
+            setChats(p);
+            try{localStorage.setItem('pepa-chats-'+userId,data.chats);}catch(e){}
+          }
+        }
+      }catch(e){}
+      setChatsLoaded(true);
+    };
+    loadChats();
+  },[user,userId]);
   useEffect(()=>{try{localStorage.setItem(K('qa'),JSON.stringify(quickActions));}catch(e){}},[quickActions]);
   useEffect(()=>{try{localStorage.setItem(K('tasks'),JSON.stringify(tasks));}catch(e){}},[tasks]);
   useEffect(()=>{endRef.current&&endRef.current.scrollIntoView({behavior:'smooth'});},[chats,loading]);
@@ -1316,8 +1353,7 @@ function App(){
 
   // Mobile topbar
   const mobileTopbar=React.createElement('div',{className:'mobile-topbar'},
-    React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
-    React.createElement('span',{className:'mobile-title'},'PEPA · Bohemia Reality')
+    React.createElement('button',{className:'hamburger',onClick:()=>setSidebarOpen(v=>!v)},'☰')
   );
 
   if(authLoading)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',background:'var(--bg)',color:'var(--text3)',fontSize:14}},'⟳ Načítám…');
