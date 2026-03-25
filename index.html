@@ -929,7 +929,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
   const userName=(user&&user.user_metadata&&user.user_metadata.name)||(user&&user.email&&user.email.split('@')[0])||'Pepo';
   const hour=new Date().getHours();
   const greeting=hour<12?'Dobré ráno':hour<18?'Dobrý den':'Dobrý večer';
-  const activeTasks=tasks.filter(t=>!t.done);
+  const activeTasks=(tasks||[]).filter(t=>!t.done);
   const q1clients=clients.filter(c=>c.quarter==='Q1 2025');
   const missingDocs=properties.filter(p=>p.notes&&p.notes.length>0);
   const todaySlots=(calendarBusy[0]&&calendarBusy[0].slots)||[];
@@ -1067,10 +1067,10 @@ function App(){
   const userId=(user&&user.id)||'guest';
   const K=(key)=>`pepa-${userId}-${key}`;
 
-  const [chats,setChats]=useState(()=>{try{const s=localStorage.getItem('pepa-chats-'+userId);return s?JSON.parse(s):[{id:'c1',title:'Nový chat',msgs:[]}];}catch(e){return[{id:'c1',title:'Nový chat',msgs:[]}];}});
+  const [chats,setChats]=useState(()=>{try{const s=localStorage.getItem('pepa-chats-'+userId);const p=s?JSON.parse(s):null;return Array.isArray(p)&&p.length>0?p:[{id:'c1',title:'Nový chat',msgs:[]}];}catch(e){return[{id:'c1',title:'Nový chat',msgs:[]}];}});
   const [activeChatId,setActiveChatId]=useState('c1');
-  const [quickActions,setQuickActions]=useState(()=>{try{const s=localStorage.getItem(K('qa'));return s?JSON.parse(s):DEFAULT_QA;}catch(e){return DEFAULT_QA;}});
-  const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem(K('tasks'));return s?JSON.parse(s):[];}catch(e){return[];}});
+  const [quickActions,setQuickActions]=useState(()=>{try{const s=localStorage.getItem(K('qa'));const p=s?JSON.parse(s):null;return Array.isArray(p)&&p.length>0?p:DEFAULT_QA;}catch(e){return DEFAULT_QA;}});
+  const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem(K('tasks'));const p=s?JSON.parse(s):null;return Array.isArray(p)?p:[];}catch(e){return[];}});
   const [customProps,setCustomProps]=useState([]);
   const [customClients2,setCustomClients2]=useState([]);
 
@@ -1079,7 +1079,7 @@ function App(){
   useEffect(()=>{try{localStorage.setItem(K('tasks'),JSON.stringify(tasks));}catch(e){}},[tasks]);
   useEffect(()=>{endRef.current&&endRef.current.scrollIntoView({behavior:'smooth'});},[chats,loading]);
 
-  const activeChat=chats.find(c=>c.id===activeChatId)||chats[0];
+  const activeChat=(chats||[]).find(c=>c.id===activeChatId)||chats[0];
 
   async function handleSignOut(){await sb.auth.signOut();setUser(null);setUserMenuOpen(false);}
 
@@ -1090,7 +1090,7 @@ function App(){
     const t=(text||input).trim();if(!t||loading)return;
     setInput('');setError('');setView('chat');
     const newMsgs=[...(activeChat&&activeChat.msgs||[]),{role:'user',content:t}];
-    if((activeChat&&activeChat.msgs&&activeChat.msgs.length)===0){const title=t.slice(0,32)+(t.length>32?'…':'');setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,title,msgs:newMsgs}:c));}
+    if((activeChat&&activeChat.msgs&&(activeChat&&activeChat.msgs||[]).length)===0){const title=t.slice(0,32)+(t.length>32?'…':'');setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,title,msgs:newMsgs}:c));}
     else setChats(prev=>prev.map(c=>c.id===activeChatId?{...c,msgs:newMsgs}:c));
     setLoading(true);
     try{
@@ -1141,7 +1141,7 @@ function App(){
         React.createElement('button',{className:`sidebar-btn${view==='chat'?' active':''}`,onClick:()=>{newChat();setSidebarOpen(false);},title:'Nový chat'},'💬',React.createElement('span',null,'Nový chat')),
         React.createElement('button',{className:`sidebar-btn${view==='tasks'?' active':''}`,onClick:()=>{setView('tasks');setSidebarOpen(false);},title:'Úkoly'},
           '✅',React.createElement('span',null,'Úkoly'),
-          tasks.filter(t=>!t.done).length>0&&React.createElement('span',{className:'sidebar-badge'},tasks.filter(t=>!t.done).length)
+          (tasks||[]).filter(t=>!t.done).length>0&&React.createElement('span',{className:'sidebar-badge'},(tasks||[]).filter(t=>!t.done).length)
         ),
         React.createElement('div',{className:'sidebar-divider'}),
         React.createElement('button',{className:'sidebar-btn',onClick:()=>setTheme(t=>t==='light'?'dark':'light'),title:'Přepnout téma'},theme==='light'?'🌙':'☀️',React.createElement('span',null,theme==='light'?'Dark mode':'Light mode'))
@@ -1150,19 +1150,19 @@ function App(){
       React.createElement('div',{className:'chat-list-panel'},
         React.createElement('div',{className:'chat-list-label'},'Konverzace',React.createElement('button',{onClick:newChat,style:{background:'none',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:14}},'+')
         ),
-        chats.map(chat=>React.createElement('div',{key:chat.id,className:'chat-list-item'+(chat.id===activeChatId?' active':''),onClick:()=>{if(renamingId!==chat.id){setActiveChatId(chat.id);setView('chat');setSidebarOpen(false);}}},
+        (chats||[]).map(chat=>React.createElement('div',{key:chat.id,className:'chat-list-item'+(chat.id===activeChatId?' active':''),onClick:()=>{if(renamingId!==chat.id){setActiveChatId(chat.id);setView('chat');setSidebarOpen(false);}}},
           React.createElement('span',null,'💬'),
           renamingId===chat.id
             ?React.createElement('input',{className:'rename-inp',value:renameVal,autoFocus:true,onChange:e=>setRenameVal(e.target.value),onKeyDown:e=>{if(e.key==='Enter'){if(renameVal.trim())setChats(prev=>prev.map(c=>c.id===chat.id?{...c,title:renameVal.trim()}:c));setRenamingId(null);}if(e.key==='Escape')setRenamingId(null);},onBlur:()=>{if(renameVal.trim())setChats(prev=>prev.map(c=>c.id===chat.id?{...c,title:renameVal.trim()}:c));setRenamingId(null);},onClick:e=>e.stopPropagation()})
             :React.createElement('span',{className:'chat-list-title',onDoubleClick:e=>{e.stopPropagation();setRenamingId(chat.id);setRenameVal(chat.title);}},chat.title),
           React.createElement('button',{className:'chat-list-del',onClick:e=>{e.stopPropagation();setRenamingId(chat.id);setRenameVal(chat.title);},title:'Přejmenovat'},'✏️'),
-          chats.length>1&&React.createElement('button',{className:'chat-list-del',onClick:e=>{e.stopPropagation();deleteChat(chat.id);},title:'Smazat'},'×')
+          (chats||[]).length>1&&React.createElement('button',{className:'chat-list-del',onClick:e=>{e.stopPropagation();deleteChat(chat.id);},title:'Smazat'},'×')
         ))
       ),
       // Quick actions
       React.createElement('div',{className:'qa-section'},
         React.createElement('div',{className:'qa-label'},'Rychlé akce',React.createElement('button',{onClick:()=>setShowAddQA(true)},'+'),React.createElement('button',{onClick:()=>setShowAddData(true)},'🗄️')),
-        quickActions.map(q=>React.createElement('button',{key:q.id,className:'qa-item',onClick:()=>{const id=uid();setChats(prev=>[...prev,{id,title:q.label,msgs:[]}]);setActiveChatId(id);setView('chat');setSidebarOpen(false);setTimeout(()=>send(q.prompt),50);}},
+        (quickActions||[]).map(q=>React.createElement('button',{key:q.id,className:'qa-item',onClick:()=>{const id=uid();setChats(prev=>[...prev,{id,title:q.label,msgs:[]}]);setActiveChatId(id);setView('chat');setSidebarOpen(false);setTimeout(()=>send(q.prompt),50);}},
           React.createElement('span',null,q.icon),
           React.createElement('span',{style:{flex:1,textAlign:'left',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},q.label),
           React.createElement('button',{className:'qa-del',onClick:e=>{e.stopPropagation();deleteQA(q.id);}},'-')
@@ -1189,11 +1189,11 @@ function App(){
   // Tasks view
   const tasksView=React.createElement('div',{style:{flex:1,overflow:'auto',padding:'24px 28px'}},
     React.createElement('h1',{style:{fontFamily:'DM Serif Display,serif',fontSize:28,marginBottom:4}},'Úkoly'),
-    React.createElement('p',{style:{color:'var(--text3)',fontSize:13,marginBottom:20}},`${tasks.filter(t=>!t.done).length} aktivních · ${tasks.filter(t=>t.done).length} dokončených`),
+    React.createElement('p',{style:{color:'var(--text3)',fontSize:13,marginBottom:20}},`${(tasks||[]).filter(t=>!t.done).length} aktivních · ${(tasks||[]).filter(t=>t.done).length} dokončených`),
     React.createElement('div',{style:{display:'flex',gap:8,marginBottom:16}},
       React.createElement('input',{style:{flex:1,background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--rs)',padding:'10px 14px',fontSize:13,color:'var(--text)',outline:'none'},placeholder:'Přidat nový úkol…',onKeyDown:e=>{if(e.key==='Enter'&&e.target.value.trim()){addTask({id:uid(),title:e.target.value.trim(),done:false,created:new Date().toLocaleDateString('cs-CZ')});e.target.value='';}}})
     ),
-    ...tasks.map(t=>React.createElement('div',{key:t.id,style:{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--rs)',marginBottom:6}},
+    ...(tasks||[]).map(t=>React.createElement('div',{key:t.id,style:{display:'flex',alignItems:'center',gap:10,padding:'12px 16px',background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--rs)',marginBottom:6}},
       React.createElement('button',{style:{width:18,height:18,borderRadius:5,border:`2px solid ${t.done?'var(--green)':'var(--border)'}`,background:t.done?'var(--green)':'none',color:'white',fontSize:10,cursor:'pointer',flexShrink:0},onClick:()=>toggleTask(t.id)},t.done?'✓':''),
       React.createElement('span',{style:{flex:1,fontSize:13,color:t.done?'var(--text3)':'var(--text)',textDecoration:t.done?'line-through':'none'}},t.title),
       React.createElement('span',{style:{fontSize:11,color:'var(--text3)'}},t.created),
@@ -1214,7 +1214,7 @@ function App(){
       )
     ),
     React.createElement('div',{className:'messages-area'},
-      (activeChat&&activeChat.msgs&&activeChat.msgs.length)===0&&React.createElement('div',{className:'chat-welcome'},
+      (activeChat&&activeChat.msgs&&(activeChat&&activeChat.msgs||[]).length)===0&&React.createElement('div',{className:'chat-welcome'},
         React.createElement('div',{className:'chat-welcome-icon'},'✨'),
         React.createElement('h2',null,'Jak mohu pomoci?'),
         React.createElement('p',null,'Zeptejte se na data, požádejte o report nebo e-mail.'),
@@ -1254,7 +1254,7 @@ function App(){
       React.createElement('button',{className:'tool-btn',onClick:()=>setShowTemplate(true)},'📝 Šablony'),
       React.createElement('button',{className:'tool-btn',onClick:exportPropertiesCSV},'📊 Nemovitosti CSV'),
       React.createElement('button',{className:'tool-btn',onClick:exportClientsCSV},'📊 Klienti CSV'),
-      (activeChat&&activeChat.msgs&&activeChat.msgs.length)>0&&React.createElement('button',{className:'tool-btn',onClick:()=>exportChatTXT(activeChat)},'💬 Export chatu')
+      (activeChat&&activeChat.msgs&&(activeChat&&activeChat.msgs||[]).length)>0&&React.createElement('button',{className:'tool-btn',onClick:()=>exportChatTXT(activeChat)},'💬 Export chatu')
     ),
     React.createElement('div',{className:'input-area'},
       React.createElement('div',{className:'input-wrap'},
