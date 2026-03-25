@@ -1551,12 +1551,12 @@ function App(){
         ),
         React.createElement('button',{className:`sidebar-btn${view==='tasks'?' active':''}`,onClick:()=>{setView('tasks');setSidebarOpen(false);},title:'Úkoly'},
           '✅',React.createElement('span',null,'Úkoly'),
-        React.createElement('button',{className:`sidebar-btn${view==='calendar'?' active':''}`,onClick:()=>{setView('calendar');setSidebarOpen(false);},title:'Kalendář'},
-          '📅',React.createElement('span',null,'Kalendář')),
           (tasks||[]).filter(t=>!t.done).length>0&&React.createElement('span',{className:'sidebar-badge'},(tasks||[]).filter(t=>!t.done).length)
         ),
-      ),
-      // Chat list
+        React.createElement('button',{className:`sidebar-btn${view==='calendar'?' active':''}`,onClick:()=>{setView('calendar');setSidebarOpen(false);},title:'Kalendář'},
+          '📅',React.createElement('span',null,'Kalendář')
+        ),
+                // Chat list
       React.createElement('div',{className:'chat-list-panel'},
         React.createElement('div',{className:'chat-list-label'},'Konverzace',React.createElement('button',{onClick:newChat,style:{background:'none',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:14}},'+')
         ),
@@ -1581,7 +1581,7 @@ function App(){
       // Bottom
       
     )
-  );
+  ));
 
   // Tasks view
   const tasksView=React.createElement('div',{style:{flex:1,overflow:'auto',padding:'24px 28px'}},
