@@ -1042,22 +1042,25 @@ function App(){
 
   async function handleSignOut() {
     await sb.auth.signOut();
-    setUser(null);
     setUserMenuOpen(false);
-    // Clear local data
-    localStorage.removeItem('pepa-chats');
-    localStorage.removeItem('pepa-tasks');
+    setUser(null);
   }
+
+  const userId = user?.id || 'guest';
+  const K = (key) => `pepa-${userId}-${key}`; // user-scoped storage key
 
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'dark');
   const [view,setView]=useState('chat');
   const [chats,setChats]=useState(()=>{
-    try{const s=localStorage.getItem('pepa-chats');return s?JSON.parse(s):[{id:'c1',title:'Nový chat',msgs:[]}];}
+    try{const s=localStorage.getItem(K('chats'));return s?JSON.parse(s):[{id:'c1',title:'Nový chat',msgs:[]}];}
     catch(e){return[{id:'c1',title:'Nový chat',msgs:[]}];}
   });
-  const [activeChatId,setActiveChatId]=useState(()=>localStorage.getItem('pepa-active-chat')||'c1');
+  const [activeChatId,setActiveChatId]=useState(()=>{
+    const saved=localStorage.getItem(K('active-chat'));
+    return saved||'c1';
+  });
   const [quickActions,setQuickActions]=useState(()=>{
-    try{const s=localStorage.getItem('pepa-qa');return s?JSON.parse(s):DEFAULT_QA;}
+    try{const s=localStorage.getItem(K('qa'));return s?JSON.parse(s):DEFAULT_QA;}
     catch(e){return DEFAULT_QA;}
   });
   const [loading,setLoading]=useState(false);
@@ -1071,19 +1074,19 @@ function App(){
   const [uploadProcessing,setUploadProcessing]=useState(false);
   const [uploadFileName,setUploadFileName]=useState('');
   const [showBriefing,setShowBriefing]=useState(true);
-  const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem('pepa-tasks');return s?JSON.parse(s):[{id:'t1',title:'Odpovědět ABC Invest na nabídku penthouse',done:false,created:'25. 3. 2025'},{id:'t2',title:'Zaslat kupní smlouvu Kováčovým',done:false,created:'25. 3. 2025'},{id:'t3',title:'Přiřadit agenta k MUDr. Vlčkovi',done:false,created:'25. 3. 2025'}];}catch(e){return[];}});
+  const [tasks,setTasks]=useState(()=>{try{const s=localStorage.getItem(K('tasks'));return s?JSON.parse(s):[];}catch(e){return[];}});
   const [renamingId,setRenamingId]=useState(null);
   const [renameVal,setRenameVal]=useState('');
-  const [customProps,setCustomProps]=useState(()=>{try{const s=localStorage.getItem('pepa-props');return s?JSON.parse(s):[];}catch(e){return[];}});
-  const [customClients,setCustomClients]=useState(()=>{try{const s=localStorage.getItem('pepa-clients');return s?JSON.parse(s):[];}catch(e){return[];}});
+  const [customProps,setCustomProps]=useState(()=>{try{const s=localStorage.getItem(K('props'));return s?JSON.parse(s):[];}catch(e){return[];}});
+  const [customClients,setCustomClients]=useState(()=>{try{const s=localStorage.getItem(K('clients'));return s?JSON.parse(s):[];}catch(e){return[];}});
   const endRef=useRef(null);
   const inputRef=useRef(null);
 
   useEffect(()=>{document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('pepa-theme',theme);},[theme]);
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'});},[chats,loading]);
-  useEffect(()=>{try{localStorage.setItem('pepa-chats',JSON.stringify(chats));}catch(e){}},[chats]);
-  useEffect(()=>{localStorage.setItem('pepa-active-chat',activeChatId);},[activeChatId]);
-  useEffect(()=>{try{localStorage.setItem('pepa-qa',JSON.stringify(quickActions));}catch(e){}},[quickActions]);
+  useEffect(()=>{try{localStorage.setItem(K('chats'),JSON.stringify(chats));}catch(e){}},[chats]);
+  useEffect(()=>{localStorage.setItem(K('active-chat'),activeChatId);},[activeChatId]);
+  useEffect(()=>{try{localStorage.setItem(K('qa'),JSON.stringify(quickActions));}catch(e){}},[quickActions]);
 
   const activeChat=chats.find(c=>c.id===activeChatId)||chats[0];
 
@@ -1136,9 +1139,9 @@ function App(){
 
   function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
 
-  useEffect(()=>{try{localStorage.setItem('pepa-props',JSON.stringify(customProps));}catch(e){}},[customProps]);
-  useEffect(()=>{try{localStorage.setItem('pepa-clients',JSON.stringify(customClients));}catch(e){}},[customClients]);
-  useEffect(()=>{try{localStorage.setItem('pepa-tasks',JSON.stringify(tasks));}catch(e){}},[tasks]);
+  useEffect(()=>{try{localStorage.setItem(K('props'),JSON.stringify(customProps));}catch(e){}},[customProps]);
+  useEffect(()=>{try{localStorage.setItem(K('clients'),JSON.stringify(customClients));}catch(e){}},[customClients]);
+  useEffect(()=>{try{localStorage.setItem(K('tasks'),JSON.stringify(tasks));}catch(e){}},[tasks]);
 
   function addQA(qa){setQuickActions(prev=>[...prev,qa]);setShowAddQA(false);}
   function deleteQA(id){setQuickActions(prev=>prev.filter(q=>q.id!==id));}
