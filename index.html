@@ -70,8 +70,8 @@ input,textarea{font-family:'Inter',sans-serif}
   z-index:50;overflow:hidden;
 }
 .sidebar-logo{display:none}
-.sidebar-hamburger-btn{background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;padding:8px 14px;line-height:1;width:100%;text-align:left;transition:color .15s}
-.sidebar-hamburger-btn:hover{color:white}
+.sidebar-hamburger-btn{width:48px;height:40px;border-radius:10px;border:none;background:none;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:2px auto;transition:all .2s}
+.sidebar-hamburger-btn:hover{background:rgba(255,255,255,.07);color:white}
 .sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1;width:100%;padding:0 8px}
 .sidebar-btn{
   width:100%;height:40px;border-radius:10px;
@@ -616,7 +616,7 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
   .sidebar-overlay.open{display:block}
   /* Main content */
-  .main{width:100vw!important;margin-left:0!important}
+  .main{width:100vw!important;margin-left:0!important;padding-top:0}
   .home-grid{grid-template-columns:1fr!important}
   .home-grid-3{grid-template-columns:1fr!important}
   .welcome-stats{display:none!important}
@@ -1219,7 +1219,7 @@ function App(){
   const sidebar=React.createElement(React.Fragment,null,
     React.createElement('div',{className:'sidebar-overlay'+(sidebarOpen?' open':''),onClick:()=>setSidebarOpen(false)}),
     React.createElement('aside',{className:'sidebar'+(sidebarOpen?' open':'')},
-      React.createElement('div',{style:{flexShrink:0,paddingTop:'max(env(safe-area-inset-top,44px),44px)'}},
+      React.createElement('div',{style:{flexShrink:0,paddingTop:'12px'}},
         React.createElement('div',{style:{position:'relative',padding:'8px 10px 4px'}},
           React.createElement('button',{className:'sidebar-avatar',onClick:()=>setUserMenuOpen(v=>!v)},
             React.createElement('div',{className:'sidebar-avatar-dot'},(user&&user.email||'?')[0].toUpperCase()),
@@ -1267,20 +1267,7 @@ function App(){
         ))
       ),
       // Bottom
-      React.createElement('div',{className:'sidebar-bottom'},
-        React.createElement('div',{style:{position:'relative'}},
-          React.createElement('div',{className:'sidebar-avatar',onClick:()=>setUserMenuOpen(v=>!v)},
-            ((user&&user.email)||'?')[0].toUpperCase()
-          ),
-          userMenuOpen&&React.createElement('div',{className:'user-dropdown'},
-            React.createElement('div',{className:'user-info'},
-              React.createElement('div',{className:'user-name'},(user&&user.user_metadata&&user.user_metadata.name)||(user&&user.email&&user.email.split('@')[0])||'Uživatel'),
-              React.createElement('div',{className:'user-email'},(user&&user.email)||'')
-            ),
-            React.createElement('button',{className:'dropdown-btn',onClick:handleSignOut},'🚪 Odhlásit se')
-          )
-        )
-      )
+      
     )
   );
 
