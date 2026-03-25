@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#7C6FF7"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="PEPA"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
 <title>PEPA — Back Office Agent · Bohemia Reality</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1113,6 +1120,14 @@ function App(){
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'light');
   const [view,setView]=useState('home');
   const [sidebarOpen,setSidebarOpen]=useState(false);
+  const [installPrompt,setInstallPrompt]=useState(null);
+  const [showInstall,setShowInstall]=useState(false);
+
+  useEffect(()=>{
+    const handler=e=>{e.preventDefault();setInstallPrompt(e);setShowInstall(true);};
+    window.addEventListener('beforeinstallprompt',handler);
+    return ()=>window.removeEventListener('beforeinstallprompt',handler);
+  },[]);
   const [showSearch,setShowSearch]=useState(false);
   const [searchQ,setSearchQ]=useState('');
   const [listening,setListening]=useState(false);
@@ -1440,6 +1455,8 @@ function App(){
   // Topbar
   const topbar=React.createElement('div',{className:'topbar'},
     React.createElement('div',{className:'topbar-title'},'Bohemia Reality',React.createElement('span',{className:'topbar-greeting'},'· Back Office')),
+    React.createElement('button',{className:'topbar-btn',onClick:()=>setShowSearch(true),title:'Hledat (Ctrl+K)'},'🔍'),
+    showInstall&&React.createElement('button',{className:'topbar-btn',title:'Přidat na plochu',onClick:async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}},style:{background:'var(--accent)',color:'white',border:'none'}},'📲'),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setTheme(t=>t==='light'?'dark':'light'),title:'Přepnout téma'},theme==='light'?'🌙':'☀️')
   );
 
@@ -1502,6 +1519,15 @@ function App(){
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+
+// Register Service Worker
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg=>console.log('SW registered:', reg.scope))
+      .catch(err=>console.log('SW error:', err));
+  });
+}
 </script>
 </body>
 </html>
