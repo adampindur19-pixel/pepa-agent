@@ -630,6 +630,15 @@ const SUPABASE_KEY = 'sb_publishable_fP8IAEATD7qiyUebsVU85A_bsAvYqXI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ============================================================
+// HELPERS
+// ============================================================
+function translateAuthError(msg) {
+  const map = [["Invalid login credentials","Nesprávný e-mail nebo heslo"],["Email not confirmed","E-mail není potvrzen. Zkontrolujte schránku."],["User already registered","Účet s tímto e-mailem již existuje."],["Password should be at least 6 characters","Heslo musí mít alespoň 6 znaků"],["Unable to validate email address: invalid format","Neplatný formát e-mailové adresy"],["Email rate limit exceeded","Příliš mnoho pokusů. Zkuste to za chvíli."],["Invalid email or password","Nesprávný e-mail nebo heslo"]];
+  for(const [en,cs] of map) { if(msg.includes(en)) return cs; }
+  return msg;
+}
+
+// ============================================================
 // DATA
 // ============================================================
 const properties = [
@@ -906,15 +915,28 @@ function AddDataModal({onAdd,onClose}){
 // ============================================================
 function AuthScreen({onAuth}){
   const [tab,setTab]=useState('login');const [email,setEmail]=useState('');const [password,setPassword]=useState('');const [name,setName]=useState('');const [loading,setLoading]=useState(false);const [error,setError]=useState('');const [success,setSuccess]=useState('');
-  async function handleLogin(e){e.preventDefault();if(!email||!password)return;setLoading(true);setError('');try{const {data,error:err}=await sb.auth.signInWithPassword({email,password});if(err)throw err;onAuth(data.user);}catch(err){setError(err.message||'Přihlášení se nezdařilo');}finally{setLoading(false);}}
-  async function handleRegister(e){e.preventDefault();if(!email||!password||!name)return;setLoading(true);setError('');try{const {data,error:err}=await sb.auth.signUp({email,password,options:{data:{name}}});if(err)throw err;if(data.user&&!data.session)setSuccess('Registrace úspěšná! Zkontrolujte e-mail.');else if(data.user)onAuth(data.user);}catch(err){setError(err.message||'Registrace se nezdařila');}finally{setLoading(false);}}
+  async function handleLogin(e){e.preventDefault();if(!email||!password)return;setLoading(true);setError('');try{const {data,error:err}=await sb.auth.signInWithPassword({email,password});if(err)throw err;onAuth(data.user);}catch(err){setError(translateAuthError(err.message||'Přihlášení se nezdařilo'));}finally{setLoading(false);}}
+  async function handleRegister(e){e.preventDefault();if(!email||!password||!name)return;setLoading(true);setError('');try{const {data,error:err}=await sb.auth.signUp({email,password,options:{data:{name}}});if(err)throw err;if(data.user&&!data.session){
+        setSuccess('Registrace úspěšná! Na e-mail vám dorazí potvrzovací odkaz.');
+      } else if(!data.user && !data.session) {
+        setError('Účet s tímto e-mailem již existuje. Přihlaste se nebo resetujte heslo.');
+        setTab('login');
+      }else if(data.user)onAuth(data.user);}catch(err){setError(translateAuthError(err.message||'Registrace se nezdařila'));}finally{setLoading(false);}}
   return React.createElement('div',{className:'auth-screen'},
     React.createElement('div',{className:'auth-card'},
       React.createElement('div',{className:'auth-logo'},React.createElement('div',{className:'auth-logo-icon'},'🏢'),React.createElement('div',{className:'auth-logo-name'},'PEPA'),React.createElement('div',{className:'auth-logo-sub'},'Back Office Agent · Bohemia Reality')),
       React.createElement('div',{className:'auth-tabs'},React.createElement('button',{className:'auth-tab'+(tab==='login'?' active':''),onClick:()=>{setTab('login');setError('');setSuccess('');}},'Přihlsásit se'),React.createElement('button',{className:'auth-tab'+(tab==='register'?' active':''),onClick:()=>{setTab('register');setError('');setSuccess('');}},'Registrovat')),
       error&&React.createElement('div',{className:'auth-error'},error),
       success&&React.createElement('div',{className:'auth-success'},success),
-      tab==='login'?React.createElement('form',{onSubmit:handleLogin},React.createElement('div',{className:'auth-field'},React.createElement('label',null,'E-mail'),React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'vas@email.cz',required:true})),React.createElement('div',{className:'auth-field'},React.createElement('label',null,'Heslo'),React.createElement('input',{type:'password',value:password,onChange:e=>setPassword(e.target.value),placeholder:'••••••••',required:true})),React.createElement('button',{type:'submit',className:'auth-submit',disabled:loading},loading?'Přihlašuji…':'Přihlásit se')):
+      tab==='login'?React.createElement('form',{onSubmit:handleLogin},React.createElement('div',{className:'auth-field'},React.createElement('label',null,'E-mail'),React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'vas@email.cz',required:true})),React.createElement('div',{className:'auth-field'},React.createElement('label',null,'Heslo'),React.createElement('input',{type:'password',value:password,onChange:e=>setPassword(e.target.value),placeholder:'••••••••',required:true})),React.createElement('button',{type:'submit',className:'auth-submit',disabled:loading},loading?'Přihlašuji…':'Přihlásit se'),
+          React.createElement('button',{type:'button',style:{background:'none',border:'none',color:'var(--text3)',fontSize:12,cursor:'pointer',marginTop:8,width:'100%'},onClick:async()=>{
+            if(!email){setError('Zadejte e-mail pro reset hesla');return;}
+            setLoading(true);
+            const {error:err}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://bohemia-reality.vercel.app'});
+            if(err)setError(translateAuthError(err.message));
+            else setSuccess('Odkaz pro reset hesla byl odeslán na '+email);
+            setLoading(false);
+          }},'🔒 Zapomněli jste heslo?')):
       React.createElement('form',{onSubmit:handleRegister},React.createElement('div',{className:'auth-field'},React.createElement('label',null,'Jméno'),React.createElement('input',{type:'text',value:name,onChange:e=>setName(e.target.value),placeholder:'Pepa Novák',required:true})),React.createElement('div',{className:'auth-field'},React.createElement('label',null,'E-mail'),React.createElement('input',{type:'email',value:email,onChange:e=>setEmail(e.target.value),placeholder:'vas@email.cz',required:true})),React.createElement('div',{className:'auth-field'},React.createElement('label',null,'Heslo'),React.createElement('input',{type:'password',value:password,onChange:e=>setPassword(e.target.value),placeholder:'Min. 6 znaků',required:true,minLength:6})),React.createElement('button',{type:'submit',className:'auth-submit',disabled:loading},loading?'Registruji…':'Vytvořit účet')),
       React.createElement('div',{className:'auth-footer'},'Bohemia Reality s.r.o. · Interní systém')
     )
