@@ -159,7 +159,7 @@ input,textarea{font-family:'Inter',sans-serif}
 .topbar-btn:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
 
 /* ===== HOME DASHBOARD ===== */
-.home-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.home-view{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
 .home-view::-webkit-scrollbar{width:4px}
 .home-view::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
@@ -592,11 +592,15 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 /* Mobile */
 .mobile-topbar{display:none}
 @media(max-width:768px){
-  .sidebar{width:56px}
+  .sidebar{width:56px!important}
+  .chat-list-panel,.qa-section{display:none!important}
   .sidebar-btn{width:40px;height:40px;font-size:16px;padding:0;justify-content:center}
   .sidebar-btn span{display:none}
   .chat-list-panel,.qa-section,.sidebar-logo + *{display:none}
-  .home-grid{grid-template-columns:1fr}
+  .home-grid{grid-template-columns:1fr!important}
+  .home-grid-3{grid-template-columns:1fr!important}
+  .welcome-stats{display:none}
+  .main{width:calc(100vw - 56px)!important}
   .home-grid-3{grid-template-columns:1fr 1fr}
   .span-2{grid-column:span 1}
   .welcome-banner{flex-direction:column;gap:16px;padding:20px}
@@ -629,6 +633,7 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 <body>
 <div id="root"></div>
 <script>
+
 // ============================================================
 // SUPABASE
 // ============================================================
@@ -969,7 +974,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
     // Welcome banner
     React.createElement('div',{className:'welcome-banner'},
       React.createElement('div',{className:'welcome-left'},
-        React.createElement('h1',null,`${hour<12?'Dobré ráno':'Dobrý den'}, ${userName}!`),
+        React.createElement('h1',null,(hour<12?'Dobré ráno':'Dobrý den')+', '+userName+'!'),
         React.createElement('p',null,'Úterý, 25. března 2025 · Bohemia Reality s.r.o.')
       ),
       React.createElement('div',{className:'welcome-stats'},
@@ -977,7 +982,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
         React.createElement('div',null,React.createElement('div',{className:'welcome-stat-val'},activeTasks.length),React.createElement('div',{className:'welcome-stat-lbl'},'Aktivní úkoly')),
         React.createElement('div',null,React.createElement('div',{className:'welcome-stat-val'},gmailInbox.length),React.createElement('div',{className:'welcome-stat-lbl'},'Nové emaily'))
       ),
-      React.createElement('button',{className:'welcome-btn',onClick:()=>onOpenChat("Připrav ranní briefing na dnešní den — co mám v kalendáři, emaily, priority.")},'☀️ Ranní briefing')
+      React.createElement('button',{className:'welcome-btn',onClick:()=>onOpenChat('Připrav ranní briefing na dnešní den — co mám v kalendáři, emaily, priority.')},'☀️ Ranní briefing')
     ),
     // Row 1: KPI cards
     React.createElement('div',{className:'home-grid-3'},
@@ -999,7 +1004,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
       React.createElement('div',{className:'card'},
         React.createElement('div',{className:'card-header'},
           React.createElement('div',null,React.createElement('div',{className:'card-title'},'📬 Příchozí e-maily'),React.createElement('div',{className:'card-sub'},gmailInbox.length+' nepřečtených')),
-          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat("Shrň mi všechny příchozí emaily a navrhni co mám udělat.")},'Zobrazit vše')
+          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat('Shrň mi všechny příchozí emaily a navrhni co mám udělat.')},'Zobrazit vše')
         ),
         ...gmailInbox.slice(0,4).map((email,i)=>React.createElement('div',{key:i,className:'email-item',onClick:()=>onOpenChat(`Napiš odpověď na email od ${email.name}: "${email.subject}"`)},
           React.createElement('div',{className:'email-avatar'},email.name[0]),
@@ -1011,7 +1016,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
       React.createElement('div',{className:'card'},
         React.createElement('div',{className:'card-header'},
           React.createElement('div',null,React.createElement('div',{className:'card-title'},'📅 Dnešní kalendář'),React.createElement('div',{className:'card-sub'},todaySlots.length+' schůzek')),
-          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat("Jaké mám dnes schůzky a co je třeba připravit?")},'Detail')
+          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat('Jaké mám dnes schůzky a co je třeba připravit?')},'Detail')
         ),
         todaySlots.length===0?React.createElement('div',{style:{color:'var(--text3)',fontSize:13,textAlign:'center',padding:'20px 0'}},'Dnes žádné schůzky'):
         todaySlots.map((slot,i)=>{
@@ -1030,7 +1035,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
       React.createElement('div',{className:'card'},
         React.createElement('div',{className:'card-header'},
           React.createElement('div',null,React.createElement('div',{className:'card-title'},'✅ Úkoly'),React.createElement('div',{className:'card-sub'},activeTasks.length+' aktivních')),
-          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat("Jaké jsou prioritní úkoly?")},'Prioritizovat')
+          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat('Jaké jsou prioritní úkoly?')},'Prioritizovat')
         ),
         tasks.slice(0,5).map((t,i)=>React.createElement('div',{key:t.id,className:'task-row'},
           React.createElement('button',{className:'task-check'+(t.done?' done':''),onClick:()=>onToggleTask(t.id)},t.done?'✓':''),
@@ -1046,7 +1051,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
       React.createElement('div',{className:'card'},
         React.createElement('div',{className:'card-header'},
           React.createElement('div',null,React.createElement('div',{className:'card-title'},'🔔 Priority a upozornění'),React.createElement('div',{className:'card-sub'},alerts.filter(a=>a.priority==='vysoká').length+' urgentních')),
-          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat("Jaké jsou aktuální problémy a priority? Navrhni řešení.")},'Řešit')
+          React.createElement('button',{className:'card-action',onClick:()=>onOpenChat('Jaké jsou aktuální problémy a priority? Navrhni řešení.')},'Řešit')
         ),
         alerts.map((a,i)=>React.createElement('div',{key:i,className:'alert-item',onClick:()=>onOpenChat(a.action+': '+a.title+'. '+a.desc)},
           React.createElement('div',{className:'alert-dot',style:{background:a.priority==='vysoká'?'var(--red)':a.priority==='střední'?'var(--orange)':'var(--green)'}}),
@@ -1172,8 +1177,6 @@ function App(){
           '✅',React.createElement('span',null,'Úkoly'),
           (tasks||[]).filter(t=>!t.done).length>0&&React.createElement('span',{className:'sidebar-badge'},(tasks||[]).filter(t=>!t.done).length)
         ),
-        React.createElement('div',{className:'sidebar-divider'}),
-        React.createElement('button',{className:'sidebar-btn',onClick:()=>setTheme(t=>t==='light'?'dark':'light'),title:'Přepnout téma'},theme==='light'?'🌙':'☀️',React.createElement('span',null,theme==='light'?'Dark mode':'Light mode'))
       ),
       // Chat list
       React.createElement('div',{className:'chat-list-panel'},
