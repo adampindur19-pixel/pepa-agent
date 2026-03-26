@@ -717,6 +717,101 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .katastr-link:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
 .katastr-note{font-size:11px;color:var(--text3);margin-top:10px;padding:8px 10px;background:var(--orange-dim);border:1px solid rgba(245,158,11,.2);border-radius:var(--rs)}
 
+/* ===== ONBOARDING ===== */
+.onboarding-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);animation:fadeIn .3s ease}
+.onboarding-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rx);width:560px;max-width:92vw;box-shadow:var(--shadow-lg);overflow:hidden}
+.onboarding-progress{height:4px;background:var(--surface2)}
+.onboarding-progress-bar{height:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s ease}
+.onboarding-body{padding:36px 36px 28px}
+.onboarding-step-num{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.onboarding-icon{font-size:48px;margin-bottom:16px;display:block}
+.onboarding-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:10px;line-height:1.2}
+.onboarding-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:24px}
+.onboarding-features{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.onboarding-feature{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs)}
+.onboarding-feature-icon{font-size:20px;flex-shrink:0;margin-top:1px}
+.onboarding-feature-title{font-size:13px;font-weight:600;color:var(--text)}
+.onboarding-feature-desc{font-size:12px;color:var(--text3);margin-top:2px}
+.onboarding-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px}
+.onboarding-shortcut{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface2);border-radius:var(--rs)}
+.shortcut-key{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:11px;font-weight:600;color:var(--text);font-family:monospace;box-shadow:0 2px 0 var(--border)}
+.shortcut-desc{font-size:12px;color:var(--text2)}
+.onboarding-footer{display:flex;align-items:center;justify-content:space-between;padding:16px 36px 24px}
+.onboarding-dots{display:flex;gap:6px}
+.onboarding-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .2s;border:none;cursor:pointer;padding:0}
+.onboarding-dot.active{background:var(--accent);width:20px;border-radius:4px}
+.onboarding-skip{font-size:12px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;transition:color .15s}
+.onboarding-skip:hover{color:var(--text)}
+
+/* ===== NOTIFICATION CENTER ===== */
+.notif-center{position:fixed;top:60px;right:16px;width:360px;max-height:500px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);z-index:300;overflow:hidden;display:flex;flex-direction:column;animation:fadeIn .2s ease}
+.notif-center-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-center-title{font-size:14px;font-weight:600;color:var(--text)}
+.notif-center-clear{font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;font-weight:500}
+.notif-list{flex:1;overflow-y:auto}
+.notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border2);cursor:pointer;transition:background .15s}
+.notif-item:hover{background:var(--surface2)}
+.notif-item:last-child{border-bottom:none}
+.notif-item-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.notif-item-title{font-size:13px;font-weight:500;color:var(--text)}
+.notif-item-desc{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4}
+.notif-item-time{font-size:10px;color:var(--text3);margin-top:4px}
+.notif-item-badge{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600;margin-left:auto;flex-shrink:0;align-self:flex-start;margin-top:2px}
+.notif-topbar-btn{position:relative}
+.notif-unread-badge{position:absolute;top:-2px;right:-2px;width:16px;height:16px;border-radius:50%;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
+
+/* ===== NOTIFICATION CENTER ===== */
+.notif-center-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:400;display:flex;justify-content:flex-end;backdrop-filter:blur(2px);animation:fadeIn .15s ease}
+.notif-center{width:380px;max-width:95vw;height:100vh;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.notif-center-header{padding:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.notif-center-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text)}
+.notif-close{background:none;border:none;color:var(--text3);font-size:22px;cursor:pointer;line-height:1;transition:color .15s}
+.notif-close:hover{color:var(--text)}
+.notif-list{flex:1;overflow-y:auto;padding:12px}
+.notif-list::-webkit-scrollbar{width:4px}
+.notif-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.notif-item{display:flex;gap:12px;padding:12px;border-radius:var(--rs);margin-bottom:6px;cursor:pointer;transition:all .15s;border:1px solid var(--border)}
+.notif-item:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.notif-item.unread{border-left:3px solid var(--accent)}
+.notif-dot2{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.notif-item-title{font-size:13px;font-weight:600;color:var(--text)}
+.notif-item-desc{font-size:12px;color:var(--text3);margin-top:3px;line-height:1.4}
+.notif-item-time{font-size:10px;color:var(--text3);margin-top:4px}
+.notif-section-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;padding:8px 4px 4px}
+.notif-topbar-btn{position:relative}
+.notif-badge-top{position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface)}
+
+/* ===== ONBOARDING ===== */
+.onboarding-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);animation:fadeIn .3s ease}
+.onboarding-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rx);width:520px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.onboarding-progress{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.onboarding-progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .3s ease}
+.onboarding-body{padding:32px}
+.onboarding-step-num{font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.onboarding-icon{font-size:48px;margin-bottom:16px;display:block}
+.onboarding-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:8px}
+.onboarding-desc{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px}
+.onboarding-features{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.onboarding-feature{display:flex;align-items:flex-start;gap:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--rs);border:1px solid var(--border)}
+.onboarding-feature-icon{font-size:20px;flex-shrink:0}
+.onboarding-feature-text{font-size:13px;color:var(--text2);line-height:1.4}
+.onboarding-feature-text strong{color:var(--text);display:block;margin-bottom:2px}
+.onboarding-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:24px}
+.shortcut-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border-radius:var(--rs)}
+.shortcut-key{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 7px;font-size:11px;font-weight:700;color:var(--accent);font-family:monospace;box-shadow:0 2px 0 var(--border)}
+.shortcut-desc{font-size:12px;color:var(--text2)}
+.onboarding-footer{display:flex;align-items:center;justify-content:space-between;padding:20px 32px;border-top:1px solid var(--border);flex-shrink:0}
+.onboarding-dots{display:flex;gap:6px}
+.onboarding-dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s;border:none;cursor:pointer;padding:0}
+.onboarding-dot.active{background:var(--accent);width:20px;border-radius:4px}
+
+/* ===== KEYBOARD SHORTCUTS HELP ===== */
+.shortcuts-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.shortcuts-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--rx);padding:28px;width:480px;max-width:90vw;box-shadow:var(--shadow-lg)}
+.shortcuts-modal h3{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:16px;color:var(--text)}
+.shortcuts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.shortcut-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:var(--rs)}
+
 /* ===== NOTIFICATIONS ===== */
 .notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sidebar)}
 .notif-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--sidebar)}
@@ -1560,10 +1655,7 @@ function TeamCalendar({user,onAskPepa}){
   const [weekOffset,setWeekOffset]=useState(0);
   const [calView,setCalView]=useState('timeline'); // 'timeline' | 'week'
 
-  // Load meetings from Supabase
-  useEffect(()=>{
-    loadMeetings();
-  },[]);
+  // loadMeetings called in real-time useEffect above
 
   async function loadMeetings(){
     setLoading(true);
@@ -1573,6 +1665,29 @@ function TeamCalendar({user,onAskPepa}){
     }catch(e){}
     setLoading(false);
   }
+
+  // Realtime subscription for meetings
+  useEffect(()=>{
+    const channel=sb.channel('meetings-changes')
+      .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},()=>{
+        loadMeetings();
+      })
+      .subscribe();
+    return ()=>sb.removeChannel(channel);
+  },[]);
+
+  // Real-time subscription
+  useEffect(()=>{
+    loadMeetings();
+    const sub=sb.channel('meetings-realtime')
+      .on('postgres_changes',{event:'*',schema:'public',table:'meetings'},payload=>{
+        if(payload.eventType==='INSERT')setMeetings(p=>[...p,payload.new].sort((a,b)=>a.date.localeCompare(b.date)));
+        if(payload.eventType==='DELETE')setMeetings(p=>p.filter(m=>m.id!==payload.old.id));
+        if(payload.eventType==='UPDATE')setMeetings(p=>p.map(m=>m.id===payload.new.id?payload.new:m));
+      })
+      .subscribe();
+    return()=>sb.removeChannel(sub);
+  },[]);
 
   async function saveMeeting(form){
     try{
@@ -1940,6 +2055,292 @@ function PDFModal({activeChat, onClose}) {
 }
 
 // ============================================================
+// ONBOARDING
+// ============================================================
+const ONBOARDING_STEPS = [
+  {
+    icon: '👋',
+    title: 'Vítejte v PEPA!',
+    desc: 'Váš AI back office asistent pro Bohemia Reality. Zvládne reporty, emaily, analýzy a kalendář — vše česky a okamžitě.',
+    features: [
+      {icon:'🤖', title:'AI asistent', desc:'Ptejte se přirozeně — grafy, tabulky, emaily na pár kliknutí'},
+      {icon:'📊', title:'Živá data', desc:'Portfolio, klienti, leady — vše aktuální a přehledné'},
+      {icon:'👥', title:'Týmový nástroj', desc:'Sdílené schůzky, kalendář agentů, real-time sync'},
+    ]
+  },
+  {
+    icon: '💬',
+    title: 'Chat s PEPOU',
+    desc: 'Hlavní síla aplikace. Zeptejte se na cokoliv — PEPA zná vaše data, píše emaily a generuje reporty.',
+    features: [
+      {icon:'📈', title:'Grafy a tabulky', desc:'„Graf vývoje leadů za 6 měsíců" → okamžitý výsledek'},
+      {icon:'✉️', title:'E-maily', desc:'„Napiš odpověď ABC Invest s protinabídkou" → hotový email'},
+      {icon:'🎤', title:'Hlasový vstup', desc:'Mluvte místo psaní — mikrofon v chatu'},
+    ]
+  },
+  {
+    icon: '🗺️',
+    title: 'Mapa a Kalendář',
+    desc: 'Vizuální přehled portfolia na mapě a týmový kalendář s timeline view pro všechny agenty.',
+    features: [
+      {icon:'📍', title:'Mapa nemovitostí', desc:'Kliknutím na pin zobrazíte detail, tržní srovnání a katastr'},
+      {icon:'📅', title:'Timeline kalendář', desc:'Schůzky agentů v přehledné ose, přidání na klik'},
+      {icon:'🏛️', title:'Katastr ČÚZK', desc:'Přímé propojení s katastrem nemovitostí (Penthouse Pankrác)'},
+    ]
+  },
+  {
+    icon: '⌨️',
+    title: 'Klávesové zkratky',
+    desc: 'Pracujte rychleji s klávesovými zkratkami. Naučte se pár základních a ušetříte hodiny.',
+    shortcuts: [
+      {key:'Ctrl+K', desc:'Vyhledávání'},
+      {key:'G H', desc:'Přehled (Home)'},
+      {key:'G C', desc:'Chat'},
+      {key:'G T', desc:'Úkoly (Tasks)'},
+      {key:'G K', desc:'Kalendář'},
+      {key:'G M', desc:'Mapa'},
+      {key:'Esc', desc:'Zavřít modal'},
+      {key:'↑ Enter', desc:'Odeslat zprávu'},
+    ]
+  },
+];
+
+function OnboardingModal({userName, onClose}) {
+  const [step, setStep] = useState(0);
+  const total = ONBOARDING_STEPS.length;
+  const s = ONBOARDING_STEPS[step];
+  const isLast = step === total - 1;
+
+  return React.createElement('div',{className:'onboarding-overlay'},
+    React.createElement('div',{className:'onboarding-card'},
+      // Progress bar
+      React.createElement('div',{className:'onboarding-progress'},
+        React.createElement('div',{className:'onboarding-progress-bar',style:{width:((step+1)/total*100)+'%'}})
+      ),
+      // Body
+      React.createElement('div',{className:'onboarding-body'},
+        React.createElement('div',{className:'onboarding-step-num'},'Krok '+(step+1)+' z '+total),
+        React.createElement('span',{className:'onboarding-icon'},s.icon),
+        React.createElement('h2',{className:'onboarding-title'},step===0?'Vítejte, '+userName+'!':s.title),
+        React.createElement('p',{className:'onboarding-desc'},s.desc),
+        s.features&&React.createElement('div',{className:'onboarding-features'},
+          s.features.map((f,i)=>React.createElement('div',{key:i,className:'onboarding-feature'},
+            React.createElement('span',{className:'onboarding-feature-icon'},f.icon),
+            React.createElement('div',null,
+              React.createElement('div',{className:'onboarding-feature-title'},f.title),
+              React.createElement('div',{className:'onboarding-feature-desc'},f.desc)
+            )
+          ))
+        ),
+        s.shortcuts&&React.createElement('div',{className:'onboarding-shortcuts'},
+          s.shortcuts.map((sc,i)=>React.createElement('div',{key:i,className:'onboarding-shortcut'},
+            React.createElement('span',{className:'shortcut-key'},sc.key),
+            React.createElement('span',{className:'shortcut-desc'},sc.desc)
+          ))
+        )
+      ),
+      // Footer
+      React.createElement('div',{className:'onboarding-footer'},
+        React.createElement('div',{className:'onboarding-dots'},
+          Array.from({length:total},(_,i)=>React.createElement('button',{key:i,className:'onboarding-dot'+(i===step?' active':''),onClick:()=>setStep(i)}))
+        ),
+        React.createElement('div',{style:{display:'flex',gap:8,alignItems:'center'}},
+          !isLast&&React.createElement('button',{className:'onboarding-skip',onClick:onClose},'Přeskočit'),
+          React.createElement('button',{
+            className:'btn-primary',
+            onClick:()=>isLast?onClose():setStep(s=>s+1),
+            style:{padding:'10px 24px'}
+          },isLast?'Začít používat 🚀':'Další →')
+        )
+      )
+    )
+  );
+}
+
+// ============================================================
+// NOTIFICATION CENTER
+// ============================================================
+function NotifCenter({onClose, onAction}) {
+  const notifs = [
+    ...alerts.map((a,i)=>({
+      id:'alert-'+i, icon:a.priority==='vysoká'?'🔴':'🟡',
+      title:a.title, desc:a.desc,
+      badge:a.priority, badgeColor:a.priority==='vysoká'?'var(--red)':'var(--orange)',
+      badgeBg:a.priority==='vysoká'?'var(--red-dim)':'var(--orange-dim)',
+      time:'Dnes', action:a.action
+    })),
+    ...gmailInbox.slice(0,3).map((e,i)=>({
+      id:'email-'+i, icon:'📬',
+      title:'Email: '+e.name,
+      desc:e.subject, badge:'email',
+      badgeColor:'var(--accent)', badgeBg:'var(--accent-dim)',
+      time:e.date, action:'Odpovědět na email od '+e.name
+    })),
+  ];
+
+  return React.createElement('div',{className:'notif-center'},
+    React.createElement('div',{className:'notif-center-header'},
+      React.createElement('span',{className:'notif-center-title'},'🔔 Upozornění ('+notifs.length+')'),
+      React.createElement('button',{className:'notif-center-clear',onClick:onClose},'Zavřít')
+    ),
+    React.createElement('div',{className:'notif-list'},
+      notifs.map(n=>React.createElement('div',{key:n.id,className:'notif-item',onClick:()=>{onAction(n.action);onClose();}},
+        React.createElement('span',{className:'notif-item-icon'},n.icon),
+        React.createElement('div',{style:{flex:1,minWidth:0}},
+          React.createElement('div',{className:'notif-item-title'},n.title),
+          React.createElement('div',{className:'notif-item-desc'},n.desc),
+          React.createElement('div',{className:'notif-item-time'},n.time)
+        ),
+        React.createElement('span',{
+          className:'notif-item-badge',
+          style:{background:n.badgeBg,color:n.badgeColor}
+        },n.badge)
+      ))
+    )
+  );
+}
+
+// ============================================================
+// NOTIFICATION CENTER
+// ============================================================
+function NotifCenter({onClose, onAction}) {
+  const notifs = [
+    {id:'n1',type:'warning',title:'ABC Invest čeká na odpověď',desc:'Nabídka 18,5 M Kč na Penthouse — deadline pátek 28. 3.',time:'Před 2 hodinami',action:'Napsat odpověď',unread:true},
+    {id:'n2',type:'warning',title:'3 nemovitosti bez dokumentace',desc:'NEM-002, NEM-004, NEM-006 mají chybějící data',time:'Dnes 8:00',action:'Zobrazit seznam',unread:true},
+    {id:'n3',type:'info',title:'Nová zpráva od Kováčových',desc:'Posíláme podepsanou rezervační smlouvu na byt Smíchov.',time:'Včera 16:45',action:'Odpovědět',unread:true},
+    {id:'n4',type:'info',title:'Vila Průhonice 7 měsíců neprodaná',desc:'Zvážit snížení ceny nebo změnu strategie.',time:'Včera 9:00',action:'Analyzovat',unread:false},
+    {id:'n5',type:'info',title:'MUDr. Vlček — nový lead',desc:'Zájem o prohlídku, zatím bez přiřazeného agenta.',time:'23. 3. 11:20',action:'Přiřadit',unread:false},
+    {id:'n6',type:'success',title:'Prodej uzavřen — Penthouse Pankrác',desc:'Transakce 11,2 M Kč úspěšně dokončena.',time:'21. 3. 14:00',action:null,unread:false},
+    {id:'n7',type:'info',title:'Nový klient přidán',desc:'MUDr. Roman Vlček přidán do systému.',time:'21. 3. 10:00',action:null,unread:false},
+  ];
+  const colors = {warning:'var(--red)',info:'var(--accent)',success:'var(--green)'};
+
+  return React.createElement('div',{className:'notif-center-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'notif-center'},
+      React.createElement('div',{className:'notif-center-header'},
+        React.createElement('div',null,
+          React.createElement('div',{className:'notif-center-title'},'Notifikace'),
+          React.createElement('div',{style:{fontSize:12,color:'var(--text3)',marginTop:2}},notifs.filter(n=>n.unread).length+' nepřečtených')
+        ),
+        React.createElement('button',{className:'notif-close',onClick:onClose},'×')
+      ),
+      React.createElement('div',{className:'notif-list'},
+        React.createElement('div',{className:'notif-section-label'},'Nepřečtené'),
+        notifs.filter(n=>n.unread).map(n=>React.createElement('div',{key:n.id,className:'notif-item unread',onClick:()=>{if(n.action)onAction(n.action+': '+n.title+'. '+n.desc);onClose();}},
+          React.createElement('div',{className:'notif-dot2',style:{background:colors[n.type]}}),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('div',{className:'notif-item-title'},n.title),
+            React.createElement('div',{className:'notif-item-desc'},n.desc),
+            React.createElement('div',{className:'notif-item-time'},n.time),
+            n.action&&React.createElement('div',{style:{fontSize:11,color:'var(--accent)',marginTop:4,fontWeight:600}},n.action+' →')
+          )
+        )),
+        React.createElement('div',{className:'notif-section-label',style:{marginTop:8}},'Starší'),
+        notifs.filter(n=>!n.unread).map(n=>React.createElement('div',{key:n.id,className:'notif-item',onClick:()=>{if(n.action)onAction(n.action+': '+n.title);onClose();}},
+          React.createElement('div',{className:'notif-dot2',style:{background:colors[n.type],opacity:.5}}),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('div',{className:'notif-item-title'},n.title),
+            React.createElement('div',{className:'notif-item-desc'},n.desc),
+            React.createElement('div',{className:'notif-item-time'},n.time)
+          )
+        ))
+      )
+    )
+  );
+}
+
+// ============================================================
+// ONBOARDING
+// ============================================================
+
+function Onboarding({userName, onComplete}) {
+  const [step, setStep] = useState(0);
+  const current = ONBOARDING_STEPS[step];
+  const isLast = step === ONBOARDING_STEPS.length - 1;
+  const progress = ((step + 1) / ONBOARDING_STEPS.length) * 100;
+
+  return React.createElement('div',{className:'onboarding-overlay'},
+    React.createElement('div',{className:'onboarding-card'},
+      React.createElement('div',{className:'onboarding-progress'},
+        React.createElement('div',{className:'onboarding-progress-bar',style:{width:progress+'%'}})
+      ),
+      React.createElement('div',{className:'onboarding-body'},
+        React.createElement('div',{className:'onboarding-step-num'},'Krok '+(step+1)+' z '+ONBOARDING_STEPS.length),
+        React.createElement('span',{className:'onboarding-icon'},current.icon),
+        React.createElement('h2',{className:'onboarding-title'},
+          step===0 ? 'Vítejte, '+userName+'!' : current.title
+        ),
+        React.createElement('p',{className:'onboarding-desc'},current.desc),
+        current.features&&React.createElement('div',{className:'onboarding-features'},
+          current.features.map((f,i)=>React.createElement('div',{key:i,className:'onboarding-feature'},
+            React.createElement('span',{className:'onboarding-feature-icon'},f.icon),
+            React.createElement('div',{className:'onboarding-feature-text'},
+              React.createElement('strong',null,f.title),
+              f.desc
+            )
+          ))
+        ),
+        current.shortcuts&&React.createElement('div',{className:'onboarding-shortcuts'},
+          current.shortcuts.map((s,i)=>React.createElement('div',{key:i,className:'shortcut-item'},
+            React.createElement('span',{className:'shortcut-key'},s.key),
+            React.createElement('span',{className:'shortcut-desc'},s.desc)
+          ))
+        )
+      ),
+      React.createElement('div',{className:'onboarding-footer'},
+        React.createElement('div',{className:'onboarding-dots'},
+          ONBOARDING_STEPS.map((_,i)=>React.createElement('button',{key:i,className:'onboarding-dot'+(i===step?' active':''),onClick:()=>setStep(i)}))
+        ),
+        React.createElement('div',{style:{display:'flex',gap:8}},
+          step>0&&React.createElement('button',{className:'btn-secondary',style:{padding:'9px 18px',fontSize:13},onClick:()=>setStep(s=>s-1)},'← Zpět'),
+          React.createElement('button',{className:'btn-primary',style:{padding:'9px 24px',fontSize:13},onClick:()=>isLast?onComplete():setStep(s=>s+1)},
+            isLast?'Začít používat PEPA 🚀':'Další →'
+          )
+        )
+      )
+    )
+  );
+}
+
+// ============================================================
+// KEYBOARD SHORTCUTS MODAL
+// ============================================================
+function ShortcutsModal({onClose}) {
+  const groups = [
+    {label:'Navigace',items:[
+      {key:'G H',desc:'Přehled'},
+      {key:'G C',desc:'Nový chat'},
+      {key:'G T',desc:'Úkoly'},
+      {key:'G M',desc:'Mapa'},
+      {key:'G K',desc:'Kalendář'},
+    ]},
+    {label:'Akce',items:[
+      {key:'Ctrl+K',desc:'Vyhledávání'},
+      {key:'Enter',desc:'Odeslat zprávu'},
+      {key:'Shift+Enter',desc:'Nový řádek'},
+      {key:'Esc',desc:'Zavřít / Zpět'},
+      {key:'?',desc:'Tato nápověda'},
+    ]},
+  ];
+
+  return React.createElement('div',{className:'shortcuts-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'shortcuts-modal'},
+      React.createElement('h3',null,'⌨️ Klávesové zkratky'),
+      groups.map((g,gi)=>React.createElement('div',{key:gi,style:{marginBottom:16}},
+        React.createElement('div',{className:'notif-section-label'},g.label),
+        React.createElement('div',{className:'shortcuts-grid'},
+          g.items.map((s,i)=>React.createElement('div',{key:i,className:'shortcut-row'},
+            React.createElement('span',{className:'shortcut-key'},s.key),
+            React.createElement('span',{className:'shortcut-desc'},s.desc)
+          ))
+        )
+      )),
+      React.createElement('button',{className:'btn-secondary',style:{width:'100%',marginTop:8},onClick:onClose},'Zavřít')
+    )
+  );
+}
+
+// ============================================================
 // APP
 // ============================================================
 function App(){
@@ -1949,6 +2350,9 @@ function App(){
   const [theme,setTheme]=useState(()=>localStorage.getItem('pepa-theme')||'light');
   const [view,setView]=useState('home'); // home|chat|tasks|calendar
   const [sidebarOpen,setSidebarOpen]=useState(false);
+  const [showOnboarding,setShowOnboarding]=useState(false);
+  const [showNotifCenter,setShowNotifCenter]=useState(false);
+  const notifCount = alerts.filter(a=>a.priority==='vysoká').length + gmailInbox.length;
   const [installPrompt,setInstallPrompt]=useState(null);
   const [showInstall,setShowInstall]=useState(false);
 
@@ -1959,7 +2363,9 @@ function App(){
   },[]);
   const [showSearch,setShowSearch]=useState(false);
   const [showPDF,setShowPDF]=useState(false);
-  const [searchQ,setSearchQ]=useState('');
+  const [showNotif,setShowNotif]=useState(false);
+  const [showShortcuts,setShowShortcuts]=useState(false);
+    const [searchQ,setSearchQ]=useState('');
   const [listening,setListening]=useState(false);
   const [shareToast,setShareToast]=useState(false);
   const [unreadEmails]=useState(gmailInbox.length);
@@ -1979,7 +2385,16 @@ function App(){
 
   // Auth
   useEffect(()=>{
-    sb.auth.getSession().then(({data:{session}})=>{setUser((session&&session.user)||null);setAuthLoading(false);});
+    sb.auth.getSession().then(({data:{session}})=>{const u=(session&&session.user)||null;
+      setUser(u);setAuthLoading(false);
+      if(u){
+        try{
+          const isNew=(Date.now()-new Date(u.created_at).getTime())<5*60*1000;
+          const seen=localStorage.getItem('pepa-onboarding-'+u.id);
+          if(isNew&&!seen){setTimeout(()=>setShowOnboarding(true),800);localStorage.setItem('pepa-onboarding-'+u.id,'1');}
+        }catch(e){}
+      }
+    });
     const {data:{subscription}}=sb.auth.onAuthStateChange((_,session)=>setUser((session&&session.user)||null));
     return ()=>subscription.unsubscribe();
   },[]);
@@ -2041,7 +2456,34 @@ function App(){
   useEffect(()=>{try{localStorage.setItem(K('tasks'),JSON.stringify(tasks));}catch(e){}},[tasks]);
   useEffect(()=>{endRef.current&&endRef.current.scrollIntoView({behavior:'smooth'});},[chats,loading]);
 
-  // Keyboard shortcut Ctrl+K for search
+  // Keyboard shortcuts
+  useEffect(()=>{
+    let gPressed = false, gTimer = null;
+    const handler = e => {
+      if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+      if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();setShowSearch(v=>!v);return;}
+      if(e.key==='Escape'){setShowSearch(false);setShowNotifCenter(false);setShowPDF(false);return;}
+      // G + key navigation
+      if(e.key==='g'||e.key==='G'){
+        gPressed=true;
+        clearTimeout(gTimer);
+        gTimer=setTimeout(()=>{gPressed=false;},1000);
+        return;
+      }
+      if(gPressed){
+        gPressed=false;clearTimeout(gTimer);
+        const nav={'h':'home','H':'home','c':'chat','C':'chat','t':'tasks','T':'tasks','k':'calendar','K':'calendar','m':'map','M':'map'};
+        if(nav[e.key]){
+          if(nav[e.key]==='chat') {const id=uid();setChats(p=>[...p,{id,title:'Nový chat',msgs:[]}]);setActiveChatId(id);}
+          setView(nav[e.key]);
+        }
+      }
+    };
+    window.addEventListener('keydown',handler);
+    return()=>window.removeEventListener('keydown',handler);
+  },[]);
+
+  // Old Ctrl+K only shortcut - now merged above
   useEffect(()=>{
     const handler=e=>{if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();setShowSearch(v=>!v);}};
     window.addEventListener('keydown',handler);
@@ -2160,7 +2602,7 @@ function App(){
             React.createElement('button',{className:'dropdown-btn',onClick:handleSignOut},'Odhlasit se')
           )
         ),
-        React.createElement('button',{className:'sidebar-hamburger-btn',onClick:()=>setSidebarOpen(v=>!v)},'\u2630'),
+        React.createElement('button',{className:'sidebar-hamburger-btn',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
         React.createElement('div',{className:'sidebar-divider'})
       ),
       React.createElement('div',{className:'sidebar-nav'},
@@ -2288,8 +2730,17 @@ function App(){
   const topbar=React.createElement('div',{className:'topbar'},
     React.createElement('div',{className:'topbar-title'},'Bohemia Reality',React.createElement('span',{className:'topbar-greeting'},'· Back Office')),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setShowSearch(true),title:'Hledat (Ctrl+K)'},'🔍'),
+    React.createElement('div',{className:'notif-topbar-btn',style:{position:'relative',display:'inline-flex'}},
+      React.createElement('button',{className:'topbar-btn',onClick:()=>setShowNotifCenter(v=>!v),title:'Upozornění'},'🔔'),
+      notifCount>0&&React.createElement('span',{className:'notif-unread-badge'},notifCount>9?'9+':notifCount)
+    ),
+    React.createElement('button',{className:'topbar-btn notif-topbar-btn',onClick:()=>setShowNotif(true),title:'Notifikace'},
+      '🔔',
+      React.createElement('span',{className:'notif-badge-top'},'3')
+    ),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setShowPDF(true),title:'Export PDF'},'📄'),
     showInstall&&React.createElement('button',{className:'topbar-btn',title:'Přidat na plochu',onClick:async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}},style:{background:'var(--accent)',color:'white',border:'none'}},'📲'),
+    React.createElement('button',{className:'topbar-btn',onClick:()=>setShowOnboarding(true),title:'Nápověda a zkratky'},'❓'),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setTheme(t=>t==='light'?'dark':'light'),title:'Přepnout téma'},theme==='light'?'🌙':'☀️')
   );
 
@@ -2316,6 +2767,9 @@ function App(){
     showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)}),
     showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{openChat(prompt);},onClose:()=>setShowTemplate(false)}),
     showPDF&&React.createElement(PDFModal,{activeChat,onClose:()=>setShowPDF(false)}),
+    showNotif&&React.createElement(NotifCenter,{onClose:()=>setShowNotif(false),onAction:(prompt)=>{openChat(prompt);}}),
+    showShortcuts&&React.createElement(ShortcutsModal,{onClose:()=>setShowShortcuts(false)}),
+    showOnboarding&&React.createElement(Onboarding,{userName:(user&&user.user_metadata&&user.user_metadata.name)||(user&&user.email&&user.email.split('@')[0])||'uživateli',onComplete:()=>{setShowOnboarding(false);if(user)localStorage.setItem('pepa-onboarding-'+user.id,'done');}}),
     showSearch&&React.createElement('div',{className:'search-overlay',onClick:e=>{if(e.target===e.currentTarget)setShowSearch(false);}},
       React.createElement('div',{className:'search-box'},
         React.createElement('div',{className:'search-input-wrap'},
