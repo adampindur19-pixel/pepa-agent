@@ -122,10 +122,10 @@ input,textarea{font-family:'Inter',sans-serif}
 
 /* User dropdown */
 .user-dropdown{
-  position:absolute;bottom:calc(100% + 6px);left:0;right:0;
+  position:fixed;bottom:80px;left:8px;
   background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:8px;min-width:180px;
-  box-shadow:var(--shadow-lg);z-index:200;
+  border-radius:var(--r);padding:8px;min-width:200px;
+  box-shadow:var(--shadow-lg);z-index:300;
 }
 .user-info{padding:8px 10px 10px;border-bottom:1px solid var(--border);margin-bottom:6px}
 .user-name{font-size:13px;font-weight:600;color:var(--text)}
@@ -560,8 +560,12 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 }
 
 /* Quick actions in sidebar */
-.qa-section{padding:0 8px 8px;width:100%}
-.qa-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;padding:8px 6px 4px;display:flex;align-items:center;justify-content:space-between}
+.qa-section{padding:0 8px 8px;width:100%;overflow-y:auto;max-height:220px}
+.qa-section::-webkit-scrollbar{width:3px}
+.qa-section::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
+.qa-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em;padding:8px 6px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.qa-label button{background:none;border:none;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;line-height:1;width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:4px;transition:all .15s}
+.qa-label button:hover{background:rgba(255,255,255,.1);color:white}
 .qa-label button{background:none;border:none;color:rgba(255,255,255,.3);font-size:14px;cursor:pointer;transition:color .15s}
 .qa-label button:hover{color:rgba(255,255,255,.7)}
 .qa-item{
@@ -2814,26 +2818,26 @@ function App(){
 
   // sendDirect - send with explicit chatId (for quick actions, openChat)
   async function sendDirect(text, chatId) {
-    const t = text.trim();
-    if(!t || loading) return;
-    setError(''); setView('chat');
-    const newMsgs = [{role:'user', content:t}];
-    setChats(prev=>prev.map(c=>c.id===chatId?{...c,title:t.slice(0,32)+(t.length>32?'…':''),msgs:newMsgs}:c));
+    const t = (text||'').trim();
+    if(!t) return;
+    setError(''); setView('chat'); setActiveChatId(chatId);
+    const userMsg = {role:'user', content:t};
+    const assistantMsg = {role:'assistant', content:''};
+    // Set initial messages including empty assistant placeholder
+    setChats(prev=>prev.map(ch=>ch.id===chatId?{...ch,title:t.slice(0,32)+(t.length>32?'…':''),msgs:[userMsg,assistantMsg]}:ch));
     setLoading(true);
     try {
-      setChats(prev=>prev.map(c=>c.id===chatId?{...c,msgs:[...newMsgs,{role:'assistant',content:''}]}:c));
       const res = await callAgent(
-        newMsgs.map(m=>({role:m.role,content:m.content})),
+        [{role:'user', content:t}],
         (partial)=>{
-          setChats(prev=>prev.map(c=>{
-            if(c.id!==chatId) return c;
-            const msgs=[...c.msgs];
-            msgs[msgs.length-1]={role:'assistant',content:partial};
-            return {...c,msgs};
+          setChats(prev=>prev.map(ch=>{
+            if(ch.id!==chatId) return ch;
+            const msgs=[userMsg,{role:'assistant',content:partial}];
+            return {...ch,msgs};
           }));
         }
       );
-      setChats(prev=>prev.map(c=>c.id===chatId?{...c,msgs:[...newMsgs,{role:'assistant',content:res||'Prázdná odpověď.'}]}:c));
+      setChats(prev=>prev.map(ch=>ch.id===chatId?{...ch,msgs:[userMsg,{role:'assistant',content:res||'Prázdná odpověď.'}]}:ch));
     } catch(e) { setError('Chyba: '+e.message); }
     finally { setLoading(false); }
   }
@@ -2934,6 +2938,9 @@ function App(){
         React.createElement('button',{className:`sidebar-btn${view==='analytics'?' active':''}`,onClick:()=>{setView('analytics');setSidebarOpen(false);},title:'Analýzy'},
           '📊',React.createElement('span',null,'Analýzy')
         ),
+        React.createElement('button',{className:'sidebar-btn',onClick:()=>setShowAddData(true),title:'Přidat data'},
+          '🗄️',React.createElement('span',null,'Přidat data')
+        ),
                 // Chat list
       React.createElement('div',{className:'chat-list-panel'},
         React.createElement('div',{className:'chat-list-label'},'Konverzace',React.createElement('button',{onClick:newChat,style:{background:'none',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:14}},'+')
@@ -2949,7 +2956,7 @@ function App(){
       ),
       // Quick actions
       React.createElement('div',{className:'qa-section'},
-        React.createElement('div',{className:'qa-label'},'Rychlé akce',React.createElement('button',{onClick:()=>setShowAddQA(true)},'+'),React.createElement('button',{onClick:()=>setShowAddData(true)},'🗄️')),
+        React.createElement('div',{className:'qa-label'},'Rychlé akce',React.createElement('button',{onClick:()=>setShowAddQA(true),title:'Přidat akci'},'+')),
         (quickActions||[]).map(q=>React.createElement('button',{key:q.id,className:'qa-item',onClick:()=>{const id=uid();setChats(prev=>[...prev,{id,title:q.label,msgs:[]}]);setActiveChatId(id);setView('chat');setSidebarOpen(false);setTimeout(()=>sendDirect(q.prompt,id),100);}},
           React.createElement('span',null,q.icon),
           React.createElement('span',{style:{flex:1,textAlign:'left',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},q.label),
