@@ -11,12 +11,12 @@
         { "key": "Content-Type", "value": "application/javascript" },
         { "key": "Service-Worker-Allowed", "value": "/" }
       ]
-    },
+    }
+  ],
+  "crons": [
     {
-      "source": "/manifest.json", 
-      "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" }
-      ]
+      "path": "/api/morning-report",
+      "schedule": "0 7 * * 1-5"
     }
   ]
 }
