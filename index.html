@@ -595,8 +595,8 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 
 /* ===== PROPERTY MAP ===== */
 .map-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
-.map-container{height:500px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);position:relative}
-.map-container .leaflet-container{height:100%;width:100%;border-radius:var(--r)}
+.map-container{height:460px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);position:relative}
+.map-container .leaflet-container{height:100%!important;width:100%!important;border-radius:var(--r)}
 .map-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .map-toolbar h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);flex:1}
 .map-filter-wrap{display:flex;gap:6px;flex-wrap:wrap}
@@ -1215,7 +1215,6 @@ function PropertyMap({onAskPepa}) {
 
   useEffect(() => {
     if (!mapRef.current || leafletMap.current) return;
-    // Init map centered on Prague
     const map = window.L.map(mapRef.current, {
       center: [50.0755, 14.4378],
       zoom: 11,
@@ -1226,8 +1225,23 @@ function PropertyMap({onAskPepa}) {
       maxZoom: 19,
     }).addTo(map);
     leafletMap.current = map;
+    // Fix size after mount
+    setTimeout(() => { map.invalidateSize(); }, 100);
+    setTimeout(() => { map.invalidateSize(); }, 500);
     return () => { if(leafletMap.current){leafletMap.current.remove();leafletMap.current=null;} };
   }, []);
+
+  // Invalidate size on any view change
+  useEffect(() => {
+    if (leafletMap.current) setTimeout(() => { leafletMap.current && leafletMap.current.invalidateSize(); }, 200);
+  });
+
+  // Invalidate size when filter changes (container might resize)
+  useEffect(() => {
+    if (leafletMap.current) {
+      setTimeout(() => { leafletMap.current && leafletMap.current.invalidateSize(); }, 50);
+    }
+  }, [filterStatus]);
 
   useEffect(() => {
     if (!leafletMap.current) return;
