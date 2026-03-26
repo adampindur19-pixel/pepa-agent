@@ -1,75 +1,47 @@
-export const config = { runtime: 'edge' };
-
-export default async function handler(req) {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      },
-    });
-  }
-
-  if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return new Response(
-      JSON.stringify({ error: { message: 'ANTHROPIC_API_KEY není nastaven.' } }),
-      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
-
-  let body;
-  try {
-    body = await req.json();
-  } catch(e) {
-    return new Response(
-      JSON.stringify({ error: { message: 'Invalid request JSON: ' + e.message } }),
-      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
-
-  // Always use claude-sonnet-4-6, keep rest of body as-is (supports vision/images)
-  body.model = 'claude-sonnet-4-6';
-  if (!body.max_tokens) body.max_tokens = 1000;
-
-  let upstream;
-  try {
-    upstream = await fetch('https://api.anthropic.com/v1/messages', {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+  
+  const { model, max_tokens, system, messages, stream } = req.body;
+  
+  const body = { model, max_tokens, system, messages };
+  
+  if (stream) {
+    body.stream = true;
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify(body),
     });
-  } catch(e) {
-    return new Response(
-      JSON.stringify({ error: { message: 'Nepodařilo se spojit s Anthropic API: ' + e.message } }),
-      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-    );
+    
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      res.write(chunk);
+    }
+    res.end();
+  } else {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    res.status(200).json(data);
   }
-
-  let data;
-  try {
-    data = await upstream.json();
-  } catch(e) {
-    return new Response(
-      JSON.stringify({ error: { message: 'Anthropic API vrátilo neplatnou odpověď.' } }),
-      { status: 200, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
-    );
-  }
-
-  return new Response(JSON.stringify(data), {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
 }
