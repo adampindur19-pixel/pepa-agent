@@ -444,19 +444,19 @@ function HomeView({setView,setSendPrompt}){
           ),
           React.createElement('button',{className:'view-all',onClick:()=>setView('analytics')},'Zobrazit vše →')
         ),
-        React.createElement(ResponsiveContainer,{width:'100%',height:200},
-          React.createElement(AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
+        React.createElement(window.Recharts.ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(window.Recharts.AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
             React.createElement('defs',null,
               React.createElement('linearGradient',{id:'grad1',x1:'0',y1:'0',x2:'0',y2:'1'},
                 React.createElement('stop',{offset:'5%',stopColor:'#5B5FEF',stopOpacity:.15}),
                 React.createElement('stop',{offset:'95%',stopColor:'#5B5FEF',stopOpacity:0})
               )
             ),
-            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
-            React.createElement(XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
-            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
-            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
-            React.createElement(Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad1)',strokeWidth:2})
+            React.createElement(window.Recharts.CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(window.Recharts.XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(window.Recharts.YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(window.Recharts.Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(window.Recharts.Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad1)',strokeWidth:2})
           )
         )
       ),
@@ -623,20 +623,20 @@ function AnalyticsView(){
           React.createElement('div',{className:'section-title'},'Vývoj leadů'),
           React.createElement('div',{className:'section-sub'},'6 měsíců')
         ),
-        React.createElement(ResponsiveContainer,{width:'100%',height:200},
-          React.createElement(AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
+        React.createElement(window.Recharts.ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(window.Recharts.AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
             React.createElement('defs',null,
               React.createElement('linearGradient',{id:'grad2',x1:'0',y1:'0',x2:'0',y2:'1'},
                 React.createElement('stop',{offset:'5%',stopColor:'#5B5FEF',stopOpacity:.15}),
                 React.createElement('stop',{offset:'95%',stopColor:'#5B5FEF',stopOpacity:0})
               )
             ),
-            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
-            React.createElement(XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
-            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
-            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
-            React.createElement(Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad2)',strokeWidth:2}),
-            React.createElement(Area,{type:'monotone',dataKey:'prodeje',name:'Prodeje',stroke:'#10B981',fill:'none',strokeWidth:2})
+            React.createElement(window.Recharts.CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(window.Recharts.XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(window.Recharts.YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(window.Recharts.Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(window.Recharts.Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad2)',strokeWidth:2}),
+            React.createElement(window.Recharts.Area,{type:'monotone',dataKey:'prodeje',name:'Prodeje',stroke:'#10B981',fill:'none',strokeWidth:2})
           )
         )
       ),
@@ -645,12 +645,12 @@ function AnalyticsView(){
           React.createElement('div',{className:'section-title'},'Portfolio'),
           React.createElement('div',{className:'section-sub'},'Podle statusu')
         ),
-        React.createElement(ResponsiveContainer,{width:'100%',height:200},
-          React.createElement(PieChart,null,
-            React.createElement(Pie,{data:portfolioData,cx:'50%',cy:'50%',innerRadius:50,outerRadius:80,dataKey:'value',nameKey:'name',label:({name,value})=>name+': '+value},
-              portfolioData.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i]}))
+        React.createElement(window.Recharts.ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(window.Recharts.PieChart,null,
+            React.createElement(window.Recharts.Pie,{data:portfolioData,cx:'50%',cy:'50%',innerRadius:50,outerRadius:80,dataKey:'value',nameKey:'name',label:({name,value})=>name+': '+value},
+              portfolioData.map((_,i)=>React.createElement(window.Recharts.Cell,{key:i,fill:COLORS[i]}))
             ),
-            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)})
+            React.createElement(window.Recharts.Tooltip,{content:React.createElement(CustomTooltip)})
           )
         )
       )
@@ -659,14 +659,14 @@ function AnalyticsView(){
       React.createElement('div',{className:'section-header'},
         React.createElement('div',{className:'section-title'},'Výkon agentů'),
       ),
-      React.createElement(ResponsiveContainer,{width:'100%',height:180},
-        React.createElement(BarChart,{data:AGENTS.map(a=>({name:a.name.split(' ')[0],obchody:a.deals,tržby:+(a.revenue/1000000).toFixed(1)})),margin:{top:4,right:4,left:-20,bottom:0}},
-          React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
-          React.createElement(XAxis,{dataKey:'name',tick:{fill:'var(--text3)',fontSize:11}}),
-          React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
-          React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
-          React.createElement(Bar,{dataKey:'obchody',name:'Obchody',fill:'#5B5FEF',radius:[4,4,0,0]}),
-          React.createElement(Bar,{dataKey:'tržby',name:'Tržby (M Kč)',fill:'#10B981',radius:[4,4,0,0]})
+      React.createElement(window.Recharts.ResponsiveContainer,{width:'100%',height:180},
+        React.createElement(window.Recharts.BarChart,{data:AGENTS.map(a=>({name:a.name.split(' ')[0],obchody:a.deals,tržby:+(a.revenue/1000000).toFixed(1)})),margin:{top:4,right:4,left:-20,bottom:0}},
+          React.createElement(window.Recharts.CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+          React.createElement(window.Recharts.XAxis,{dataKey:'name',tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(window.Recharts.YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(window.Recharts.Tooltip,{content:React.createElement(CustomTooltip)}),
+          React.createElement(window.Recharts.Bar,{dataKey:'obchody',name:'Obchody',fill:'#5B5FEF',radius:[4,4,0,0]}),
+          React.createElement(window.Recharts.Bar,{dataKey:'tržby',name:'Tržby (M Kč)',fill:'#10B981',radius:[4,4,0,0]})
         )
       )
     )
