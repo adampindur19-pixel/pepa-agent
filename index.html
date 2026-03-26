@@ -812,6 +812,30 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .shortcuts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .shortcut-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:var(--rs)}
 
+/* ===== ANALYTICS ===== */
+.analytics-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.analytics-view::-webkit-scrollbar{width:4px}
+.analytics-view::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.analytics-header{display:flex;align-items:center;gap:12px}
+.analytics-header h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);flex:1}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.kpi-big{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--shadow);transition:all .2s}
+.kpi-big:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.kpi-big-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.kpi-big-value{font-family:'DM Serif Display',serif;font-size:32px;color:var(--text);line-height:1;margin-bottom:4px}
+.kpi-big-sub{font-size:12px;color:var(--text3)}
+.kpi-big-trend{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:10px;margin-top:6px}
+.kpi-big-trend.up{background:var(--green-dim);color:var(--green)}
+.kpi-big-trend.down{background:var(--red-dim);color:var(--red)}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.chart-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.chart-card-title{font-size:15px;font-weight:600;color:var(--text)}
+.chart-card-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.charts-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.charts-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(2,1fr)}.charts-grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.kpi-row{grid-template-columns:1fr 1fr}.charts-grid-2{grid-template-columns:1fr}.charts-grid-3{grid-template-columns:1fr}.analytics-view{padding:12px}.analytics-header h1{font-size:22px}}
+
 /* ===== NOTIFICATIONS ===== */
 .notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sidebar)}
 .notif-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--sidebar)}
@@ -2313,6 +2337,7 @@ function ShortcutsModal({onClose}) {
       {key:'G T',desc:'Úkoly'},
       {key:'G M',desc:'Mapa'},
       {key:'G K',desc:'Kalendář'},
+      {key:'G A',desc:'Analýzy'},
     ]},
     {label:'Akce',items:[
       {key:'Ctrl+K',desc:'Vyhledávání'},
@@ -2336,6 +2361,212 @@ function ShortcutsModal({onClose}) {
         )
       )),
       React.createElement('button',{className:'btn-secondary',style:{width:'100%',marginTop:8},onClick:onClose},'Zavřít')
+    )
+  );
+}
+
+// ============================================================
+// ANALYTICS DASHBOARD
+// ============================================================
+function AnalyticsDashboard({onAskPepa}) {
+  const {BarChart,Bar,LineChart,Line,PieChart,Pie,Cell,XAxis,YAxis,CartesianGrid,Tooltip,Legend,ResponsiveContainer,AreaChart,Area} = Recharts;
+  const COLORS = ['#7C6FF7','#22C55E','#F59E0B','#EF4444','#3B82F6','#A78BFA'];
+
+  // KPI data
+  const totalRevenue = agents.reduce((s,a)=>s+a.revenue,0);
+  const totalDeals = agents.reduce((s,a)=>s+a.deals,0);
+  const activeProps = properties.filter(p=>p.status==='k prodeji').length;
+  const q1clients = clients.filter(c=>c.quarter==='Q1 2025').length;
+
+  // Portfolio by status
+  const portfolioData = [
+    {name:'K prodeji', value:properties.filter(p=>p.status==='k prodeji').length},
+    {name:'Prodáno', value:properties.filter(p=>p.status==='prodáno').length},
+    {name:'Rezervace', value:properties.filter(p=>p.status==='rezervace').length},
+    {name:'Pronájem', value:properties.filter(p=>p.status==='pronájem').length},
+  ];
+
+  // Agent performance
+  const agentData = agents.map(a=>({
+    name:a.name.split(' ')[0],
+    obchody:a.deals,
+    tržby:Math.round(a.revenue/1000000*10)/10,
+    leady:a.leads,
+  }));
+
+  // Market comparison
+  const marketData = marketPrices.slice(0,5).map(m=>({
+    name:m.locality.split(' — ')[0].replace('Praha ','P'),
+    trh:m.avgPriceM2,
+    nase:m.ourAvg,
+  }));
+
+  // Lead sources
+  const sourceData = leadSources.map(s=>({name:s.source,value:s.count}));
+
+  const CustomTooltip = ({active,payload,label}) => {
+    if(!active||!payload?.length) return null;
+    return React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--accent-border)',borderRadius:10,padding:'10px 14px',fontSize:12,boxShadow:'var(--shadow-lg)'}},
+      label&&React.createElement('p',{style:{color:'var(--accent)',fontWeight:600,marginBottom:4}},label),
+      payload.map((e,i)=>React.createElement('p',{key:i,style:{color:e.color,margin:'2px 0'}},e.name+': ',React.createElement('strong',null,e.value+(e.name==='tržby'?' M Kč':e.name==='trh'||e.name==='nase'?' Kč/m²':''))))
+    );
+  };
+
+  return React.createElement('div',{className:'analytics-view'},
+    // Header
+    React.createElement('div',{className:'analytics-header'},
+      React.createElement('h1',null,'Analýzy a statistiky'),
+      React.createElement('button',{className:'btn-secondary',style:{padding:'8px 14px',fontSize:12},
+        onClick:()=>onAskPepa('Analyzuj výkonnost agentů a portfolia. Kde máme největší příležitosti? Co bychom měli zlepšit?')
+      },'💬 Zeptat PEPU'),
+      React.createElement('button',{className:'btn-primary',style:{padding:'8px 16px',fontSize:13},
+        onClick:()=>onAskPepa('Vytvoř podrobný report o výkonu Bohemia Reality za Q1 2025 se všemi statistikami.')
+      },'📊 Generovat report')
+    ),
+
+    // KPI cards
+    React.createElement('div',{className:'kpi-row'},
+      React.createElement('div',{className:'kpi-big'},
+        React.createElement('div',{className:'kpi-big-label'},'Celkové tržby'),
+        React.createElement('div',{className:'kpi-big-value'},(totalRevenue/1000000).toFixed(1)+' M'),
+        React.createElement('div',{className:'kpi-big-sub'},'Kč · všichni agenti'),
+        React.createElement('div',{className:'kpi-big-trend up'},'↑ +12% vs Q4 2024')
+      ),
+      React.createElement('div',{className:'kpi-big'},
+        React.createElement('div',{className:'kpi-big-label'},'Uzavřené obchody'),
+        React.createElement('div',{className:'kpi-big-value'},totalDeals),
+        React.createElement('div',{className:'kpi-big-sub'},'nemovitostí prodáno'),
+        React.createElement('div',{className:'kpi-big-trend up'},'↑ +3 vs Q4 2024')
+      ),
+      React.createElement('div',{className:'kpi-big'},
+        React.createElement('div',{className:'kpi-big-label'},'Aktivní portfolio'),
+        React.createElement('div',{className:'kpi-big-value'},activeProps),
+        React.createElement('div',{className:'kpi-big-sub'},'nemovitostí k prodeji'),
+        React.createElement('div',{className:'kpi-big-trend down'},'↓ -2 vs minulý měsíc')
+      ),
+      React.createElement('div',{className:'kpi-big'},
+        React.createElement('div',{className:'kpi-big-label'},'Noví klienti Q1'),
+        React.createElement('div',{className:'kpi-big-value'},q1clients),
+        React.createElement('div',{className:'kpi-big-sub'},'za Q1 2025'),
+        React.createElement('div',{className:'kpi-big-trend up'},'↑ +5 vs Q4 2024')
+      )
+    ),
+
+    // Main chart - leads trend
+    React.createElement('div',{className:'chart-card'},
+      React.createElement('div',{className:'chart-card-header'},
+        React.createElement('div',null,
+          React.createElement('div',{className:'chart-card-title'},'Vývoj leadů a prodejů'),
+          React.createElement('div',{className:'chart-card-sub'},'Posledních 6 měsíců')
+        ),
+        React.createElement('button',{className:'card-action',onClick:()=>onAskPepa('Analyzuj trend leadů a prodejů za posledních 6 měsíců. Jaký je výhled?')},'Analyzovat')
+      ),
+      React.createElement(ResponsiveContainer,{width:'100%',height:260},
+        React.createElement(AreaChart,{data:leadsHistory,margin:{top:8,right:16,left:0,bottom:4}},
+          React.createElement('defs',null,
+            React.createElement('linearGradient',{id:'leadGrad',x1:'0',y1:'0',x2:'0',y2:'1'},
+              React.createElement('stop',{offset:'5%',stopColor:'#7C6FF7',stopOpacity:0.15}),
+              React.createElement('stop',{offset:'95%',stopColor:'#7C6FF7',stopOpacity:0})
+            ),
+            React.createElement('linearGradient',{id:'dealGrad',x1:'0',y1:'0',x2:'0',y2:'1'},
+              React.createElement('stop',{offset:'5%',stopColor:'#22C55E',stopOpacity:0.15}),
+              React.createElement('stop',{offset:'95%',stopColor:'#22C55E',stopOpacity:0})
+            )
+          ),
+          React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+          React.createElement(XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+          React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'var(--text3)'}}),
+          React.createElement(Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#7C6FF7',fill:'url(#leadGrad)',strokeWidth:2.5}),
+          React.createElement(Area,{type:'monotone',dataKey:'prodeje',name:'Prodeje',stroke:'#22C55E',fill:'url(#dealGrad)',strokeWidth:2.5})
+        )
+      )
+    ),
+
+    // Middle row: Agent performance + Portfolio donut
+    React.createElement('div',{className:'charts-grid-2'},
+      // Agent bar chart
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-card-header'},
+          React.createElement('div',null,
+            React.createElement('div',{className:'chart-card-title'},'Výkon agentů'),
+            React.createElement('div',{className:'chart-card-sub'},'Obchody a tržby (M Kč)')
+          )
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:220},
+          React.createElement(BarChart,{data:agentData,margin:{top:8,right:16,left:0,bottom:4}},
+            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(XAxis,{dataKey:'name',tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'var(--text3)'}}),
+            React.createElement(Bar,{dataKey:'obchody',name:'Obchody',fill:'#7C6FF7',radius:[4,4,0,0]}),
+            React.createElement(Bar,{dataKey:'tržby',name:'Tržby (M Kč)',fill:'#22C55E',radius:[4,4,0,0]})
+          )
+        )
+      ),
+      // Portfolio donut
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-card-header'},
+          React.createElement('div',null,
+            React.createElement('div',{className:'chart-card-title'},'Portfolio podle statusu'),
+            React.createElement('div',{className:'chart-card-sub'},properties.length+' nemovitostí celkem')
+          )
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:220},
+          React.createElement(PieChart,null,
+            React.createElement(Pie,{data:portfolioData,cx:'50%',cy:'50%',innerRadius:55,outerRadius:90,dataKey:'value',nameKey:'name',
+              label:({name,value})=>name+': '+value},
+              portfolioData.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i%COLORS.length]}))
+            ),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)})
+          )
+        )
+      )
+    ),
+
+    // Bottom row: Market comparison + Lead sources
+    React.createElement('div',{className:'charts-grid-2'},
+      // Market comparison
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-card-header'},
+          React.createElement('div',null,
+            React.createElement('div',{className:'chart-card-title'},'Srovnání s trhem (Kč/m²)'),
+            React.createElement('div',{className:'chart-card-sub'},'Naše ceny vs tržní průměr')
+          ),
+          React.createElement('button',{className:'card-action',onClick:()=>onAskPepa('Porovnej naše ceny s tržními daty. Kde jsme předražení nebo podhodnocení?')},'Detail')
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:220},
+          React.createElement(BarChart,{data:marketData,margin:{top:8,right:16,left:0,bottom:4}},
+            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(XAxis,{dataKey:'name',tick:{fill:'var(--text3)',fontSize:10}}),
+            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:10},tickFormatter:v=>(v/1000)+'k'}),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(Legend,{wrapperStyle:{fontSize:12,color:'var(--text3)'}}),
+            React.createElement(Bar,{dataKey:'trh',name:'Tržní průměr',fill:'var(--surface2)',stroke:'var(--border)',strokeWidth:1,radius:[4,4,0,0]}),
+            React.createElement(Bar,{dataKey:'nase',name:'Naše ceny',fill:'#7C6FF7',radius:[4,4,0,0]})
+          )
+        )
+      ),
+      // Lead sources pie
+      React.createElement('div',{className:'chart-card'},
+        React.createElement('div',{className:'chart-card-header'},
+          React.createElement('div',null,
+            React.createElement('div',{className:'chart-card-title'},'Zdroje leadů'),
+            React.createElement('div',{className:'chart-card-sub'},'Odkud přicházejí klienti')
+          )
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:220},
+          React.createElement(PieChart,null,
+            React.createElement(Pie,{data:sourceData,cx:'50%',cy:'50%',outerRadius:85,dataKey:'value',nameKey:'name',
+              label:({name,percent})=>name+' '+Math.round(percent*100)+'%',labelLine:false},
+              sourceData.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i%COLORS.length]}))
+            ),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)})
+          )
+        )
+      )
     )
   );
 }
@@ -2471,7 +2702,7 @@ function App(){
       }
       if(gPressed){
         gPressed=false;clearTimeout(gTimer);
-        const nav={'h':'home','H':'home','c':'chat','C':'chat','t':'tasks','T':'tasks','k':'calendar','K':'calendar','m':'map','M':'map'};
+        const nav={'h':'home','H':'home','c':'chat','C':'chat','t':'tasks','T':'tasks','k':'calendar','K':'calendar','m':'map','M':'map','a':'analytics','A':'analytics'};
         if(nav[e.key]){
           if(nav[e.key]==='chat') {const id=uid();setChats(p=>[...p,{id,title:'Nový chat',msgs:[]}]);setActiveChatId(id);}
           setView(nav[e.key]);
@@ -2617,6 +2848,9 @@ function App(){
         React.createElement('button',{className:`sidebar-btn${view==='map'?' active':''}`,onClick:()=>{setView('map');setSidebarOpen(false);},title:'Mapa'},
           '🗺️',React.createElement('span',null,'Mapa')
         ),
+        React.createElement('button',{className:`sidebar-btn${view==='analytics'?' active':''}`,onClick:()=>{setView('analytics');setSidebarOpen(false);},title:'Analýzy'},
+          '📊',React.createElement('span',null,'Analýzy')
+        ),
                 // Chat list
       React.createElement('div',{className:'chat-list-panel'},
         React.createElement('div',{className:'chat-list-label'},'Konverzace',React.createElement('button',{onClick:newChat,style:{background:'none',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:14}},'+')
@@ -2757,6 +2991,7 @@ function App(){
       view==='tasks'?tasksView:
       view==='calendar'?React.createElement(TeamCalendar,{user,onAskPepa:(prompt)=>{openChat(prompt);}}):
       view==='map'?React.createElement(PropertyMap,{onAskPepa:(prompt)=>{openChat(prompt);}}):
+      view==='analytics'?React.createElement(AnalyticsDashboard,{onAskPepa:(prompt)=>{openChat(prompt);}}):
       chatView
     ),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
