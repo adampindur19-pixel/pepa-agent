@@ -622,6 +622,35 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .map-katastr-btn:hover{border-color:var(--accent-border);color:var(--accent)}
 @media(max-width:768px){.map-container{height:55vh;min-height:280px}.map-prop-list{grid-template-columns:1fr}}
 
+/* ===== TIMELINE CALENDAR ===== */
+.cal-view-toggle{display:flex;gap:4px;background:var(--surface2);padding:4px;border-radius:var(--rs);width:fit-content}
+.cal-view-btn{padding:6px 14px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;transition:all .15s}
+.cal-view-btn.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 4px var(--shadow)}
+
+/* Timeline view */
+.timeline-wrap{overflow-x:auto;padding-bottom:8px}
+.timeline-wrap::-webkit-scrollbar{height:4px}
+.timeline-wrap::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.timeline-grid{display:grid;min-width:700px}
+.timeline-header{display:grid;grid-template-columns:120px repeat(7,1fr);border-bottom:2px solid var(--border);margin-bottom:0}
+.timeline-header-day{padding:10px 8px;text-align:center;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.timeline-header-day.today{color:var(--accent);font-weight:700}
+.timeline-header-num{font-size:20px;font-weight:700;color:var(--text);display:block;margin-top:2px}
+.timeline-header-num.today{color:var(--accent)}
+.timeline-row{display:grid;grid-template-columns:120px repeat(7,1fr);border-bottom:1px solid var(--border2);min-height:60px}
+.timeline-row:last-child{border-bottom:none}
+.timeline-agent-cell{padding:12px 10px;display:flex;align-items:center;gap:8px;border-right:2px solid var(--border);background:var(--surface2);position:sticky;left:0;z-index:1}
+.timeline-agent-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.timeline-agent-name{font-size:12px;font-weight:600;color:var(--text);line-height:1.2}
+.timeline-day-cell{padding:4px;border-right:1px solid var(--border2);position:relative;cursor:pointer;transition:background .15s}
+.timeline-day-cell:hover{background:var(--accent-dim)}
+.timeline-day-cell.today{background:rgba(124,111,247,.04)}
+.timeline-day-cell:last-child{border-right:none}
+.timeline-event{padding:4px 7px;border-radius:6px;font-size:11px;font-weight:500;margin-bottom:2px;cursor:pointer;transition:all .15s;border-left:3px solid;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timeline-event:hover{filter:brightness(1.1);transform:translateX(1px)}
+.timeline-add{width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:18px;color:var(--accent);border:none;background:none;cursor:pointer;padding:0}
+.timeline-day-cell:hover .timeline-add{opacity:1}
+
 /* ===== TEAM CALENDAR ===== */
 .cal-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
 .cal-view::-webkit-scrollbar{width:4px}
@@ -1414,6 +1443,7 @@ function TeamCalendar({user,onAskPepa}){
   const [showAddModal,setShowAddModal]=useState(false);
   const [addDate,setAddDate]=useState('');
   const [weekOffset,setWeekOffset]=useState(0);
+  const [calView,setCalView]=useState('timeline'); // 'timeline' | 'week'
 
   // Load meetings from Supabase
   useEffect(()=>{
@@ -1471,6 +1501,10 @@ function TeamCalendar({user,onAskPepa}){
   return React.createElement('div',{className:'cal-view'},
     React.createElement('div',{className:'cal-toolbar'},
       React.createElement('h1',null,'Týmový kalendář'),
+      React.createElement('div',{className:'cal-view-toggle'},
+        React.createElement('button',{className:'cal-view-btn'+(calView==='timeline'?' active':''),onClick:()=>setCalView('timeline')},'⏱ Timeline'),
+        React.createElement('button',{className:'cal-view-btn'+(calView==='week'?' active':''),onClick:()=>setCalView('week')},'📆 Týden')
+      ),
       React.createElement('button',{className:'btn-secondary',style:{padding:'8px 14px',fontSize:12},onClick:()=>onAskPepa('Kdy mají agenti volno tento týden? Kdo má nejvíc schůzek? Shrn mi kalendář týmu.')},'💬 Zeptat PEPU'),
       React.createElement('button',{className:'btn-primary',style:{padding:'8px 16px',fontSize:13},onClick:()=>{setAddDate(today.toISOString().slice(0,10));setShowAddModal(true);}},'+ Přidat schůzku')
     ),
@@ -1485,8 +1519,52 @@ function TeamCalendar({user,onAskPepa}){
       React.createElement('button',{className:'topbar-btn',onClick:()=>setWeekOffset(o=>o+1)},'→'),
       weekOffset!==0&&React.createElement('button',{className:'cal-filter-btn',onClick:()=>setWeekOffset(0)},'Dnes')
     ),
-    // Week grid
+    // Calendar grid (timeline or week)
     loading?React.createElement('div',{style:{textAlign:'center',padding:40,color:'var(--text3)'}},'Načítám schůzky…'):
+    calView==='timeline'?
+    // TIMELINE VIEW
+    React.createElement('div',{className:'timeline-wrap'},
+      React.createElement('div',{className:'timeline-grid'},
+        // Header row
+        React.createElement('div',{className:'timeline-header'},
+          React.createElement('div',{className:'timeline-agent-cell',style:{background:'var(--surface2)',borderRight:'2px solid var(--border)'}}),
+          weekDays.map((day,di)=>React.createElement('div',{key:di,className:'timeline-header-day'+(isToday(day)?' today':'')},
+            ['Po','Út','St','Čt','Pá','So','Ne'][di],
+            React.createElement('span',{className:'timeline-header-num'+(isToday(day)?' today':'')},day.getDate())
+          ))
+        ),
+        // Agent rows
+        ['Markéta Horáčková','Tomáš Novák','Jana Veselá'].map((agent,ai)=>{
+          if(filterAgent!=='Všichni'&&filterAgent!==agent) return null;
+          const agentColor=['#7C6FF7','#22C55E','#F59E0B'][ai];
+          return React.createElement('div',{key:agent,className:'timeline-row'},
+            // Agent name cell
+            React.createElement('div',{className:'timeline-agent-cell'},
+              React.createElement('div',{className:'timeline-agent-dot',style:{background:agentColor}}),
+              React.createElement('div',{className:'timeline-agent-name'},agent.split(' ')[0]+' '+agent.split(' ')[1][0]+'.')
+            ),
+            // Day cells
+            weekDays.map((day,di)=>{
+              const ds=day.toISOString().slice(0,10);
+              const dayEvents=meetings.filter(m=>m.agent===agent&&m.date===ds);
+              return React.createElement('div',{
+                key:di,className:'timeline-day-cell'+(isToday(day)?' today':''),
+                onClick:()=>{setAddDate(ds);setShowAddModal(true);}
+              },
+                dayEvents.map(m=>React.createElement('div',{
+                  key:m.id,className:'timeline-event',
+                  style:{background:agentColor+'22',borderLeftColor:agentColor,color:agentColor},
+                  title:m.time_from+' – '+m.time_to+': '+m.title+(m.client?' ('+m.client+')':''),
+                  onClick:e=>{e.stopPropagation();if(window.confirm('Smazat: '+m.title+'?'))deleteMeeting(m.id);}
+                },m.time_from+' '+m.title)),
+                dayEvents.length===0&&React.createElement('button',{className:'timeline-add',onClick:e=>{e.stopPropagation();setAddDate(ds);setShowAddModal(true);},title:'Přidat schůzku'},'+')
+              );
+            })
+          );
+        })
+      )
+    ):
+    // WEEK VIEW (original)
     React.createElement('div',{className:'cal-week-grid'},
       weekDays.map((day,di)=>{
         const dayMeetings=getMeetingsForDay(day);
