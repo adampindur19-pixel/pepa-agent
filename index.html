@@ -2351,7 +2351,6 @@ function App(){
   const [view,setView]=useState('home'); // home|chat|tasks|calendar
   const [sidebarOpen,setSidebarOpen]=useState(false);
   const [showOnboarding,setShowOnboarding]=useState(false);
-  const [showNotifCenter,setShowNotifCenter]=useState(false);
   const notifCount = alerts.filter(a=>a.priority==='vysoká').length + gmailInbox.length;
   const [installPrompt,setInstallPrompt]=useState(null);
   const [showInstall,setShowInstall]=useState(false);
@@ -2730,10 +2729,7 @@ function App(){
   const topbar=React.createElement('div',{className:'topbar'},
     React.createElement('div',{className:'topbar-title'},'Bohemia Reality',React.createElement('span',{className:'topbar-greeting'},'· Back Office')),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setShowSearch(true),title:'Hledat (Ctrl+K)'},'🔍'),
-    React.createElement('div',{className:'notif-topbar-btn',style:{position:'relative',display:'inline-flex'}},
-      React.createElement('button',{className:'topbar-btn',onClick:()=>setShowNotifCenter(v=>!v),title:'Upozornění'},'🔔'),
-      notifCount>0&&React.createElement('span',{className:'notif-unread-badge'},notifCount>9?'9+':notifCount)
-    ),
+
     React.createElement('button',{className:'topbar-btn notif-topbar-btn',onClick:()=>setShowNotif(true),title:'Notifikace'},
       '🔔',
       React.createElement('span',{className:'notif-badge-top'},'3')
