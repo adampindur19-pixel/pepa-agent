@@ -1308,12 +1308,12 @@ function KatastrPanel({prop}) {
       React.createElement('div',{className:'katastr-links'},
         React.createElement('a',{
           className:'katastr-link',
-          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=Nemovitost&id=2750869680',
+          href:'https://nahlizenidokn.cuzk.gov.cz/ZobrazObjekt.aspx?encrypted=NAHL~FRmrZamYs4_AsMRWQ7UF_gv0k8z7pWXdI0u2ToqxOf8Wmb6FG41bkTVpffbxD1aGx4EFW1_RLtKvmn2tczbGj573MTvOlsOGfroiaaMrbFDA8GDkE-_6c4z0x1gAZikWEEtuojaQZeEFuKav4EZqDpiZkcHuI8ivXmAA2iCu7OXYOKRMTAx89VsuEC2htjcWaqTATFIoIcAqBMpfPh_FjMWudaf-TRtzndc8Mk38LAV5O6KSiQtwZb7XOWIE8rf1',
           target:'_blank',rel:'noopener noreferrer'
         },'🔗 Nahlédnout do KN'),
         React.createElement('a',{
           className:'katastr-link',
-          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=ListVlastnictvi&idKatastrUzemi=727661&cisloLV=1203',
+          href:'https://nahlizenidokn.cuzk.gov.cz/ZobrazObjekt.aspx?encrypted=NAHL~FRmrZamYs4_AsMRWQ7UF_gv0k8z7pWXdI0u2ToqxOf8Wmb6FG41bkTVpffbxD1aGx4EFW1_RLtKvmn2tczbGj573MTvOlsOGfroiaaMrbFDA8GDkE-_6c4z0x1gAZikWEEtuojaQZeEFuKav4EZqDpiZkcHuI8ivXmAA2iCu7OXYOKRMTAx89VsuEC2htjcWaqTATFIoIcAqBMpfPh_FjMWudaf-TRtzndc8Mk38LAV5O6KSiQtwZb7XOWIE8rf1',
           target:'_blank',rel:'noopener noreferrer'
         },'📋 List vlastnictví č. 1203'),
         React.createElement('a',{
@@ -1485,7 +1485,7 @@ function PropertyMap({onAskPepa}) {
             },'💰 Navrhni cenu'),
             React.createElement('a',{
               className:'map-katastr-btn',
-              href:'https://nahlizenidokn.cuzk.cz/VyhledatParcelu.aspx?rezim=nad&string='+encodeURIComponent(prop.address),
+              href:(prop.id==='NEM-010'?'https://nahlizenidokn.cuzk.gov.cz/ZobrazObjekt.aspx?encrypted=NAHL~FRmrZamYs4_AsMRWQ7UF_gv0k8z7pWXdI0u2ToqxOf8Wmb6FG41bkTVpffbxD1aGx4EFW1_RLtKvmn2tczbGj573MTvOlsOGfroiaaMrbFDA8GDkE-_6c4z0x1gAZikWEEtuojaQZeEFuKav4EZqDpiZkcHuI8ivXmAA2iCu7OXYOKRMTAx89VsuEC2htjcWaqTATFIoIcAqBMpfPh_FjMWudaf-TRtzndc8Mk38LAV5O6KSiQtwZb7XOWIE8rf1':'https://nahlizenidokn.cuzk.gov.cz/VyhledejNemovitost.aspx'),
               target:'_blank',rel:'noopener noreferrer',
               onClick:e=>e.stopPropagation()
             },'🏛️ Katastr')
