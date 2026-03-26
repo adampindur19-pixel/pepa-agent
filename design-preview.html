@@ -297,8 +297,12 @@ input{font-family:var(--font)}
 <body>
 <div id="root"></div>
 <script>
+// Wait for all scripts to load
+window.addEventListener('load', function() {
+// Recharts check
+if(!window.Recharts) { console.error('Recharts not loaded'); }
+
 const {useState,useEffect,useRef,useCallback}=React;
-// Recharts will be available after scripts load
 
 // ── DATA ──────────────────────────────────────────────
 const AGENTS=[
@@ -718,8 +722,8 @@ function App(){
   );
 }
 
-const {AreaChart,Area,BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,Cell,PieChart,Pie}=window.Recharts||{};
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+}); // end window.onload
 </script>
 </body>
 </html>
