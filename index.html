@@ -18,6 +18,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
 <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 /* ===== RESET & TOKENS ===== */
@@ -685,6 +686,20 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .agent-color-1{background:rgba(34,197,94,.15);border-color:#22C55E;color:#22C55E}
 .agent-color-2{background:rgba(245,158,11,.15);border-color:#F59E0B;color:#F59E0B}
 .agent-color-3{background:rgba(239,68,68,.15);border-color:#EF4444;color:#EF4444}
+
+/* ===== PDF EXPORT ===== */
+.pdf-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.pdf-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--rx);padding:32px;width:480px;max-width:90vw;box-shadow:var(--shadow-lg)}
+.pdf-modal h3{font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:8px}
+.pdf-modal p{font-size:13px;color:var(--text3);margin-bottom:20px}
+.pdf-options{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.pdf-option{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);cursor:pointer;transition:all .15s}
+.pdf-option:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.pdf-option.selected{border-color:var(--accent);background:var(--accent-dim)}
+.pdf-option-icon{font-size:22px;flex-shrink:0}
+.pdf-option-title{font-size:13px;font-weight:600;color:var(--text)}
+.pdf-option-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.pdf-progress{display:flex;align-items:center;gap:10px;padding:12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:var(--rs);font-size:13px;color:var(--accent);margin-bottom:16px}
 
 /* ===== NOTIFICATIONS ===== */
 .notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sidebar)}
@@ -1607,6 +1622,224 @@ function TeamCalendar({user,onAskPepa}){
 }
 
 // ============================================================
+// PDF EXPORT
+// ============================================================
+function exportPDF(type, data) {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W = 210, margin = 18, contentW = W - margin*2;
+  let y = margin;
+
+  // Colors
+  const accent = [124, 111, 247];
+  const dark = [17, 24, 39];
+  const gray = [107, 114, 128];
+  const lightGray = [243, 244, 246];
+
+  // Header
+  doc.setFillColor(accent[0],accent[1],accent[2]);
+  doc.rect(0, 0, W, 28, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(18);
+  doc.setFont('helvetica', 'bold');
+  doc.text('PEPA — Bohemia Reality s.r.o.', margin, 18);
+  doc.setFontSize(9);
+  doc.setFont('helvetica', 'normal');
+  doc.text(new Date().toLocaleDateString('cs-CZ', {day:'numeric',month:'long',year:'numeric'}), W - margin, 18, {align:'right'});
+  y = 38;
+
+  if(type === 'portfolio') {
+    doc.setTextColor(dark[0],dark[1],dark[2]);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Portfolio nemovitostí', margin, y); y += 10;
+
+    // Summary stats
+    const kProdeji = properties.filter(p=>p.status==='k prodeji').length;
+    const prodano = properties.filter(p=>p.status==='prodáno').length;
+    const rezervace = properties.filter(p=>p.status==='rezervace').length;
+    const totalValue = properties.filter(p=>p.status!=='pronájem').reduce((s,p)=>s+p.price,0);
+
+    doc.setFillColor(lightGray[0],lightGray[1],lightGray[2]);
+    doc.rect(margin, y, contentW, 18, 'F');
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(accent[0],accent[1],accent[2]);
+    const stats = [
+      'K prodeji: '+kProdeji,
+      'Rezervace: '+rezervace,
+      'Prodáno: '+prodano,
+      'Celková hodnota: '+(totalValue/1000000).toFixed(1)+' M Kč'
+    ];
+    stats.forEach((s, i) => doc.text(s, margin + 8 + i * (contentW/4), y + 11));
+    y += 24;
+
+    // Table header
+    const cols = ['ID', 'Název', 'Status', 'Cena', 'm²', 'Agent'];
+    const colW = [18, 60, 22, 30, 14, 30];
+    doc.setFillColor(accent[0],accent[1],accent[2]);
+    doc.rect(margin, y, contentW, 8, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    let x = margin + 2;
+    cols.forEach((col, i) => { doc.text(col, x, y + 5.5); x += colW[i]; });
+    y += 8;
+
+    // Table rows
+    properties.forEach((p, idx) => {
+      if(y > 270) { doc.addPage(); y = margin; }
+      doc.setFillColor(...(idx % 2 === 0 ? [255,255,255] : lightGray));
+      doc.rect(margin, y, contentW, 7, 'F');
+      doc.setTextColor(dark[0],dark[1],dark[2]);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      x = margin + 2;
+      const row = [p.id, p.name.slice(0,28), p.status, p.price>=1000000?(p.price/1000000).toFixed(1)+' M':p.price.toLocaleString('cs'), String(p.size), p.agent.split(' ')[0]];
+      row.forEach((val, i) => { doc.text(val, x, y + 4.8); x += colW[i]; });
+      y += 7;
+    });
+
+  } else if(type === 'report') {
+    doc.setTextColor(dark[0],dark[1],dark[2]);
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Týdenní report — '+new Date().toLocaleDateString('cs-CZ', {week:'long'}), margin, y); y += 8;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(gray[0],gray[1],gray[2]);
+    doc.text(data?.period || 'Aktuální období', margin, y); y += 12;
+
+    // Highlights
+    if(data?.highlights?.length) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(dark[0],dark[1],dark[2]);
+      doc.text('Klíčové události', margin, y); y += 7;
+      data.highlights.forEach(h => {
+        doc.setFillColor(lightGray[0],lightGray[1],lightGray[2]);
+        doc.rect(margin, y-4, contentW, 7, 'F');
+        doc.setFillColor(accent[0],accent[1],accent[2]);
+        doc.rect(margin, y-4, 3, 7, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(dark[0],dark[1],dark[2]);
+        doc.text(h, margin + 6, y+0.5);
+        y += 9;
+      });
+      y += 4;
+    }
+
+    // Agents stats
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(dark[0],dark[1],dark[2]);
+    doc.text('Výkon agentů', margin, y); y += 8;
+    agents.forEach((agent, i) => {
+      doc.setFillColor(...(i%2===0?[255,255,255]:lightGray));
+      doc.rect(margin, y-5, contentW, 12, 'F');
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(dark[0],dark[1],dark[2]);
+      doc.text(agent.name, margin+3, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(gray[0],gray[1],gray[2]);
+      doc.text('Obchody: '+agent.deals+'  |  Leady: '+agent.leads+'  |  Tržby: '+(agent.revenue/1000000).toFixed(1)+' M Kč', margin+3, y+5);
+      y += 14;
+    });
+
+  } else if(type === 'chat') {
+    doc.setTextColor(dark[0],dark[1],dark[2]);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Export konverzace', margin, y); y += 6;
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(gray[0],gray[1],gray[2]);
+    doc.text(data?.title || 'Chat', margin, y); y += 10;
+
+    (data?.msgs || []).forEach(m => {
+      if(y > 265) { doc.addPage(); y = margin; }
+      const isUser = m.role === 'user';
+      doc.setFillColor(...(isUser ? accent : lightGray));
+      if(isUser) doc.setTextColor(255,255,255); else doc.setTextColor(dark[0],dark[1],dark[2]);
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'bold');
+      const label = isUser ? 'Vy' : 'PEPA';
+      doc.text(label, margin, y); y += 4;
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(m.content.slice(0,500), contentW);
+      lines.slice(0,8).forEach(line => {
+        if(y > 270) { doc.addPage(); y = margin; }
+        doc.setFillColor(...(isUser ? accent : lightGray));
+        doc.setTextColor(...(isUser ? [255,255,255] : dark));
+        doc.text(line, margin, y); y += 5;
+      });
+      y += 4;
+    });
+  }
+
+  // Footer
+  const pageCount = doc.getNumberOfPages();
+  for(let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFillColor(lightGray[0],lightGray[1],lightGray[2]);
+    doc.rect(0, 287, W, 10, 'F');
+    doc.setFontSize(7);
+    doc.setTextColor(gray[0],gray[1],gray[2]);
+    doc.text('Bohemia Reality s.r.o. · PEPA Back Office Agent · Strana '+i+'/'+pageCount, W/2, 293, {align:'center'});
+  }
+
+  const filename = type==='portfolio'?'portfolio-nemovitosti':type==='report'?'tydenny-report':'chat-export';
+  doc.save(filename+'-'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+function PDFModal({activeChat, onClose}) {
+  const [selected, setSelected] = useState('portfolio');
+  const [exporting, setExporting] = useState(false);
+
+  const options = [
+    {id:'portfolio', icon:'🏠', title:'Portfolio nemovitostí', desc:'Přehled všech 12 nemovitostí s cenami a statusy'},
+    {id:'report', icon:'📊', title:'Týdenní report', desc:'Výkon agentů, klíčové události, statistiky'},
+    {id:'chat', icon:'💬', title:'Export konverzace', desc:'Aktuální chat jako PDF dokument'},
+  ];
+
+  async function doExport() {
+    setExporting(true);
+    setTimeout(() => {
+      try {
+        const data = selected==='report' ? lastWeek : selected==='chat' ? activeChat : null;
+        exportPDF(selected, data);
+      } catch(e) { console.error(e); }
+      setExporting(false);
+      onClose();
+    }, 300);
+  }
+
+  return React.createElement('div',{className:'pdf-modal-overlay',onClick:e=>{if(e.target===e.currentTarget)onClose();}},
+    React.createElement('div',{className:'pdf-modal'},
+      React.createElement('h3',null,'📄 Export do PDF'),
+      React.createElement('p',null,'Vyber co chceš exportovat:'),
+      exporting&&React.createElement('div',{className:'pdf-progress'},React.createElement('span',{className:'spin'},'⟳'),' Generuji PDF…'),
+      React.createElement('div',{className:'pdf-options'},
+        options.map(o=>React.createElement('div',{key:o.id,className:'pdf-option'+(selected===o.id?' selected':''),onClick:()=>setSelected(o.id)},
+          React.createElement('span',{className:'pdf-option-icon'},o.icon),
+          React.createElement('div',null,
+            React.createElement('div',{className:'pdf-option-title'},o.title),
+            React.createElement('div',{className:'pdf-option-desc'},o.desc)
+          ),
+          selected===o.id&&React.createElement('span',{style:{marginLeft:'auto',color:'var(--accent)',fontSize:18}},'✓')
+        ))
+      ),
+      React.createElement('div',{className:'modal-actions'},
+        React.createElement('button',{className:'btn-secondary',onClick:onClose},'Zrušit'),
+        React.createElement('button',{className:'btn-primary',disabled:exporting,onClick:doExport},'⬇️ Stáhnout PDF')
+      )
+    )
+  );
+}
+
+// ============================================================
 // APP
 // ============================================================
 function App(){
@@ -1625,6 +1858,7 @@ function App(){
     return ()=>window.removeEventListener('beforeinstallprompt',handler);
   },[]);
   const [showSearch,setShowSearch]=useState(false);
+  const [showPDF,setShowPDF]=useState(false);
   const [searchQ,setSearchQ]=useState('');
   const [listening,setListening]=useState(false);
   const [shareToast,setShareToast]=useState(false);
@@ -1954,6 +2188,7 @@ function App(){
   const topbar=React.createElement('div',{className:'topbar'},
     React.createElement('div',{className:'topbar-title'},'Bohemia Reality',React.createElement('span',{className:'topbar-greeting'},'· Back Office')),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setShowSearch(true),title:'Hledat (Ctrl+K)'},'🔍'),
+    React.createElement('button',{className:'topbar-btn',onClick:()=>setShowPDF(true),title:'Export PDF'},'📄'),
     showInstall&&React.createElement('button',{className:'topbar-btn',title:'Přidat na plochu',onClick:async()=>{if(installPrompt){await installPrompt.prompt();setShowInstall(false);}},style:{background:'var(--accent)',color:'white',border:'none'}},'📲'),
     React.createElement('button',{className:'topbar-btn',onClick:()=>setTheme(t=>t==='light'?'dark':'light'),title:'Přepnout téma'},theme==='light'?'🌙':'☀️')
   );
@@ -1980,6 +2215,7 @@ function App(){
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
     showAddData&&React.createElement(AddDataModal,{onAdd:addData,onClose:()=>setShowAddData(false)}),
     showTemplate&&React.createElement(TemplateModal,{onSelect:(prompt)=>{openChat(prompt);},onClose:()=>setShowTemplate(false)}),
+    showPDF&&React.createElement(PDFModal,{activeChat,onClose:()=>setShowPDF(false)}),
     showSearch&&React.createElement('div',{className:'search-overlay',onClick:e=>{if(e.target===e.currentTarget)setShowSearch(false);}},
       React.createElement('div',{className:'search-box'},
         React.createElement('div',{className:'search-input-wrap'},
