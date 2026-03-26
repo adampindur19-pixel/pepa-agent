@@ -593,6 +593,35 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .msg-copy:hover{border-color:var(--accent-border);color:var(--accent)}
 .msg-copy.copied{color:var(--green);border-color:var(--green)}
 
+/* ===== PROPERTY MAP ===== */
+.map-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
+.map-container{height:500px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);position:relative}
+.map-container .leaflet-container{height:100%;width:100%;border-radius:var(--r)}
+.map-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.map-toolbar h1{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);flex:1}
+.map-filter-wrap{display:flex;gap:6px;flex-wrap:wrap}
+.map-filter-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:none;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.map-filter-btn:hover{border-color:var(--accent-border);color:var(--accent)}
+.map-filter-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.map-legend{display:flex;gap:16px;flex-wrap:wrap;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs)}
+.map-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.map-legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.map-prop-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.map-prop-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
+.map-prop-card:hover{border-color:var(--accent-border);transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.map-prop-card.active{border-color:var(--accent);background:var(--accent-dim)}
+.map-prop-status{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;margin-bottom:8px}
+.map-prop-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.map-prop-addr{font-size:12px;color:var(--text3);margin-bottom:8px}
+.map-prop-meta{display:flex;gap:12px}
+.map-prop-price{font-size:14px;font-weight:700;color:var(--accent)}
+.map-prop-size{font-size:12px;color:var(--text3)}
+.map-price-btn{font-size:11px;padding:3px 8px;border:1px solid var(--accent-border);border-radius:6px;background:none;color:var(--accent);cursor:pointer;transition:all .15s;margin-top:8px}
+.map-price-btn:hover{background:var(--accent);color:white}
+.map-katastr-btn{font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:6px;background:none;color:var(--text2);cursor:pointer;transition:all .15s;margin-top:8px;margin-left:6px;text-decoration:none;display:inline-block}
+.map-katastr-btn:hover{border-color:var(--accent-border);color:var(--accent)}
+@media(max-width:768px){.map-container{height:320px}.map-prop-list{grid-template-columns:1fr}}
+
 /* ===== TEAM CALENDAR ===== */
 .cal-view{flex:1;overflow-y:auto;padding:24px 28px;display:flex;flex-direction:column;gap:20px}
 .cal-view::-webkit-scrollbar{width:4px}
@@ -710,6 +739,8 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 @media(min-width:769px){.mobile-topbar{display:none!important}.sidebar-overlay{display:none!important}}
 @media(min-width:769px){.sidebar-overlay{display:none!important}.mobile-topbar{display:none!important}}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -734,6 +765,22 @@ function translateAuthError(msg) {
 // ============================================================
 // DATA
 // ============================================================
+// Property coordinates (lat, lng) for Prague area
+const propCoords = {
+  'NEM-001':[50.0755,14.4378], // Vinohrady
+  'NEM-002':[49.9947,14.5428], // Průhonice
+  'NEM-003':[50.0462,14.4030], // Smíchov
+  'NEM-004':[50.0875,14.4508], // Žižkov
+  'NEM-005':[50.1024,14.3927], // Dejvice
+  'NEM-006':[49.9947,14.5428], // Průhonice
+  'NEM-007':[50.1028,14.4472], // Holešovice
+  'NEM-008':[50.1265,14.5241], // Letňany
+  'NEM-009':[50.0612,14.4472], // Nusle
+  'NEM-010':[50.0560,14.4428], // Pankrác
+  'NEM-011':[49.7800,14.9200], // Sázava
+  'NEM-012':[50.0462,14.4030], // Smíchov
+};
+
 const properties = [
   {id:"NEM-001",name:"Byt 3+kk, Vinohrady",address:"Mánesova 45, Praha 2",type:"byt",size:82,price:8900000,status:"prodáno",agent:"Markéta Horáčková",reconstruction:"2019",energyClass:"B",notes:""},
   {id:"NEM-002",name:"Rodinný dům, Průhonice",address:"Kytínská 12, Průhonice",type:"dům",size:210,price:15500000,status:"k prodeji",agent:"Tomáš Novák",reconstruction:null,energyClass:"C",notes:"Chybí info o rekonstrukci a stáří střechy"},
@@ -1140,6 +1187,154 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
           React.createElement('span',{className:'alert-priority',style:{background:a.priority==='vysoká'?'var(--red-dim)':a.priority==='střední'?'var(--orange-dim)':'var(--green-dim)',color:a.priority==='vysoká'?'var(--red)':a.priority==='střední'?'var(--orange)':'var(--green)'}},a.priority)
         ))
       )
+    )
+  );
+}
+
+// ============================================================
+// PROPERTY MAP
+// ============================================================
+const STATUS_COLORS = {
+  'k prodeji': '#7C6FF7',
+  'prodáno': '#22C55E',
+  'rezervace': '#F59E0B',
+  'pronájem': '#3B82F6',
+};
+
+function PropertyMap({onAskPepa}) {
+  const mapRef = useRef(null);
+  const leafletMap = useRef(null);
+  const markersRef = useRef([]);
+  const [filterStatus, setFilterStatus] = useState('vše');
+  const [selectedProp, setSelectedProp] = useState(null);
+  const [priceAnalysis, setPriceAnalysis] = useState({});
+
+  const statuses = ['vše', 'k prodeji', 'rezervace', 'pronájem', 'prodáno'];
+
+  const filtered = filterStatus === 'vše' ? properties : properties.filter(p => p.status === filterStatus);
+
+  useEffect(() => {
+    if (!mapRef.current || leafletMap.current) return;
+    // Init map centered on Prague
+    const map = window.L.map(mapRef.current, {
+      center: [50.0755, 14.4378],
+      zoom: 11,
+      zoomControl: true,
+    });
+    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
+    }).addTo(map);
+    leafletMap.current = map;
+    return () => { if(leafletMap.current){leafletMap.current.remove();leafletMap.current=null;} };
+  }, []);
+
+  useEffect(() => {
+    if (!leafletMap.current) return;
+    // Clear existing markers
+    markersRef.current.forEach(m => m.remove());
+    markersRef.current = [];
+
+    filtered.forEach(prop => {
+      const coords = propCoords[prop.id];
+      if (!coords) return;
+      const color = STATUS_COLORS[prop.status] || '#6B7280';
+      const icon = window.L.divIcon({
+        html: '<div style="width:14px;height:14px;border-radius:50%;background:'+color+';border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3)"></div>',
+        className: '',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+      const marker = window.L.marker(coords, {icon})
+        .addTo(leafletMap.current)
+        .bindPopup('<b>'+prop.name+'</b><br>'+prop.address+'<br><span style="color:'+color+';font-weight:600">'+prop.status+'</span><br>'+(prop.price > 1000000 ? (prop.price/1000000).toFixed(1)+' M Kč' : prop.price.toLocaleString('cs-CZ')+' Kč'));
+      marker.on('click', () => setSelectedProp(prop));
+      markersRef.current.push(marker);
+    });
+  }, [filtered]);
+
+  function getPriceAdvice(prop) {
+    const market = marketPrices.find(m => prop.address.includes(m.locality.split(' — ')[0].replace('Praha ','P')));
+    if (!market) return null;
+    const ourM2 = Math.round(prop.price / prop.size);
+    const diff = ((ourM2 - market.avgPriceM2) / market.avgPriceM2 * 100).toFixed(1);
+    return {ourM2, marketM2: market.avgPriceM2, diff, locality: market.locality};
+  }
+
+  function formatPrice(p) {
+    return p >= 1000000 ? (p/1000000).toFixed(2).replace('.',',')+' M Kč' : p.toLocaleString('cs-CZ')+' Kč';
+  }
+
+  return React.createElement('div',{className:'map-view'},
+    React.createElement('div',{className:'map-toolbar'},
+      React.createElement('h1',null,'Mapa nemovitostí'),
+      React.createElement('button',{className:'btn-secondary',style:{padding:'8px 14px',fontSize:12},
+        onClick:()=>onAskPepa('Analyzuj naše portfolio nemovitostí. Které jsou nejdéle v nabídce? Které jsou předražené podle tržních cen?')
+      },'💬 Zeptat PEPU'),
+      React.createElement('button',{className:'btn-primary',style:{padding:'8px 16px',fontSize:13},
+        onClick:()=>onAskPepa('Navrhni cenovou strategii pro naše nemovitosti k prodeji na základě tržních dat.')
+      },'💰 Navrhnout ceny')
+    ),
+    // Filter buttons
+    React.createElement('div',{className:'map-filter-wrap'},
+      statuses.map(s=>React.createElement('button',{
+        key:s, className:'map-filter-btn'+(filterStatus===s?' active':''),
+        onClick:()=>setFilterStatus(s),
+        style:{borderColor: s!=='vše'&&filterStatus!==s ? STATUS_COLORS[s]||'var(--border)' : undefined}
+      }, s==='vše'?'Vše ('+properties.length+')':s+' ('+(properties.filter(p=>p.status===s).length)+')'))
+    ),
+    // Map
+    React.createElement('div',{className:'map-container'},
+      React.createElement('div',{ref:mapRef,style:{height:'100%',width:'100%'}})
+    ),
+    // Legend
+    React.createElement('div',{className:'map-legend'},
+      Object.entries(STATUS_COLORS).map(([status,color])=>
+        React.createElement('div',{key:status,className:'map-legend-item'},
+          React.createElement('div',{className:'map-legend-dot',style:{background:color}}),
+          status
+        )
+      )
+    ),
+    // Property cards
+    React.createElement('div',{className:'map-prop-list'},
+      filtered.map(prop=>{
+        const priceAdv = getPriceAdvice(prop);
+        return React.createElement('div',{
+          key:prop.id,
+          className:'map-prop-card'+(selectedProp?.id===prop.id?' active':''),
+          onClick:()=>{
+            setSelectedProp(prop);
+            const coords=propCoords[prop.id];
+            if(coords&&leafletMap.current) leafletMap.current.setView(coords,14);
+          }
+        },
+          React.createElement('div',{className:'map-prop-status',style:{background:(STATUS_COLORS[prop.status]||'#6B7280')+'22',color:STATUS_COLORS[prop.status]||'#6B7280'}},
+            React.createElement('div',{style:{width:7,height:7,borderRadius:'50%',background:STATUS_COLORS[prop.status]||'#6B7280'}}),
+            prop.status
+          ),
+          React.createElement('div',{className:'map-prop-name'},prop.name),
+          React.createElement('div',{className:'map-prop-addr'},'📍 '+prop.address),
+          React.createElement('div',{className:'map-prop-meta'},
+            React.createElement('span',{className:'map-prop-price'},formatPrice(prop.price)),
+            React.createElement('span',{className:'map-prop-size'},prop.size+' m²')
+          ),
+          priceAdv&&React.createElement('div',{style:{fontSize:11,marginTop:6,color:Number(priceAdv.diff)>5?'var(--red)':Number(priceAdv.diff)<-5?'var(--green)':'var(--text3)'}},
+            (Number(priceAdv.diff)>0?'↑ ':'↓ ')+Math.abs(priceAdv.diff)+'% oproti trhu ('+priceAdv.marketM2.toLocaleString('cs-CZ')+' Kč/m²)'
+          ),
+          React.createElement('div',{style:{display:'flex',gap:4,marginTop:8,flexWrap:'wrap'}},
+            React.createElement('button',{className:'map-price-btn',
+              onClick:e=>{e.stopPropagation();onAskPepa('Navrhni optimální cenu pro '+prop.name+' ('+prop.id+'). Porovnej s tržními daty a doporuč konkrétní cenu.');}
+            },'💰 Navrhni cenu'),
+            React.createElement('a',{
+              className:'map-katastr-btn',
+              href:'https://nahlizenidokn.cuzk.cz/VyhledatParcelu.aspx?rezim=nad&string='+encodeURIComponent(prop.address),
+              target:'_blank',rel:'noopener noreferrer',
+              onClick:e=>e.stopPropagation()
+            },'🏛️ Katastr')
+          )
+        );
+      })
     )
   );
 }
@@ -1552,6 +1747,9 @@ function App(){
         React.createElement('button',{className:`sidebar-btn${view==='calendar'?' active':''}`,onClick:()=>{setView('calendar');setSidebarOpen(false);},title:'Kalendář'},
           '📅',React.createElement('span',null,'Kalendář')
         ),
+        React.createElement('button',{className:`sidebar-btn${view==='map'?' active':''}`,onClick:()=>{setView('map');setSidebarOpen(false);},title:'Mapa'},
+          '🗺️',React.createElement('span',null,'Mapa')
+        ),
                 // Chat list
       React.createElement('div',{className:'chat-list-panel'},
         React.createElement('div',{className:'chat-list-label'},'Konverzace',React.createElement('button',{onClick:newChat,style:{background:'none',border:'none',color:'rgba(255,255,255,.3)',cursor:'pointer',fontSize:14}},'+')
@@ -1684,6 +1882,7 @@ function App(){
       view==='home'?React.createElement(HomeDashboard,{user,tasks,onAddTask:addTask,onToggleTask:toggleTask,onDeleteTask:deleteTask,onOpenChat:openChat}):
       view==='tasks'?tasksView:
       view==='calendar'?React.createElement(TeamCalendar,{user,onAskPepa:(prompt)=>{openChat(prompt);}}):
+      view==='map'?React.createElement(PropertyMap,{onAskPepa:(prompt)=>{openChat(prompt);}}):
       chatView
     ),
     showAddQA&&React.createElement(AddQAModal,{onSave:addQA,onClose:()=>setShowAddQA(false)}),
