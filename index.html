@@ -1060,31 +1060,45 @@ Při e-mailech zkontroluj kalendář a navrhni volné termíny.`;
 async function callAgent(messages, onChunk) {
   // If onChunk provided, use streaming
   if(onChunk) {
-    const r = await fetch("/api/claude", {
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:SYSTEM_PROMPT,messages,stream:true})
-    });
-    if(!r.ok) throw new Error('API error '+r.status);
-    const reader = r.body.getReader();
-    const decoder = new TextDecoder();
-    let full = '';
-    while(true) {
-      const {done, value} = await reader.read();
-      if(done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      for(const line of lines) {
-        if(!line.startsWith('data: ')) continue;
-        const data = line.slice(6);
-        if(data === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(data);
-          const text = parsed.delta?.text || parsed.content?.[0]?.text || '';
-          if(text) { full += text; onChunk(full); }
-        } catch(e) {}
+    try {
+      const r = await fetch("/api/claude", {
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:SYSTEM_PROMPT,messages,stream:true})
+      });
+      if(!r.ok) {
+        const err = await r.json().catch(()=>({error:{message:'HTTP '+r.status}}));
+        throw new Error((err.error&&err.error.message)||'API error '+r.status);
       }
+      if(!r.body) throw new Error('Streaming not supported');
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+      while(true) {
+        const {done, value} = await reader.read();
+        if(done) break;
+        const chunk = decoder.decode(value, {stream:true});
+        const lines = chunk.split('\n');
+        for(const line of lines) {
+          if(!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if(data === '[DONE]' || !data) continue;
+          try {
+            const parsed = JSON.parse(data);
+            // Handle different event types
+            if(parsed.type === 'content_block_delta') {
+              const text = parsed.delta&&parsed.delta.text || '';
+              if(text) { full += text; onChunk(full); }
+            } else if(parsed.type === 'message_delta') {
+              // end of stream
+            }
+          } catch(e) {}
+        }
+      }
+      return full || 'Prázdná odpověď.';
+    } catch(streamErr) {
+      // Fallback to non-streaming on error
+      console.warn('Streaming failed, falling back:', streamErr.message);
     }
-    return full || 'Prázdná odpověď.';
   }
   // Fallback non-streaming
   const r = await fetch("/api/claude", {
@@ -2798,6 +2812,32 @@ function App(){
     };
   },[searchQ,chats]);
 
+  // sendDirect - send with explicit chatId (for quick actions, openChat)
+  async function sendDirect(text, chatId) {
+    const t = text.trim();
+    if(!t || loading) return;
+    setError(''); setView('chat');
+    const newMsgs = [{role:'user', content:t}];
+    setChats(prev=>prev.map(c=>c.id===chatId?{...c,title:t.slice(0,32)+(t.length>32?'…':''),msgs:newMsgs}:c));
+    setLoading(true);
+    try {
+      setChats(prev=>prev.map(c=>c.id===chatId?{...c,msgs:[...newMsgs,{role:'assistant',content:''}]}:c));
+      const res = await callAgent(
+        newMsgs.map(m=>({role:m.role,content:m.content})),
+        (partial)=>{
+          setChats(prev=>prev.map(c=>{
+            if(c.id!==chatId) return c;
+            const msgs=[...c.msgs];
+            msgs[msgs.length-1]={role:'assistant',content:partial};
+            return {...c,msgs};
+          }));
+        }
+      );
+      setChats(prev=>prev.map(c=>c.id===chatId?{...c,msgs:[...newMsgs,{role:'assistant',content:res||'Prázdná odpověď.'}]}:c));
+    } catch(e) { setError('Chyba: '+e.message); }
+    finally { setLoading(false); }
+  }
+
   async function send(text){
     const t=(text||input).trim();if(!t||loading)return;
     setInput('');setError('');setView('chat');
@@ -2826,7 +2866,7 @@ function App(){
     finally{setLoading(false);setTimeout(()=>inputRef.current&&inputRef.current.focus(),100);}
   }
 
-  function openChat(prompt){const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,32),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>send(prompt),50);}
+  function openChat(prompt){const id=uid();setChats(prev=>[...prev,{id,title:prompt.slice(0,32),msgs:[]}]);setActiveChatId(id);setView('chat');setTimeout(()=>sendDirect(prompt,id),100);}
 
   async function handleFile(file){
     setShowUpload(false);setUploadProcessing(true);setUploadFileName(file.name);
@@ -2910,7 +2950,7 @@ function App(){
       // Quick actions
       React.createElement('div',{className:'qa-section'},
         React.createElement('div',{className:'qa-label'},'Rychlé akce',React.createElement('button',{onClick:()=>setShowAddQA(true)},'+'),React.createElement('button',{onClick:()=>setShowAddData(true)},'🗄️')),
-        (quickActions||[]).map(q=>React.createElement('button',{key:q.id,className:'qa-item',onClick:()=>{const id=uid();setChats(prev=>[...prev,{id,title:q.label,msgs:[]}]);setActiveChatId(id);setView('chat');setSidebarOpen(false);setTimeout(()=>send(q.prompt),50);}},
+        (quickActions||[]).map(q=>React.createElement('button',{key:q.id,className:'qa-item',onClick:()=>{const id=uid();setChats(prev=>[...prev,{id,title:q.label,msgs:[]}]);setActiveChatId(id);setView('chat');setSidebarOpen(false);setTimeout(()=>sendDirect(q.prompt,id),100);}},
           React.createElement('span',null,q.icon),
           React.createElement('span',{style:{flex:1,textAlign:'left',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},q.label),
           React.createElement('button',{className:'qa-del',onClick:e=>{e.stopPropagation();deleteQA(q.id);}},'-')
