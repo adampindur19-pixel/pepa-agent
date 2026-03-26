@@ -2938,8 +2938,9 @@ function App(){
         React.createElement('button',{className:`sidebar-btn${view==='analytics'?' active':''}`,onClick:()=>{setView('analytics');setSidebarOpen(false);},title:'Analýzy'},
           '📊',React.createElement('span',null,'Analýzy')
         ),
-        React.createElement('button',{className:'sidebar-btn',onClick:()=>setShowAddData(true),title:'Přidat data'},
-          '🗄️',React.createElement('span',null,'Přidat data')
+        React.createElement('div',{className:'sidebar-divider'}),
+        React.createElement('button',{className:'sidebar-btn',onClick:()=>setShowAddData(true),title:'Přidat nemovitost nebo klienta',style:{color:'rgba(255,255,255,.5)'}},
+          '➕',React.createElement('span',null,'Přidat data')
         ),
                 // Chat list
       React.createElement('div',{className:'chat-list-panel'},
