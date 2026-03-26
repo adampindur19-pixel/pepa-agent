@@ -1350,7 +1350,7 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
     React.createElement('div',{className:'welcome-banner'},
       React.createElement('div',{className:'welcome-left'},
         React.createElement('h1',null,(hour<12?'Dobré ráno':'Dobrý den')+', '+userName+'!'),
-        React.createElement('p',null,'Úterý, 25. března 2025 · Bohemia Reality s.r.o.')
+        React.createElement('p',null,new Date().toLocaleDateString('cs-CZ',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+' · Bohemia Reality s.r.o.')
       ),
       React.createElement('div',{className:'welcome-stats'},
         React.createElement('div',null,React.createElement('div',{className:'welcome-stat-val'},q1clients.length),React.createElement('div',{className:'welcome-stat-lbl'},'Klienti Q1')),
