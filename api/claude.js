@@ -1060,31 +1060,45 @@ Při e-mailech zkontroluj kalendář a navrhni volné termíny.`;
 async function callAgent(messages, onChunk) {
   // If onChunk provided, use streaming
   if(onChunk) {
-    const r = await fetch("/api/claude", {
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:SYSTEM_PROMPT,messages,stream:true})
-    });
-    if(!r.ok) throw new Error('API error '+r.status);
-    const reader = r.body.getReader();
-    const decoder = new TextDecoder();
-    let full = '';
-    while(true) {
-      const {done, value} = await reader.read();
-      if(done) break;
-      const chunk = decoder.decode(value);
-      const lines = chunk.split('\n');
-      for(const line of lines) {
-        if(!line.startsWith('data: ')) continue;
-        const data = line.slice(6);
-        if(data === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(data);
-          const text = parsed.delta?.text || parsed.content?.[0]?.text || '';
-          if(text) { full += text; onChunk(full); }
-        } catch(e) {}
+    try {
+      const r = await fetch("/api/claude", {
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({model:"claude-sonnet-4-6",max_tokens:1000,system:SYSTEM_PROMPT,messages,stream:true})
+      });
+      if(!r.ok) {
+        const err = await r.json().catch(()=>({error:{message:'HTTP '+r.status}}));
+        throw new Error((err.error&&err.error.message)||'API error '+r.status);
       }
+      if(!r.body) throw new Error('Streaming not supported');
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+      while(true) {
+        const {done, value} = await reader.read();
+        if(done) break;
+        const chunk = decoder.decode(value, {stream:true});
+        const lines = chunk.split('\n');
+        for(const line of lines) {
+          if(!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if(data === '[DONE]' || !data) continue;
+          try {
+            const parsed = JSON.parse(data);
+            // Handle different event types
+            if(parsed.type === 'content_block_delta') {
+              const text = parsed.delta&&parsed.delta.text || '';
+              if(text) { full += text; onChunk(full); }
+            } else if(parsed.type === 'message_delta') {
+              // end of stream
+            }
+          } catch(e) {}
+        }
+      }
+      return full || 'Prázdná odpověď.';
+    } catch(streamErr) {
+      // Fallback to non-streaming on error
+      console.warn('Streaming failed, falling back:', streamErr.message);
     }
-    return full || 'Prázdná odpověď.';
   }
   // Fallback non-streaming
   const r = await fetch("/api/claude", {
