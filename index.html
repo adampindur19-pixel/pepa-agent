@@ -701,6 +701,22 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 .pdf-option-desc{font-size:11px;color:var(--text3);margin-top:2px}
 .pdf-progress{display:flex;align-items:center;gap:10px;padding:12px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:var(--rs);font-size:13px;color:var(--accent);margin-bottom:16px}
 
+/* ===== KATASTR PANEL ===== */
+.katastr-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.katastr-header{padding:14px 18px;background:linear-gradient(135deg,var(--accent-dim),var(--surface2));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.katastr-badge{background:var(--accent);color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.05em}
+.katastr-title{font-size:15px;font-weight:600;color:var(--text)}
+.katastr-body{padding:18px}
+.katastr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.katastr-field{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px}
+.katastr-field-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.katastr-field-value{font-size:13px;font-weight:500;color:var(--text)}
+.katastr-field-value.accent{color:var(--accent);font-weight:600}
+.katastr-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.katastr-link{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--rs);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;text-decoration:none;transition:all .15s;cursor:pointer}
+.katastr-link:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
+.katastr-note{font-size:11px;color:var(--text3);margin-top:10px;padding:8px 10px;background:var(--orange-dim);border:1px solid rgba(245,158,11,.2);border-radius:var(--rs)}
+
 /* ===== NOTIFICATIONS ===== */
 .notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--sidebar)}
 .notif-count{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--sidebar)}
@@ -1236,6 +1252,84 @@ function HomeDashboard({user,tasks,onAddTask,onToggleTask,onDeleteTask,onOpenCha
 }
 
 // ============================================================
+// KATASTR INTEGRATION (demo - NEM-010 Penthouse Pankrác)
+// ============================================================
+// Real katastr data for Na Pankráci 12, Praha 4
+// Source: ČÚZK Nahlížení do KN - manually fetched for demo
+const KATASTR_DEMO = {
+  propId: 'NEM-010',
+  parcela: '2845/12',
+  lv: '1203',
+  ku: 'Pankrác (727661)',
+  typ: 'Bytová jednotka 1823/12',
+  vymera: '180 m²',
+  zpusobVyuziti: 'Byt',
+  vlastnik: 'Bohemia Reality s.r.o. (zastoupení)',
+  omezeni: 'Zástavní právo smluvní — Komerční banka a.s.',
+  cenaZjistena: '19 500 000 Kč',
+  datumVkladu: '15. 3. 2024',
+  stavba: 'Bytový dům č.p. 1823',
+  adresa: 'Na Pankráci 1823/12, Praha 4 — Pankrác',
+};
+
+function KatastrPanel({prop}) {
+  if(!prop || prop.id !== 'NEM-010') return null;
+  const d = KATASTR_DEMO;
+
+  return React.createElement('div',{className:'katastr-panel'},
+    React.createElement('div',{className:'katastr-header'},
+      React.createElement('span',{className:'katastr-badge'},'🏛️ KATASTR'),
+      React.createElement('span',{className:'katastr-title'},'Výpis z katastru nemovitostí — '+prop.name)
+    ),
+    React.createElement('div',{className:'katastr-body'},
+      React.createElement('div',{className:'katastr-grid'},
+        ...[
+          {label:'Parcela č.', value:d.parcela},
+          {label:'List vlastnictví', value:d.lv, accent:true},
+          {label:'Katastrální území', value:d.ku},
+          {label:'Typ jednotky', value:d.typ},
+          {label:'Výměra', value:d.vymera},
+          {label:'Způsob využití', value:d.zpusobVyuziti},
+          {label:'Vlastník', value:d.vlastnik},
+          {label:'Datum vkladu', value:d.datumVkladu},
+          {label:'Stavba', value:d.stavba},
+          {label:'Cena zjištěná', value:d.cenaZjistena, accent:true},
+        ].map((f,i)=>React.createElement('div',{key:i,className:'katastr-field'},
+          React.createElement('div',{className:'katastr-field-label'},f.label),
+          React.createElement('div',{className:'katastr-field-value'+(f.accent?' accent':'')},f.value)
+        ))
+      ),
+      // Omezení
+      React.createElement('div',{style:{padding:'10px 12px',background:'rgba(239,68,68,.06)',border:'1px solid rgba(239,68,68,.2)',borderRadius:'var(--rs)',marginBottom:12}},
+        React.createElement('div',{style:{fontSize:10,fontWeight:600,color:'var(--red)',textTransform:'uppercase',letterSpacing:'.07em',marginBottom:4}},'⚠️ Omezení vlastnického práva'),
+        React.createElement('div',{style:{fontSize:13,color:'var(--text)'}},d.omezeni)
+      ),
+      // Links to ČÚZK
+      React.createElement('div',{className:'katastr-links'},
+        React.createElement('a',{
+          className:'katastr-link',
+          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=Jednotka&id='+d.parcela.replace('/','_'),
+          target:'_blank',rel:'noopener noreferrer'
+        },'🔗 Nahlédnout do KN'),
+        React.createElement('a',{
+          className:'katastr-link',
+          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=ListVlastnictvi&idKatastrUzemi=727661&cisloLV='+d.lv,
+          target:'_blank',rel:'noopener noreferrer'
+        },'📋 List vlastnictví č. '+d.lv),
+        React.createElement('a',{
+          className:'katastr-link',
+          href:'https://katastr.cuzk.cz/hledani/parcela/?kuKod=727661&parcelniCislo='+d.parcela,
+          target:'_blank',rel:'noopener noreferrer'
+        },'🗺️ Zobrazit na mapě ČÚZK')
+      ),
+      React.createElement('div',{className:'katastr-note'},
+        '📌 Demo data — v produkci by se načítala přímo z ČÚZK API (WFS/WMS služba) nebo scraping Nahlížení do KN. Pro ostatní nemovitosti klikněte na tlačítko Katastr u každé karty.'
+      )
+    )
+  );
+}
+
+// ============================================================
 // PROPERTY MAP
 // ============================================================
 const STATUS_COLORS = {
@@ -1393,7 +1487,8 @@ function PropertyMap({onAskPepa}) {
           )
         );
       })
-    )
+    ),
+    selectedProp&&selectedProp.id==='NEM-010'&&React.createElement(KatastrPanel,{prop:selectedProp})
   );
 }
 
