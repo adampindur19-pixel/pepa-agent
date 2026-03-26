@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"/>
+<title>PEPA — Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --font: 'Sora', sans-serif;
+  --font-display: 'Playfair Display', serif;
+
+  /* Light mode */
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --surface2: #F8F9FB;
+  --sidebar-bg: #0F1117;
+  --sidebar-text: rgba(255,255,255,.55);
+  --sidebar-active: #FFFFFF;
+  --sidebar-active-bg: rgba(255,255,255,.1);
+  --sidebar-icon: rgba(255,255,255,.4);
+  --text: #0F1117;
+  --text2: #4B5563;
+  --text3: #9CA3AF;
+  --border: rgba(0,0,0,.07);
+  --border2: rgba(0,0,0,.04);
+  --accent: #5B5FEF;
+  --accent2: #7C7FF5;
+  --accent-dim: rgba(91,95,239,.08);
+  --accent-border: rgba(91,95,239,.25);
+  --green: #10B981;
+  --green-dim: rgba(16,185,129,.1);
+  --red: #EF4444;
+  --red-dim: rgba(239,68,68,.1);
+  --orange: #F59E0B;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,.12);
+  --r: 16px;
+  --rs: 10px;
+  --rx: 20px;
+}
+[data-theme="dark"] {
+  --bg: #0C0D14;
+  --surface: #13141F;
+  --surface2: #1A1B28;
+  --sidebar-bg: #080910;
+  --sidebar-text: rgba(255,255,255,.45);
+  --sidebar-active: #FFFFFF;
+  --sidebar-active-bg: rgba(255,255,255,.08);
+  --sidebar-icon: rgba(255,255,255,.3);
+  --text: #F1F2F8;
+  --text2: #9CA3AF;
+  --text3: #4B5563;
+  --border: rgba(255,255,255,.06);
+  --border2: rgba(255,255,255,.03);
+  --accent: #6366F1;
+  --accent2: #818CF8;
+  --accent-dim: rgba(99,102,241,.12);
+  --accent-border: rgba(99,102,241,.3);
+  --shadow: 0 1px 3px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.4);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,.5);
+}
+
+/* ===== RESET ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+button{font-family:var(--font);cursor:pointer}
+input{font-family:var(--font)}
+
+/* ===== LAYOUT ===== */
+#root{display:flex;height:100dvh;overflow:hidden}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:72px;background:var(--sidebar-bg);
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0;gap:4px;flex-shrink:0;
+  transition:width .25s cubic-bezier(.4,0,.2,1);
+  position:relative;z-index:10;overflow:hidden;
+}
+.sidebar.expanded{width:220px;align-items:stretch;padding:20px 12px}
+
+.sidebar-logo{
+  width:40px;height:40px;border-radius:12px;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;margin-bottom:16px;
+}
+.sidebar.expanded .sidebar-logo{width:100%;border-radius:12px;padding:0 12px;gap:10px;font-size:15px;font-weight:600;color:white;height:44px}
+
+.nav-item{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--sidebar-icon);font-size:18px;
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+  position:relative;border:none;background:none;
+}
+.nav-item:hover{background:var(--sidebar-active-bg);color:var(--sidebar-text)}
+.nav-item.active{background:var(--sidebar-active-bg);color:var(--sidebar-active)}
+.nav-item .nav-label{display:none;font-size:13px;font-weight:500;white-space:nowrap}
+.sidebar.expanded .nav-item{width:100%;padding:0 12px;justify-content:flex-start;gap:12px;height:40px;border-radius:10px}
+.sidebar.expanded .nav-item .nav-label{display:block}
+
+.nav-divider{width:32px;height:1px;background:rgba(255,255,255,.06);margin:6px auto;flex-shrink:0}
+.sidebar.expanded .nav-divider{width:100%}
+
+.sidebar-bottom{margin-top:auto;width:100%}
+.avatar-btn{
+  width:44px;height:44px;border-radius:12px;
+  background:rgba(255,255,255,.08);border:none;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;margin:0 auto;flex-shrink:0;
+}
+.avatar-circle{width:32px;height:32px;border-radius:50%;background:var(--accent);color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.sidebar.expanded .avatar-btn{width:100%;padding:0 10px;justify-content:flex-start;gap:10px;height:44px;border-radius:10px;background:rgba(255,255,255,.06)}
+.avatar-name{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);display:none}
+.sidebar.expanded .avatar-name{display:block}
+.logout-btn{margin-left:auto;width:28px;height:28px;border-radius:8px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.2);color:#F87171;font-size:13px;display:none;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.sidebar.expanded .logout-btn{display:flex}
+.logout-btn:hover{background:rgba(239,68,68,.3);color:#EF4444}
+
+/* ===== TOPBAR ===== */
+.topbar{
+  height:60px;display:flex;align-items:center;
+  padding:0 24px;gap:12px;flex-shrink:0;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+}
+.topbar-title{font-family:var(--font-display);font-size:20px;color:var(--text);flex:1}
+.topbar-sub{font-size:12px;color:var(--text3);margin-top:1px}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;
+  background:none;border:1px solid var(--border);
+  color:var(--text2);font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;position:relative;
+}
+.icon-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--accent-border)}
+.icon-btn .badge{position:absolute;top:-4px;right:-4px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:white;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid var(--surface)}
+
+/* ===== MAIN ===== */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.content{flex:1;overflow-y:auto;padding:24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ===== CARDS ===== */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card-sm{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:16px;box-shadow:var(--shadow)}
+
+/* ===== KPI CARDS ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.kpi-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:18px 20px;
+  box-shadow:var(--shadow);transition:all .2s;cursor:default;
+}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.kpi-card.accent{background:var(--accent);border-color:var(--accent)}
+.kpi-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.kpi-card.accent .kpi-label{color:rgba(255,255,255,.7)}
+.kpi-value{font-family:var(--font-display);font-size:30px;color:var(--text);line-height:1;margin-bottom:4px}
+.kpi-card.accent .kpi-value{color:white}
+.kpi-sub{font-size:12px;color:var(--text3)}
+.kpi-card.accent .kpi-sub{color:rgba(255,255,255,.6)}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;margin-top:8px;padding:2px 8px;border-radius:20px}
+.kpi-trend.up{background:var(--green-dim);color:var(--green)}
+.kpi-trend.down{background:var(--red-dim);color:var(--red)}
+
+/* ===== GRID ===== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.grid-3{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.section-title{font-size:15px;font-weight:600;color:var(--text)}
+.section-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.view-all{font-size:12px;color:var(--accent);font-weight:500;background:none;border:none;cursor:pointer}
+
+/* ===== PROPERTY LIST ===== */
+.prop-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border2)}
+.prop-row:last-child{border-bottom:none}
+.prop-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.prop-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.prop-addr{font-size:11px;color:var(--text3)}
+.prop-price{font-size:13px;font-weight:600;color:var(--text);text-align:right}
+.prop-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px}
+
+/* ===== STATUS BADGES ===== */
+.badge-sale{background:rgba(91,95,239,.1);color:var(--accent)}
+.badge-sold{background:var(--green-dim);color:var(--green)}
+.badge-reserve{background:rgba(245,158,11,.1);color:var(--orange)}
+.badge-rent{background:rgba(59,130,246,.1);color:#3B82F6}
+
+/* ===== AGENT CARDS ===== */
+.agent-card{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border2)}
+.agent-card:last-child{border-bottom:none}
+.agent-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:13px;font-weight:700;flex-shrink:0}
+.agent-name{font-size:13px;font-weight:600;color:var(--text)}
+.agent-stat{font-size:11px;color:var(--text3);margin-top:2px}
+.agent-revenue{font-size:14px;font-weight:700;color:var(--text);margin-left:auto}
+
+/* ===== CHAT ===== */
+.chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+.messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:16px}
+.messages::-webkit-scrollbar{width:3px}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+.msg{display:flex;gap:10px;max-width:720px}
+.msg.user{flex-direction:row-reverse;align-self:flex-end}
+.msg-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;border:1px solid var(--border)}
+.msg.assistant .msg-icon{background:var(--accent);border-color:var(--accent);color:white}
+.msg.user .msg-icon{background:var(--surface);color:var(--text2)}
+.msg-bubble{padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6;color:var(--text);max-width:580px}
+.msg.assistant .msg-bubble{background:var(--surface);border:1px solid var(--border);border-radius:4px 16px 16px 16px}
+.msg.user .msg-bubble{background:var(--accent);color:white;border-radius:16px 4px 16px 16px}
+.chat-input-area{padding:16px 24px;border-top:1px solid var(--border);background:var(--surface)}
+.chat-input-wrap{display:flex;align-items:flex-end;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:10px 14px;transition:border-color .15s}
+.chat-input-wrap:focus-within{border-color:var(--accent-border)}
+.chat-textarea{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:15px;resize:none;max-height:100px;line-height:1.5}
+.chat-textarea::placeholder{color:var(--text3)}
+.send-btn{width:36px;height:36px;border-radius:10px;background:var(--accent);border:none;color:white;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.send-btn:hover{background:var(--accent2);transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;transform:none}
+.chat-hints{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 24px}
+.hint{padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .15s;text-align:left}
+.hint:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
+.thinking{display:flex;gap:4px;padding:4px 0}
+.thinking span{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:bounce .8s infinite}
+.thinking span:nth-child(2){animation-delay:.15s}
+.thinking span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* ===== TASKS ===== */
+.task-item{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;transition:all .15s}
+.task-item:hover{border-color:var(--accent-border)}
+.task-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.task-check.done{background:var(--green);border-color:var(--green);color:white;font-size:11px}
+.task-text{font-size:14px;color:var(--text);flex:1}
+.task-text.done{text-decoration:line-through;color:var(--text3)}
+.task-date{font-size:11px;color:var(--text3)}
+.task-del{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;opacity:0;transition:opacity .15s;line-height:1}
+.task-item:hover .task-del{opacity:1}
+.task-input-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.task-inp{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:15px;outline:none;font-family:var(--font);transition:border-color .15s}
+.task-inp:focus{border-color:var(--accent-border)}
+.task-inp::placeholder{color:var(--text3)}
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle{width:52px;height:28px;border-radius:14px;background:var(--surface2);border:1px solid var(--border);position:relative;cursor:pointer;transition:all .2s}
+.theme-toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--accent);transition:transform .2s;display:flex;align-items:center;justify-content:center;font-size:11px}
+[data-theme="dark"] .theme-toggle-thumb{transform:translateX(24px)}
+
+/* ===== EMPTY STATE ===== */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-icon{font-size:36px;margin-bottom:12px}
+.empty-title{font-size:16px;font-weight:600;color:var(--text2);margin-bottom:6px}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .sidebar{width:56px}
+  .sidebar.expanded{width:75vw;max-width:260px;position:fixed;top:0;left:0;height:100dvh;z-index:200}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:199}
+  .sidebar-overlay.show{display:block}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .content{padding:14px}
+  .topbar{padding:0 14px;height:52px}
+  .chat-hints{grid-template-columns:1fr}
+}
+@media(min-width:769px){
+  .hamburger-btn{display:none}
+}
+
+/* ===== MISC ===== */
+.page-title{font-family:var(--font-display);font-size:26px;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.btn-primary{padding:10px 20px;background:var(--accent);color:white;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-secondary{padding:10px 20px;background:none;color:var(--text2);border:1px solid var(--border);border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .15s}
+.btn-secondary:hover{border-color:var(--accent-border);color:var(--accent)}
+.hamburger-btn{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px;display:flex;align-items:center}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.animate{animation:fadeUp .4s ease forwards}
+.animate-delay-1{animation-delay:.05s;opacity:0}
+.animate-delay-2{animation-delay:.1s;opacity:0}
+.animate-delay-3{animation-delay:.15s;opacity:0}
+.animate-delay-4{animation-delay:.2s;opacity:0}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {useState,useEffect,useRef,useCallback}=React;
+const {AreaChart,Area,BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,Cell,PieChart,Pie}=Recharts;
+
+// ── DATA ──────────────────────────────────────────────
+const AGENTS=[
+  {name:'Markéta Horáčková',initials:'MH',color:'#5B5FEF',deals:8,leads:24,revenue:18500000},
+  {name:'Tomáš Novák',initials:'TN',color:'#10B981',deals:6,leads:18,revenue:14200000},
+  {name:'Jana Veselá',initials:'JV',color:'#F59E0B',deals:5,leads:15,revenue:11800000},
+];
+const PROPERTIES=[
+  {id:'NEM-001',name:'Byt 3+kk, Vinohrady',addr:'Praha 2',price:8900000,status:'k prodeji',size:82},
+  {id:'NEM-002',name:'Rodinný dům, Průhonice',addr:'Průhonice',price:15500000,status:'k prodeji',size:210},
+  {id:'NEM-003',name:'Kancelář, Smíchov',addr:'Praha 5',price:42000,status:'pronájem',size:155},
+  {id:'NEM-004',name:'Byt 1+kk, Žižkov',addr:'Praha 3',price:4200000,status:'prodáno',size:38},
+  {id:'NEM-005',name:'Byt 2+1, Dejvice',addr:'Praha 6',price:7100000,status:'rezervace',size:65},
+  {id:'NEM-010',name:'Penthouse, Pankrác',addr:'Praha 4',price:19500000,status:'k prodeji',size:180},
+];
+const LEADS=[
+  {month:'Říj',leads:38,prodeje:4},
+  {month:'Lis',leads:45,prodeje:5},
+  {month:'Pro',leads:41,prodeje:3},
+  {month:'Led',leads:52,prodeje:6},
+  {month:'Úno',leads:58,prodeje:7},
+  {month:'Bře',leads:63,prodeje:8},
+];
+const STATUS_COLOR={'k prodeji':'#5B5FEF','prodáno':'#10B981','rezervace':'#F59E0B','pronájem':'#3B82F6'};
+const STATUS_CLASS={'k prodeji':'badge-sale','prodáno':'badge-sold','rezervace':'badge-reserve','pronájem':'badge-rent'};
+
+function fmt(p){return p>=1000000?(p/1000000).toFixed(2).replace('.',',')+' M Kč':p.toLocaleString('cs-CZ')+' Kč/měs'}
+
+// ── COMPONENTS ────────────────────────────────────────
+function Sidebar({view,setView,theme,setTheme,sidebarOpen,setSidebarOpen}){
+  const navItems=[
+    {id:'home',icon:'⊞',label:'Přehled'},
+    {id:'chat',icon:'💬',label:'Chat s PEPOU'},
+    {id:'tasks',icon:'✅',label:'Úkoly'},
+    {id:'analytics',icon:'📊',label:'Analýzy'},
+    {id:'map',icon:'🗺️',label:'Nemovitosti'},
+  ];
+  return React.createElement(React.Fragment,null,
+    // Overlay
+    React.createElement('div',{
+      className:'sidebar-overlay'+(sidebarOpen?' show':''),
+      onClick:()=>setSidebarOpen(false)
+    }),
+    React.createElement('aside',{className:'sidebar'+(sidebarOpen?' expanded':'')},
+      // Logo
+      React.createElement('div',{className:'sidebar-logo'},
+        sidebarOpen?React.createElement(React.Fragment,null,'🏢 ','PEPA'):'🏢'
+      ),
+      // Nav
+      ...navItems.map(item=>React.createElement('button',{
+        key:item.id,
+        className:'nav-item'+(view===item.id?' active':''),
+        onClick:()=>{setView(item.id);setSidebarOpen(false);},
+        title:item.label
+      },
+        React.createElement('span',null,item.icon),
+        React.createElement('span',{className:'nav-label'},item.label)
+      )),
+      React.createElement('div',{className:'nav-divider'}),
+      // Bottom
+      React.createElement('div',{className:'sidebar-bottom'},
+        React.createElement('button',{className:'avatar-btn',title:'Profil'},
+          React.createElement('div',{className:'avatar-circle'},'A'),
+          React.createElement('span',{className:'avatar-name'},'Adam Novotný'),
+          React.createElement('button',{className:'logout-btn',title:'Odhlásit se'},'⏻')
+        )
+      )
+    )
+  );
+}
+
+function Topbar({view,setSidebarOpen,theme,setTheme}){
+  const titles={home:'Přehled',chat:'Chat s PEPOU',tasks:'Úkoly',analytics:'Analýzy',map:'Nemovitosti'};
+  return React.createElement('header',{className:'topbar'},
+    React.createElement('button',{className:'hamburger-btn',onClick:()=>setSidebarOpen(v=>!v)},'☰'),
+    React.createElement('div',{style:{flex:1}},
+      React.createElement('div',{className:'topbar-title'},titles[view]||'PEPA'),
+      React.createElement('div',{className:'topbar-sub'},'Bohemia Reality s.r.o.')
+    ),
+    React.createElement('div',{className:'topbar-actions'},
+      React.createElement('button',{className:'icon-btn',title:'Notifikace'},
+        '🔔',
+        React.createElement('span',{className:'badge'},'3')
+      ),
+      React.createElement('button',{className:'icon-btn',title:'Export PDF'},'📄'),
+      // Theme toggle
+      React.createElement('div',{
+        className:'theme-toggle',
+        onClick:()=>setTheme(t=>t==='light'?'dark':'light'),
+        title:'Přepnout téma'
+      },
+        React.createElement('div',{className:'theme-toggle-thumb'},theme==='light'?'☀️':'🌙')
+      )
+    )
+  );
+}
+
+function HomeView({setView,setSendPrompt}){
+  const totalRevenue=AGENTS.reduce((s,a)=>s+a.revenue,0);
+  const CustomTooltip=({active,payload,label})=>{
+    if(!active||!payload?.length)return null;
+    return React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 14px',fontSize:12,boxShadow:'var(--shadow-lg)'}},
+      React.createElement('p',{style:{color:'var(--accent)',fontWeight:600,marginBottom:4}},label),
+      payload.map((e,i)=>React.createElement('p',{key:i,style:{color:e.color,margin:'2px 0'}},e.name+': ',React.createElement('strong',null,e.value)))
+    );
+  };
+  return React.createElement('div',{className:'content'},
+    // KPI
+    React.createElement('div',{className:'kpi-grid'},
+      React.createElement('div',{className:'kpi-card accent animate'},
+        React.createElement('div',{className:'kpi-label'},'Celkové tržby'),
+        React.createElement('div',{className:'kpi-value'},(totalRevenue/1000000).toFixed(1)+' M'),
+        React.createElement('div',{className:'kpi-sub'},'Kč · Q1 2025'),
+        React.createElement('div',{className:'kpi-trend up'},'↑ +12%')
+      ),
+      React.createElement('div',{className:'kpi-card animate animate-delay-1'},
+        React.createElement('div',{className:'kpi-label'},'Uzavřené obchody'),
+        React.createElement('div',{className:'kpi-value'},AGENTS.reduce((s,a)=>s+a.deals,0)),
+        React.createElement('div',{className:'kpi-sub'},'nemovitostí prodáno'),
+        React.createElement('div',{className:'kpi-trend up'},'↑ +3 vs Q4')
+      ),
+      React.createElement('div',{className:'kpi-card animate animate-delay-2'},
+        React.createElement('div',{className:'kpi-label'},'Aktivní portfolio'),
+        React.createElement('div',{className:'kpi-value'},PROPERTIES.filter(p=>p.status==='k prodeji').length),
+        React.createElement('div',{className:'kpi-sub'},'nemovitostí k prodeji'),
+        React.createElement('div',{className:'kpi-trend down'},'↓ -2 vs minulý měsíc')
+      ),
+      React.createElement('div',{className:'kpi-card animate animate-delay-3'},
+        React.createElement('div',{className:'kpi-label'},'Aktivní leady'),
+        React.createElement('div',{className:'kpi-value'},'63'),
+        React.createElement('div',{className:'kpi-sub'},'tento měsíc'),
+        React.createElement('div',{className:'kpi-trend up'},'↑ +8%')
+      )
+    ),
+    // Chart + Properties
+    React.createElement('div',{className:'grid-3 animate animate-delay-2'},
+      // Lead chart
+      React.createElement('div',{className:'card'},
+        React.createElement('div',{className:'section-header'},
+          React.createElement('div',null,
+            React.createElement('div',{className:'section-title'},'Vývoj leadů a prodejů'),
+            React.createElement('div',{className:'section-sub'},'Posledních 6 měsíců')
+          ),
+          React.createElement('button',{className:'view-all',onClick:()=>setView('analytics')},'Zobrazit vše →')
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
+            React.createElement('defs',null,
+              React.createElement('linearGradient',{id:'grad1',x1:'0',y1:'0',x2:'0',y2:'1'},
+                React.createElement('stop',{offset:'5%',stopColor:'#5B5FEF',stopOpacity:.15}),
+                React.createElement('stop',{offset:'95%',stopColor:'#5B5FEF',stopOpacity:0})
+              )
+            ),
+            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad1)',strokeWidth:2})
+          )
+        )
+      ),
+      // Recent properties
+      React.createElement('div',{className:'card'},
+        React.createElement('div',{className:'section-header'},
+          React.createElement('div',{className:'section-title'},'Nemovitosti'),
+          React.createElement('button',{className:'view-all',onClick:()=>setView('map')},'Vše →')
+        ),
+        PROPERTIES.slice(0,5).map(p=>React.createElement('div',{key:p.id,className:'prop-row'},
+          React.createElement('div',{className:'prop-dot',style:{background:STATUS_COLOR[p.status]}}),
+          React.createElement('div',{style:{flex:1}},
+            React.createElement('div',{className:'prop-name'},p.name),
+            React.createElement('div',{className:'prop-addr'},p.addr+' · '+p.size+'m²')
+          ),
+          React.createElement('div',{style:{textAlign:'right'}},
+            React.createElement('div',{className:'prop-price'},fmt(p.price)),
+            React.createElement('div',{className:'prop-badge '+STATUS_CLASS[p.status]},p.status)
+          )
+        ))
+      )
+    ),
+    // Agents
+    React.createElement('div',{className:'card animate animate-delay-3'},
+      React.createElement('div',{className:'section-header'},
+        React.createElement('div',{className:'section-title'},'Tým agentů'),
+        React.createElement('button',{className:'view-all',onClick:()=>setView('analytics')},'Analýzy →')
+      ),
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:12}},
+        AGENTS.map(a=>React.createElement('div',{key:a.name,className:'card-sm',style:{borderTop:'3px solid '+a.color}},
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:10}},
+            React.createElement('div',{className:'agent-avatar',style:{background:a.color}},a.initials),
+            React.createElement('div',null,
+              React.createElement('div',{style:{fontSize:13,fontWeight:600,color:'var(--text)'}},a.name.split(' ')[0]+' '+a.name.split(' ')[1]),
+              React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},a.deals+' obchodů · '+a.leads+' leadů')
+            )
+          ),
+          React.createElement('div',{style:{fontSize:20,fontWeight:700,color:'var(--text)',fontFamily:'var(--font-display)'}},(a.revenue/1000000).toFixed(1)+' M Kč')
+        ))
+      )
+    )
+  );
+}
+
+function ChatView(){
+  const [msgs,setMsgs]=useState([]);
+  const [input,setInput]=useState('');
+  const [loading,setLoading]=useState(false);
+  const bottomRef=useRef(null);
+
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:'smooth'});},[msgs]);
+
+  async function send(text){
+    const t=(text||input).trim();
+    if(!t||loading)return;
+    setInput('');
+    const userMsg={role:'user',content:t};
+    setMsgs(prev=>[...prev,userMsg,{role:'assistant',content:''}]);
+    setLoading(true);
+    try{
+      const r=await fetch('/api/claude',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[...msgs,userMsg].map(m=>({role:m.role,content:m.content})),stream:true,
+          system:'Jsi PEPA, AI asistent pro back office realitní kanceláře Bohemia Reality. Odpovídáš stručně a přesně v češtině.'})
+      });
+      const reader=r.body.getReader();const dec=new TextDecoder();let full='';
+      while(true){
+        const{done,value}=await reader.read();if(done)break;
+        const chunk=dec.decode(value,{stream:true});
+        for(const line of chunk.split('\n')){
+          if(!line.startsWith('data: '))continue;
+          const data=line.slice(6).trim();
+          if(data==='[DONE]'||!data)continue;
+          try{const p=JSON.parse(data);if(p.type==='content_block_delta'){full+=p.delta?.text||'';setMsgs(prev=>{const n=[...prev];n[n.length-1]={role:'assistant',content:full};return n;});}}catch(e){}
+        }
+      }
+    }catch(e){setMsgs(prev=>{const n=[...prev];n[n.length-1]={role:'assistant',content:'Chyba: '+e.message};return n;});}
+    finally{setLoading(false);}
+  }
+
+  const hints=['Jaký je aktuální stav portfolia?','Připrav ranní briefing na dnes','Které nemovitosti jsou nejdéle v nabídce?','Napiš e-mail ABC Invest o Penthouse'];
+
+  return React.createElement('div',{className:'chat-wrap'},
+    React.createElement('div',{className:'messages'},
+      msgs.length===0&&React.createElement('div',{style:{maxWidth:520,margin:'0 auto',paddingTop:20}},
+        React.createElement('div',{style:{fontSize:32,marginBottom:8}},'✨'),
+        React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22,color:'var(--text)',marginBottom:6}},'Jak mohu pomoci?'),
+        React.createElement('div',{style:{fontSize:14,color:'var(--text3)',marginBottom:20}},'Zeptejte se na cokoliv z portfolio, klientů nebo reportů.'),
+        React.createElement('div',{className:'chat-hints',style:{padding:0}},
+          hints.map(h=>React.createElement('button',{key:h,className:'hint',onClick:()=>send(h)},h))
+        )
+      ),
+      msgs.map((m,i)=>React.createElement('div',{key:i,className:'msg '+m.role},
+        React.createElement('div',{className:'msg-icon'},m.role==='assistant'?'✨':'👤'),
+        React.createElement('div',{className:'msg-bubble'},
+          m.role==='assistant'&&m.content===''&&loading?
+            React.createElement('div',{className:'thinking'},
+              React.createElement('span'),React.createElement('span'),React.createElement('span')
+            ):m.content
+        )
+      )),
+      React.createElement('div',{ref:bottomRef})
+    ),
+    React.createElement('div',{className:'chat-input-area'},
+      React.createElement('div',{className:'chat-input-wrap'},
+        React.createElement('textarea',{
+          className:'chat-textarea',rows:1,placeholder:'Napište zprávu…',
+          value:input,onChange:e=>setInput(e.target.value),
+          onKeyDown:e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+        }),
+        React.createElement('button',{className:'send-btn',disabled:!input.trim()||loading,onClick:()=>send()},'↑')
+      )
+    )
+  );
+}
+
+function TasksView(){
+  const [tasks,setTasks]=useState([
+    {id:1,title:'Připravit dokumenty pro NEM-010',done:false,date:'26. 3.'},
+    {id:2,title:'Odpovědět ABC Invest na nabídku',done:false,date:'27. 3.'},
+    {id:3,title:'Aktualizovat cenu Vila Průhonice',done:true,date:'25. 3.'},
+  ]);
+  const [input,setInput]=useState('');
+
+  function add(){
+    if(!input.trim())return;
+    setTasks(prev=>[...prev,{id:Date.now(),title:input.trim(),done:false,date:new Date().toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric'})}]);
+    setInput('');
+  }
+
+  return React.createElement('div',{className:'content'},
+    React.createElement('div',{className:'page-title'},'Úkoly'),
+    React.createElement('div',{className:'page-sub'},tasks.filter(t=>!t.done).length+' aktivních · '+tasks.filter(t=>t.done).length+' dokončených'),
+    React.createElement('div',{className:'task-input-wrap'},
+      React.createElement('input',{className:'task-inp',placeholder:'Přidat nový úkol…',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==='Enter')add();},style:{fontSize:16}}),
+      React.createElement('button',{className:'btn-primary',onClick:add},'+ Přidat úkol')
+    ),
+    tasks.map(t=>React.createElement('div',{key:t.id,className:'task-item'},
+      React.createElement('button',{className:'task-check'+(t.done?' done':''),onClick:()=>setTasks(prev=>prev.map(x=>x.id===t.id?{...x,done:!x.done}:x))},t.done?'✓':''),
+      React.createElement('span',{className:'task-text'+(t.done?' done':'')},t.title),
+      React.createElement('span',{className:'task-date'},t.date),
+      React.createElement('button',{className:'task-del',onClick:()=>setTasks(prev=>prev.filter(x=>x.id!==t.id))},'×')
+    ))
+  );
+}
+
+function AnalyticsView(){
+  const CustomTooltip=({active,payload,label})=>{
+    if(!active||!payload?.length)return null;
+    return React.createElement('div',{style:{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:'10px 14px',fontSize:12}},
+      label&&React.createElement('p',{style:{color:'var(--accent)',fontWeight:600,marginBottom:4}},label),
+      payload.map((e,i)=>React.createElement('p',{key:i,style:{color:e.color}},' '+e.name+': '+e.value))
+    );
+  };
+  const portfolioData=[{name:'K prodeji',value:4},{name:'Prodáno',value:4},{name:'Rezervace',value:2},{name:'Pronájem',value:2}];
+  const COLORS=['#5B5FEF','#10B981','#F59E0B','#3B82F6'];
+  return React.createElement('div',{className:'content'},
+    React.createElement('div',{className:'page-title'},'Analýzy'),
+    React.createElement('div',{className:'page-sub'},'Výkonnost portfolia a týmu'),
+    // Charts
+    React.createElement('div',{className:'grid-2',style:{marginBottom:16}},
+      React.createElement('div',{className:'card'},
+        React.createElement('div',{className:'section-header'},
+          React.createElement('div',{className:'section-title'},'Vývoj leadů'),
+          React.createElement('div',{className:'section-sub'},'6 měsíců')
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(AreaChart,{data:LEADS,margin:{top:4,right:4,left:-20,bottom:0}},
+            React.createElement('defs',null,
+              React.createElement('linearGradient',{id:'grad2',x1:'0',y1:'0',x2:'0',y2:'1'},
+                React.createElement('stop',{offset:'5%',stopColor:'#5B5FEF',stopOpacity:.15}),
+                React.createElement('stop',{offset:'95%',stopColor:'#5B5FEF',stopOpacity:0})
+              )
+            ),
+            React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+            React.createElement(XAxis,{dataKey:'month',tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+            React.createElement(Area,{type:'monotone',dataKey:'leads',name:'Leady',stroke:'#5B5FEF',fill:'url(#grad2)',strokeWidth:2}),
+            React.createElement(Area,{type:'monotone',dataKey:'prodeje',name:'Prodeje',stroke:'#10B981',fill:'none',strokeWidth:2})
+          )
+        )
+      ),
+      React.createElement('div',{className:'card'},
+        React.createElement('div',{className:'section-header'},
+          React.createElement('div',{className:'section-title'},'Portfolio'),
+          React.createElement('div',{className:'section-sub'},'Podle statusu')
+        ),
+        React.createElement(ResponsiveContainer,{width:'100%',height:200},
+          React.createElement(PieChart,null,
+            React.createElement(Pie,{data:portfolioData,cx:'50%',cy:'50%',innerRadius:50,outerRadius:80,dataKey:'value',nameKey:'name',label:({name,value})=>name+': '+value},
+              portfolioData.map((_,i)=>React.createElement(Cell,{key:i,fill:COLORS[i]}))
+            ),
+            React.createElement(Tooltip,{content:React.createElement(CustomTooltip)})
+          )
+        )
+      )
+    ),
+    React.createElement('div',{className:'card'},
+      React.createElement('div',{className:'section-header'},
+        React.createElement('div',{className:'section-title'},'Výkon agentů'),
+      ),
+      React.createElement(ResponsiveContainer,{width:'100%',height:180},
+        React.createElement(BarChart,{data:AGENTS.map(a=>({name:a.name.split(' ')[0],obchody:a.deals,tržby:+(a.revenue/1000000).toFixed(1)})),margin:{top:4,right:4,left:-20,bottom:0}},
+          React.createElement(CartesianGrid,{strokeDasharray:'3 3',stroke:'var(--border)'}),
+          React.createElement(XAxis,{dataKey:'name',tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(YAxis,{tick:{fill:'var(--text3)',fontSize:11}}),
+          React.createElement(Tooltip,{content:React.createElement(CustomTooltip)}),
+          React.createElement(Bar,{dataKey:'obchody',name:'Obchody',fill:'#5B5FEF',radius:[4,4,0,0]}),
+          React.createElement(Bar,{dataKey:'tržby',name:'Tržby (M Kč)',fill:'#10B981',radius:[4,4,0,0]})
+        )
+      )
+    )
+  );
+}
+
+function MapView(){
+  return React.createElement('div',{className:'content'},
+    React.createElement('div',{className:'page-title'},'Nemovitosti'),
+    React.createElement('div',{className:'page-sub'},PROPERTIES.length+' nemovitostí v portfoliu'),
+    React.createElement('div',{style:{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap'}},
+      ['Vše','k prodeji','prodáno','rezervace','pronájem'].map(s=>
+        React.createElement('button',{key:s,className:'btn-secondary',style:{padding:'6px 14px',fontSize:12}},s)
+      )
+    ),
+    React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}},
+      PROPERTIES.map(p=>React.createElement('div',{key:p.id,className:'card',style:{borderTop:'3px solid '+(STATUS_COLOR[p.status]||'#ccc'),cursor:'pointer',transition:'all .2s'}},
+        React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:8}},
+          React.createElement('span',{className:'prop-badge '+STATUS_CLASS[p.status],style:{fontSize:11}},p.status),
+          React.createElement('span',{style:{fontSize:11,color:'var(--text3)',marginLeft:'auto'}},p.id)
+        ),
+        React.createElement('div',{style:{fontSize:15,fontWeight:600,color:'var(--text)',marginBottom:3}},p.name),
+        React.createElement('div',{style:{fontSize:12,color:'var(--text3)',marginBottom:10}},'📍 '+p.addr+' · '+p.size+' m²'),
+        React.createElement('div',{style:{fontSize:18,fontWeight:700,color:'var(--accent)',fontFamily:'var(--font-display)'}},fmt(p.price))
+      ))
+    )
+  );
+}
+
+// ── APP ───────────────────────────────────────────────
+function App(){
+  const [view,setView]=useState('home');
+  const [theme,setTheme]=useState('light');
+  const [sidebarOpen,setSidebarOpen]=useState(false);
+
+  useEffect(()=>{
+    document.documentElement.setAttribute('data-theme',theme);
+  },[theme]);
+
+  const views={home:HomeView,chat:ChatView,tasks:TasksView,analytics:AnalyticsView,map:MapView};
+  const ViewComponent=views[view]||HomeView;
+
+  return React.createElement('div',{id:'app'},
+    React.createElement(Sidebar,{view,setView,theme,setTheme,sidebarOpen,setSidebarOpen}),
+    React.createElement('div',{className:'main'},
+      React.createElement(Topbar,{view,setSidebarOpen,theme,setTheme}),
+      React.createElement(ViewComponent,{setView})
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
