@@ -1308,19 +1308,24 @@ function KatastrPanel({prop}) {
       React.createElement('div',{className:'katastr-links'},
         React.createElement('a',{
           className:'katastr-link',
-          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=Jednotka&id='+d.parcela.replace('/','_'),
+          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=Nemovitost&id=2750869680',
           target:'_blank',rel:'noopener noreferrer'
         },'🔗 Nahlédnout do KN'),
         React.createElement('a',{
           className:'katastr-link',
-          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=ListVlastnictvi&idKatastrUzemi=727661&cisloLV='+d.lv,
+          href:'https://nahlizenidokn.cuzk.cz/ZobrazObjekt.aspx?typ=ListVlastnictvi&idKatastrUzemi=727661&cisloLV=1203',
           target:'_blank',rel:'noopener noreferrer'
-        },'📋 List vlastnictví č. '+d.lv),
+        },'📋 List vlastnictví č. 1203'),
         React.createElement('a',{
           className:'katastr-link',
-          href:'https://katastr.cuzk.cz/hledani/parcela/?kuKod=727661&parcelniCislo='+d.parcela,
+          href:'https://www.cuzk.cz/Uvod/Produkty-a-sluzby/INSPIRE/Prohlizeci-sluzby/Prohlizec-WMS-katastr.aspx',
           target:'_blank',rel:'noopener noreferrer'
-        },'🗺️ Zobrazit na mapě ČÚZK')
+        },'🗺️ Mapa ČÚZK'),
+        React.createElement('a',{
+          className:'katastr-link',
+          href:'https://nahlizenidokn.cuzk.cz/VyhledatNemovitost.aspx?polozka=adresa&dotaz=Na+Pankr%C3%A1ci+12+Praha+4',
+          target:'_blank',rel:'noopener noreferrer'
+        },'🔍 Hledat podle adresy')
       ),
       React.createElement('div',{className:'katastr-note'},
         '📌 Demo data — v produkci by se načítala přímo z ČÚZK API (WFS/WMS služba) nebo scraping Nahlížení do KN. Pro ostatní nemovitosti klikněte na tlačítko Katastr u každé karty.'
