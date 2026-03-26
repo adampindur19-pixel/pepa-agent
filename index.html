@@ -872,54 +872,78 @@ table.data-table tr:hover td{background:var(--accent-dim);color:var(--text)}
 /* Mobile */
 .mobile-topbar{display:none}
 @media(max-width:768px){
-  /* Sidebar - icon only when closed, full when open */
-  .sidebar{
-    position:fixed;top:0;left:0;height:100vh;z-index:200;
-    width:56px;
-    transform:translateX(0);transition:width .25s,transform .25s;
-    overflow:hidden;
-  }
-  .sidebar-avatar{width:36px;height:36px;border-radius:50%;padding:0;justify-content:center;gap:0}
-  .sidebar-avatar .sidebar-avatar-name{display:none}
-  .sidebar-avatar-dot{width:28px;height:28px}
+  /* Sidebar */
+  .sidebar{position:fixed;top:0;left:0;height:100vh;z-index:200;width:56px;overflow:hidden}
   .sidebar.open{width:220px}
+  /* Avatar - circle only when closed */
+  .sidebar-avatar{width:36px;height:36px;border-radius:50%;padding:0;justify-content:center;gap:0;margin:0 auto;height:36px}
+  .sidebar-avatar .sidebar-avatar-name{display:none}
+  .sidebar-avatar-dot{width:32px;height:32px;border-radius:50%}
+  .sidebar-logout-btn{display:none}
+  /* Avatar open - full width */
+  .sidebar.open .sidebar-avatar{width:100%;height:44px;border-radius:10px;padding:0 12px;gap:10px}
+  .sidebar.open .sidebar-avatar .sidebar-avatar-name{display:block}
+  .sidebar.open .sidebar-logout-btn{display:flex}
+  /* Nav buttons */
   .sidebar-btn{width:40px;height:40px;font-size:16px;padding:0;justify-content:center;margin:0 auto}
   .sidebar-btn span{display:none}
+  .sidebar-hamburger-btn{width:40px!important;margin:2px auto!important}
   .sidebar.open .sidebar-btn{width:100%;height:40px;padding:0 14px;justify-content:flex-start;margin:0}
   .sidebar.open .sidebar-btn span{display:inline}
-  .sidebar-logo{display:none}
-  .sidebar.open .sidebar-logo{display:none}
+  /* Chat/QA panels */
   .chat-list-panel,.qa-section,.sidebar-divider{display:none}
   .sidebar.open .chat-list-panel,.sidebar.open .qa-section,.sidebar.open .sidebar-divider{display:flex;flex-direction:column;width:100%}
-  .sidebar-bottom{margin:0 auto;padding:0 10px}
-  .sidebar.open .sidebar-bottom{margin:0;width:100%;padding:0 8px}
-  .sidebar.open .sidebar-avatar{width:100%;border-radius:10px;padding:0 10px;gap:10px}
-  .sidebar.open .sidebar-avatar .sidebar-avatar-name{display:block}
+  .sidebar-bottom{margin:0 auto;padding:0 10px;width:100%}
+  .sidebar.open .sidebar-bottom{padding:0 8px}
+  /* Overlay */
   .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199}
   .sidebar-overlay.open{display:block}
-  /* Main content */
-  .main{width:calc(100vw - 56px)!important;margin-left:56px!important}
+  /* Main */
+  .main{width:calc(100vw - 56px)!important;margin-left:56px!important;display:flex;flex-direction:column}
+  /* Topbar - show on mobile too */
+  .topbar{display:flex!important;padding:8px 10px;flex-shrink:0}
+  .topbar-title{font-size:14px}
+  .topbar-greeting{display:none}
+  .topbar-btn{width:32px;height:32px;font-size:14px}
+  /* Home */
   .home-grid{grid-template-columns:1fr!important}
   .home-grid-3{grid-template-columns:1fr!important}
   .welcome-stats{display:none!important}
-  .welcome-banner{padding:20px 20px;min-height:130px;border-radius:12px}
-  .welcome-left h1{font-size:24px!important}
-  .welcome-btn{padding:10px 16px;font-size:13px}
-  .welcome-left h1{font-size:22px}
-  .home-view{padding:12px!important;gap:12px!important}
-  .card{padding:14px}
-  .topbar{padding:10px 14px;display:none}
-  .chat-header{display:flex}
-  .messages-area{padding:12px 0}
-  .message{padding:6px 12px}
-  .user-text{max-width:85%}
-  .input-area{padding:10px 12px 14px}
-  .toolbar{padding:4px 12px 0}
-  .email-subject{max-width:130px}
-  /* Mobile topbar */
+  .welcome-banner{padding:18px;min-height:110px;border-radius:12px}
+  .welcome-left h1{font-size:20px!important}
+  .welcome-btn{padding:8px 14px;font-size:12px}
+  .home-view{padding:10px!important;gap:10px!important}
+  .card{padding:12px}
+  /* Chat */
+  .chat-header{display:flex;padding:10px 12px}
+  .chat-header .chat-btn{font-size:11px;padding:4px 8px}
+  .messages-area{padding:8px 0}
+  .message{padding:4px 10px}
+  .user-text{max-width:88%}
+  .input-area{padding:8px 10px 12px}
+  .toolbar{padding:4px 10px 0;overflow-x:auto}
+  .tool-btn{font-size:10px;padding:3px 8px}
+  .email-subject{max-width:120px}
+  /* Tasks */
+  .tasks-view{padding:12px}
+  /* Calendar */
+  .cal-view{padding:12px;gap:12px}
+  .cal-week-grid{grid-template-columns:repeat(4,1fr)!important}
+  .timeline-wrap{overflow-x:auto}
+  .timeline-grid{min-width:500px}
+  .cal-toolbar{flex-wrap:wrap;gap:8px}
+  .cal-toolbar h1{font-size:20px;width:100%}
+  .cal-view-toggle{width:100%}
+  .cal-filter-wrap{overflow-x:auto;flex-wrap:nowrap}
+  /* Analytics */
+  .analytics-view{padding:12px;gap:12px}
+  .kpi-row{grid-template-columns:1fr 1fr!important}
+  .charts-grid-2{grid-template-columns:1fr!important}
+  .charts-grid-3{grid-template-columns:1fr!important}
+  /* Hide mobile topbar (using sidebar hamburger instead) */
   .mobile-topbar{display:none!important}
-  .hamburger{background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer;padding:0;line-height:1}
 }
+
 @media(min-width:769px){.mobile-topbar{display:none!important}.sidebar-overlay{display:none!important}}
 @media(min-width:769px){.sidebar-overlay{display:none!important}.mobile-topbar{display:none!important}}
 </style>
