@@ -298,7 +298,7 @@ input{font-family:var(--font)}
 <div id="root"></div>
 <script>
 const {useState,useEffect,useRef,useCallback}=React;
-const {AreaChart,Area,BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,Cell,PieChart,Pie}=Recharts;
+// Recharts will be available after scripts load
 
 // ── DATA ──────────────────────────────────────────────
 const AGENTS=[
@@ -718,6 +718,7 @@ function App(){
   );
 }
 
+const {AreaChart,Area,BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,ResponsiveContainer,Cell,PieChart,Pie}=window.Recharts||{};
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 </body>
